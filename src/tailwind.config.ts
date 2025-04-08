@@ -103,6 +103,9 @@ export default {
       boxShadow: {
         'card': '0 4px 12px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1)',
         'card-hover': '0 6px 16px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.12)',
+      },
+      scale: {
+        '102': '1.02',
       }
     },
   },
