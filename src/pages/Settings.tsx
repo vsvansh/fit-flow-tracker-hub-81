@@ -1,17 +1,53 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Bell, Globe, Lock, Smartphone, Volume2, Droplet, Moon, Zap } from "lucide-react";
+import { Bell, Globe, Lock, Smartphone, Volume2, Droplet, Moon, Zap, ArrowLeft } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
+import { Link } from "react-router-dom";
+import { useTheme } from "@/providers/ThemeProvider";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Activity } from "lucide-react";
 
 const Settings = () => {
+  const { theme, setTheme } = useTheme();
+  const [units, setUnits] = useState({
+    distance: "km",
+    weight: "kg",
+    height: "cm",
+  });
+  
+  const handleUnitChange = (type: keyof typeof units, value: string) => {
+    setUnits(prev => ({
+      ...prev,
+      [type]: value
+    }));
+    
+    toast({
+      title: `${type.charAt(0).toUpperCase() + type.slice(1)} unit updated`,
+      description: `Your measurement preference has been changed to ${value}`,
+    });
+  };
+  
+  const handleToggle = (setting: string, value: boolean) => {
+    toast({
+      title: `${setting} ${value ? 'enabled' : 'disabled'}`,
+      description: `You have ${value ? 'enabled' : 'disabled'} ${setting.toLowerCase()}`,
+    });
+  };
+
   return (
     <div className="container mx-auto px-4 py-6">
-      <h1 className="text-3xl font-bold mb-6">Settings</h1>
+      <div className="flex items-center mb-6">
+        <Link to="/" className="mr-4">
+          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+        </Link>
+        <h1 className="text-3xl font-bold">Settings</h1>
+      </div>
       
       <Tabs defaultValue="general" className="space-y-4">
         <TabsList className="grid w-full grid-cols-5">
@@ -37,7 +73,13 @@ const Settings = () => {
                   </div>
                   <p className="text-sm text-muted-foreground">Switch between light and dark themes</p>
                 </div>
-                <Switch id="dark-mode" />
+                <Switch 
+                  id="dark-mode" 
+                  checked={theme === "dark"}
+                  onCheckedChange={(isChecked) => {
+                    setTheme(isChecked ? "dark" : "light");
+                  }}
+                />
               </div>
               
               <div className="flex items-center justify-between">
@@ -48,7 +90,11 @@ const Settings = () => {
                   </div>
                   <p className="text-sm text-muted-foreground">Show real-time updates on dashboard</p>
                 </div>
-                <Switch id="live-updates" defaultChecked />
+                <Switch 
+                  id="live-updates" 
+                  defaultChecked 
+                  onCheckedChange={(checked) => handleToggle("Live updates", checked)}
+                />
               </div>
               
               <div className="flex items-center justify-between">
@@ -59,7 +105,11 @@ const Settings = () => {
                   </div>
                   <p className="text-sm text-muted-foreground">Show water intake tracker on dashboard</p>
                 </div>
-                <Switch id="water-widget" defaultChecked />
+                <Switch 
+                  id="water-widget" 
+                  defaultChecked 
+                  onCheckedChange={(checked) => handleToggle("Water tracking widget", checked)}
+                />
               </div>
               
               <div className="pt-4">
@@ -79,24 +129,60 @@ const Settings = () => {
               <div className="space-y-2">
                 <div className="font-medium">Distance</div>
                 <div className="flex space-x-2">
-                  <Button variant="outline" className="w-full" data-active="true">Kilometers</Button>
-                  <Button variant="outline" className="w-full">Miles</Button>
+                  <Button 
+                    variant={units.distance === "km" ? "default" : "outline"} 
+                    className="w-full" 
+                    onClick={() => handleUnitChange("distance", "km")}
+                  >
+                    Kilometers
+                  </Button>
+                  <Button 
+                    variant={units.distance === "mi" ? "default" : "outline"} 
+                    className="w-full"
+                    onClick={() => handleUnitChange("distance", "mi")}
+                  >
+                    Miles
+                  </Button>
                 </div>
               </div>
               
               <div className="space-y-2">
                 <div className="font-medium">Weight</div>
                 <div className="flex space-x-2">
-                  <Button variant="outline" className="w-full" data-active="true">Kilograms</Button>
-                  <Button variant="outline" className="w-full">Pounds</Button>
+                  <Button 
+                    variant={units.weight === "kg" ? "default" : "outline"} 
+                    className="w-full"
+                    onClick={() => handleUnitChange("weight", "kg")}
+                  >
+                    Kilograms
+                  </Button>
+                  <Button 
+                    variant={units.weight === "lb" ? "default" : "outline"} 
+                    className="w-full"
+                    onClick={() => handleUnitChange("weight", "lb")}
+                  >
+                    Pounds
+                  </Button>
                 </div>
               </div>
               
               <div className="space-y-2">
                 <div className="font-medium">Height</div>
                 <div className="flex space-x-2">
-                  <Button variant="outline" className="w-full" data-active="true">Centimeters</Button>
-                  <Button variant="outline" className="w-full">Feet/Inches</Button>
+                  <Button 
+                    variant={units.height === "cm" ? "default" : "outline"} 
+                    className="w-full"
+                    onClick={() => handleUnitChange("height", "cm")}
+                  >
+                    Centimeters
+                  </Button>
+                  <Button 
+                    variant={units.height === "ft" ? "default" : "outline"} 
+                    className="w-full"
+                    onClick={() => handleUnitChange("height", "ft")}
+                  >
+                    Feet/Inches
+                  </Button>
                 </div>
               </div>
               
@@ -123,7 +209,11 @@ const Settings = () => {
                     </div>
                     <p className="text-sm text-muted-foreground">Get reminders about daily goals</p>
                   </div>
-                  <Switch id="daily-reminders" defaultChecked />
+                  <Switch 
+                    id="daily-reminders" 
+                    defaultChecked 
+                    onCheckedChange={(checked) => handleToggle("Daily reminders", checked)}
+                  />
                 </div>
                 
                 <div className="flex items-center justify-between">
@@ -134,7 +224,11 @@ const Settings = () => {
                     </div>
                     <p className="text-sm text-muted-foreground">Get notified about new challenge invitations</p>
                   </div>
-                  <Switch id="challenge-invites" defaultChecked />
+                  <Switch 
+                    id="challenge-invites" 
+                    defaultChecked 
+                    onCheckedChange={(checked) => handleToggle("Challenge invites", checked)}
+                  />
                 </div>
                 
                 <div className="flex items-center justify-between">
@@ -145,7 +239,10 @@ const Settings = () => {
                     </div>
                     <p className="text-sm text-muted-foreground">Get updates when friends reach milestones</p>
                   </div>
-                  <Switch id="friend-activity" />
+                  <Switch 
+                    id="friend-activity" 
+                    onCheckedChange={(checked) => handleToggle("Friend activity notifications", checked)}
+                  />
                 </div>
                 
                 <div className="flex items-center justify-between">
@@ -156,7 +253,11 @@ const Settings = () => {
                     </div>
                     <p className="text-sm text-muted-foreground">Receive weekly progress summaries</p>
                   </div>
-                  <Switch id="weekly-reports" defaultChecked />
+                  <Switch 
+                    id="weekly-reports" 
+                    defaultChecked 
+                    onCheckedChange={(checked) => handleToggle("Weekly reports", checked)}
+                  />
                 </div>
               </div>
               
@@ -183,7 +284,10 @@ const Settings = () => {
                     </div>
                     <p className="text-sm text-muted-foreground">Allow others to view your profile</p>
                   </div>
-                  <Switch id="public-profile" />
+                  <Switch 
+                    id="public-profile"
+                    onCheckedChange={(checked) => handleToggle("Public profile", checked)}
+                  />
                 </div>
                 
                 <div className="flex items-center justify-between">
@@ -194,7 +298,11 @@ const Settings = () => {
                     </div>
                     <p className="text-sm text-muted-foreground">Share your activity on community feeds</p>
                   </div>
-                  <Switch id="activity-feed" defaultChecked />
+                  <Switch 
+                    id="activity-feed" 
+                    defaultChecked 
+                    onCheckedChange={(checked) => handleToggle("Activity feed sharing", checked)}
+                  />
                 </div>
                 
                 <div className="flex items-center justify-between">
@@ -205,7 +313,10 @@ const Settings = () => {
                     </div>
                     <p className="text-sm text-muted-foreground">Participate in challenges anonymously</p>
                   </div>
-                  <Switch id="anonymous-mode" />
+                  <Switch 
+                    id="anonymous-mode"
+                    onCheckedChange={(checked) => handleToggle("Anonymous mode", checked)}
+                  />
                 </div>
                 
                 <div className="flex items-center justify-between">
@@ -216,7 +327,10 @@ const Settings = () => {
                     </div>
                     <p className="text-sm text-muted-foreground">Share your workout locations</p>
                   </div>
-                  <Switch id="location-sharing" />
+                  <Switch 
+                    id="location-sharing"
+                    onCheckedChange={(checked) => handleToggle("Location sharing", checked)}
+                  />
                 </div>
               </div>
               
@@ -234,8 +348,25 @@ const Settings = () => {
             <CardContent className="space-y-4">
               <p className="text-sm">You can download all your fitness data or delete your account permanently.</p>
               <div className="flex space-x-4">
-                <Button variant="outline">Download My Data</Button>
-                <Button variant="destructive">Delete Account</Button>
+                <Button 
+                  variant="outline"
+                  onClick={() => toast({
+                    title: "Data download initiated",
+                    description: "Your data will be sent to your email once ready."
+                  })}
+                >
+                  Download My Data
+                </Button>
+                <Button 
+                  variant="destructive"
+                  onClick={() => toast({
+                    title: "Account deletion requested",
+                    description: "Please check your email to confirm account deletion.",
+                    variant: "destructive"
+                  })}
+                >
+                  Delete Account
+                </Button>
               </div>
             </CardContent>
           </Card>
@@ -275,7 +406,16 @@ const Settings = () => {
                     </div>
                   </div>
                   <div>
-                    <Button variant="outline" size="sm">Connect</Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => toast({ 
+                        title: "Connecting to Spotify",
+                        description: "You'll be redirected to authorize the connection."
+                      })}
+                    >
+                      Connect
+                    </Button>
                   </div>
                 </div>
                 
@@ -290,7 +430,16 @@ const Settings = () => {
                     </div>
                   </div>
                   <div>
-                    <Button variant="outline" size="sm">Connect</Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => toast({ 
+                        title: "Connecting to Apple Health",
+                        description: "You'll be redirected to authorize the connection."
+                      })}
+                    >
+                      Connect
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -310,7 +459,11 @@ const Settings = () => {
                   <p className="font-medium">Automatic Challenge Suggestions</p>
                   <p className="text-sm text-muted-foreground">Get suggestions for new challenges based on your activity</p>
                 </div>
-                <Switch id="auto-challenges" defaultChecked />
+                <Switch 
+                  id="auto-challenges" 
+                  defaultChecked 
+                  onCheckedChange={(checked) => handleToggle("Challenge suggestions", checked)}
+                />
               </div>
               
               <div className="flex items-center justify-between">
@@ -318,7 +471,12 @@ const Settings = () => {
                   <p className="font-medium">Challenge Difficulty</p>
                   <p className="text-sm text-muted-foreground">How hard should challenges be?</p>
                 </div>
-                <Select defaultValue="medium">
+                <Select defaultValue="medium" onValueChange={(value) => {
+                  toast({
+                    title: "Challenge difficulty updated",
+                    description: `Difficulty set to ${value}`
+                  });
+                }}>
                   <SelectTrigger className="w-[180px]">
                     <SelectValue placeholder="Select difficulty" />
                   </SelectTrigger>
@@ -335,7 +493,11 @@ const Settings = () => {
                   <p className="font-medium">Friends Can Challenge Me</p>
                   <p className="text-sm text-muted-foreground">Allow friends to send you challenge invites</p>
                 </div>
-                <Switch id="friend-challenges" defaultChecked />
+                <Switch 
+                  id="friend-challenges" 
+                  defaultChecked 
+                  onCheckedChange={(checked) => handleToggle("Friend challenges", checked)}
+                />
               </div>
               
               <Button onClick={() => toast({ title: "Challenge settings saved", description: "Your challenge preferences have been updated" })}>
@@ -350,6 +512,3 @@ const Settings = () => {
 };
 
 export default Settings;
-
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Activity } from "lucide-react";

@@ -4,7 +4,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { 
   Bell, Settings, LogIn, Moon, Sun, 
   Menu, X, Home, User, ChevronDown,
-  Footprints, BarChart3, Award, Users
+  Footprints, BarChart3, Award, Users, Utensils
 } from "lucide-react";
 import { Button } from "./ui/button";
 import { useTheme } from "@/providers/ThemeProvider";
@@ -51,6 +51,7 @@ const Navbar = () => {
   const navItems: NavItem[] = [
     { name: "Dashboard", path: "/", icon: <Home className="w-4 h-4 mr-2" /> },
     { name: "Activity", path: "/activity", icon: <BarChart3 className="w-4 h-4 mr-2" /> },
+    { name: "Nutrition", path: "/nutrition", icon: <Utensils className="w-4 h-4 mr-2" /> },
     { name: "Challenges", path: "/challenges", icon: <Award className="w-4 h-4 mr-2" /> },
     { name: "Social", path: "/social", icon: <Users className="w-4 h-4 mr-2" /> },
   ];
