@@ -1,122 +1,205 @@
 
-export interface DailyActivity {
-  date: string;
-  steps: number;
-  caloriesBurned: number;
-  distance: number;
-  activeMinutes?: number;
-  goalAchieved?: boolean;
-}
+import { subDays, format, addDays } from "date-fns";
 
-export interface Goal {
-  id: string;
-  name: string;
-  target: number;
-  current: number;
-  unit: string;
-  period?: "daily" | "weekly" | "monthly";
-}
+// Generate dynamic fitness data for the past 30 days
+const generateDailyActivity = (days: number = 30) => {
+  const today = new Date();
+  const dailyActivities = [];
 
-export interface UserProfile {
-  name: string;
-  age: number;
-  gender: "male" | "female" | "other";
-  height: number; // in cm
-  weight: number; // in kg
-  activityLevel: "sedentary" | "light" | "moderate" | "intense";
-  picture?: string;
-}
+  for (let i = days - 1; i >= 0; i--) {
+    const date = subDays(today, i);
+    const formattedDate = format(date, "yyyy-MM-dd");
+    
+    // Generate somewhat realistic data with some variance
+    const dayOfWeek = date.getDay(); // 0 is Sunday, 6 is Saturday
+    const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+    
+    // Base values
+    let steps = Math.floor(Math.random() * 3000) + 7000; // 7000-10000 base steps
+    
+    // Add variance based on weekday/weekend
+    if (isWeekend) {
+      steps += Math.floor(Math.random() * 2000); // More active on weekends
+    } else if (dayOfWeek === 1 || dayOfWeek === 5) {
+      steps -= Math.floor(Math.random() * 1500); // Less active on Monday and Friday
+    }
+    
+    // Most recent days tend to have more data (improvement trend)
+    if (i < 7) {
+      steps += Math.floor(Math.random() * 1500);
+    }
+    
+    // Randomize a bit
+    steps = Math.max(3000, Math.min(15000, steps + Math.floor(Math.random() * 2000 - 1000)));
+    
+    // Calculate derived metrics
+    const distance = parseFloat((steps * 0.0008).toFixed(1)); // km
+    const caloriesBurned = Math.floor(steps * 0.05); // calories
+    const activeMinutes = Math.floor(steps / 200); // active minutes
+    
+    dailyActivities.push({
+      date: formattedDate,
+      steps,
+      distance,
+      caloriesBurned,
+      activeMinutes,
+    });
+  }
 
-// Mock user profile data
-export const userProfile: UserProfile = {
-  name: "Alex Johnson",
-  age: 32,
-  gender: "male",
-  height: 178,
-  weight: 75,
-  activityLevel: "moderate",
+  return dailyActivities;
 };
 
-// Mock daily activity data
-export const dailyActivities: DailyActivity[] = [
-  { date: "2025-04-01", steps: 8234, caloriesBurned: 320, distance: 6.2, activeMinutes: 42, goalAchieved: false },
-  { date: "2025-04-02", steps: 10128, caloriesBurned: 412, distance: 7.9, activeMinutes: 55, goalAchieved: true },
-  { date: "2025-04-03", steps: 7403, caloriesBurned: 290, distance: 5.6, activeMinutes: 38, goalAchieved: false },
-  { date: "2025-04-04", steps: 12507, caloriesBurned: 502, distance: 9.5, activeMinutes: 67, goalAchieved: true },
-  { date: "2025-04-05", steps: 6209, caloriesBurned: 245, distance: 4.7, activeMinutes: 32, goalAchieved: false },
-  { date: "2025-04-06", steps: 9125, caloriesBurned: 375, distance: 6.9, activeMinutes: 48, goalAchieved: false },
-  { date: "2025-04-07", steps: 11432, caloriesBurned: 462, distance: 8.7, activeMinutes: 61, goalAchieved: true },
-  { date: "2025-04-08", steps: 8742, caloriesBurned: 349, distance: 6.6, activeMinutes: 45, goalAchieved: false }
+// User profile data
+export const userProfile = {
+  name: "Alex Thompson",
+  email: "alex.thompson@example.com",
+  gender: "male" as const,
+  age: 32,
+  height: 178, // cm
+  weight: 76, // kg
+  activityLevel: "moderate" as const,
+  joinDate: "2023-11-15",
+};
+
+// Fitness goals
+export const fitnessGoals = [
+  {
+    id: "1",
+    name: "Daily Steps",
+    target: 10000,
+    current: 8431,
+    unit: "steps",
+    period: "daily",
+  },
+  {
+    id: "2",
+    name: "Calories Burned",
+    target: 500,
+    current: 423,
+    unit: "cal",
+    period: "daily",
+  },
+  {
+    id: "3",
+    name: "Distance",
+    target: 8,
+    current: 6.2,
+    unit: "km",
+    period: "daily",
+  },
+  {
+    id: "4",
+    name: "Active Minutes",
+    target: 60,
+    current: 42,
+    unit: "min",
+    period: "daily",
+  },
+  {
+    id: "5",
+    name: "Weekly Distance",
+    target: 40,
+    current: 28.5,
+    unit: "km",
+    period: "weekly",
+  },
 ];
 
-// Mock fitness goals
-export const fitnessGoals: Goal[] = [
-  { id: "1", name: "Daily Steps", target: 10000, current: 8742, unit: "steps", period: "daily" },
-  { id: "2", name: "Calories Burned", target: 500, current: 349, unit: "cal", period: "daily" },
-  { id: "3", name: "Distance", target: 8, current: 6.6, unit: "km", period: "daily" },
-  { id: "4", name: "Active Minutes", target: 60, current: 45, unit: "mins", period: "daily" },
-  { id: "5", name: "Weekly Distance", target: 50, current: 32.4, unit: "km", period: "weekly" }
-];
+// Generate the daily activities
+export const dailyActivities = generateDailyActivity();
 
 // Get today's activity
-export const getTodayActivity = (): DailyActivity => {
-  return dailyActivities[dailyActivities.length - 1];
-};
-
-// Calculate percentage completion
-export const calculateCompletion = (current: number, target: number): number => {
-  const percentage = (current / target) * 100;
-  return Math.min(percentage, 100);
-};
-
-// Calculate calories burned based on steps, weight and activity level
-export const calculateCaloriesBurned = (
-  steps: number,
-  weight: number = 70,
-  activityLevel: string = "moderate"
-): number => {
-  // Basic calculation (simplified)
-  const caloriesPerStep = {
-    sedentary: 0.04,
-    light: 0.045,
-    moderate: 0.05,
-    intense: 0.06,
+export const getTodayActivity = () => {
+  // This could fetch from API in a real app
+  return {
+    steps: 8431,
+    distance: 6.2,
+    caloriesBurned: 423,
+    activeMinutes: 42,
   };
-  
-  const multiplier = caloriesPerStep[activityLevel as keyof typeof caloriesPerStep] || 0.05;
-  return Math.round(steps * multiplier * (weight / 70));
 };
 
-// Get streak count (consecutive days with achieved goals)
-export const getStreakCount = (): number => {
-  let streak = 0;
-  
-  // Count backwards from most recent day
-  for (let i = dailyActivities.length - 1; i >= 0; i--) {
-    if (dailyActivities[i].goalAchieved) {
-      streak++;
-    } else {
-      break;
-    }
-  }
-  
-  return streak;
+// Get streak count
+export const getStreakCount = () => {
+  // This would be calculated based on real data
+  return 7;
 };
 
-// Calculate weekly stats
+// Calculate completion percentage
+export const calculateCompletion = (current: number, goal: number) => {
+  return Math.min(100, Math.round((current / goal) * 100));
+};
+
+// Get weekly statistics
 export const getWeeklyStats = () => {
-  const weekData = dailyActivities.slice(-7);
+  const lastSevenDays = dailyActivities.slice(-7);
   
-  const totalSteps = weekData.reduce((sum, day) => sum + day.steps, 0);
-  const totalCalories = weekData.reduce((sum, day) => sum + day.caloriesBurned, 0);
-  const totalDistance = weekData.reduce((sum, day) => sum + day.distance, 0);
+  const totalSteps = lastSevenDays.reduce((sum, day) => sum + day.steps, 0);
+  const totalCalories = lastSevenDays.reduce((sum, day) => sum + day.caloriesBurned, 0);
+  const totalDistance = lastSevenDays.reduce((sum, day) => sum + day.distance, 0);
   
   return {
     totalSteps,
     totalCalories,
     totalDistance,
-    averageSteps: Math.round(totalSteps / weekData.length),
-    averageCalories: Math.round(totalCalories / weekData.length),
-    averageDistance: parseFloat((totalDistance / weekData.length).toFixed(1)),
+    averageSteps: Math.round(totalSteps / 7),
+    averageCalories: Math.round(totalCalories / 7),
+    averageDistance: parseFloat((totalDistance / 7).toFixed(1)),
   };
+};
+
+// Get best performing day of the week
+export const getBestDay = () => {
+  const lastSevenDays = dailyActivities.slice(-7);
+  let bestDay = lastSevenDays[0];
+  
+  for (const day of lastSevenDays) {
+    if (day.steps > bestDay.steps) {
+      bestDay = day;
+    }
+  }
+  
+  const date = new Date(bestDay.date);
+  return format(date, "EEEE"); // Return day name
+};
+
+// Additional data generators for future use
+export const getFutureChallenges = () => {
+  const today = new Date();
+  
+  return [
+    {
+      id: "c1",
+      title: "Spring Step Challenge",
+      description: "Reach 300,000 steps in the next 30 days",
+      startDate: format(today, "yyyy-MM-dd"),
+      endDate: format(addDays(today, 30), "yyyy-MM-dd"),
+      goal: 300000,
+      unit: "steps",
+      participants: 156,
+      joined: false,
+    },
+    {
+      id: "c2",
+      title: "Weekend Warrior",
+      description: "Complete 30,000 steps this weekend",
+      startDate: format(addDays(today, 5 - today.getDay()), "yyyy-MM-dd"), // Next Saturday
+      endDate: format(addDays(today, 6 - today.getDay()), "yyyy-MM-dd"), // Next Sunday
+      goal: 30000,
+      unit: "steps",
+      participants: 47,
+      joined: true,
+    },
+    {
+      id: "c3",
+      title: "Marathon Prep",
+      description: "Log 100km of distance over the next 2 weeks",
+      startDate: format(today, "yyyy-MM-dd"),
+      endDate: format(addDays(today, 14), "yyyy-MM-dd"),
+      goal: 100,
+      unit: "km",
+      participants: 28,
+      joined: false,
+    },
+  ];
 };
