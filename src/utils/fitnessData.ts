@@ -1,3 +1,4 @@
+
 export const userProfile = {
   name: "Alex Johnson",
   email: "alex.johnson@example.com",
@@ -105,6 +106,7 @@ export const weightHistory = [
   { date: "2023-06-05", weight: 82 }
 ];
 
+// Updated fitnessGoals to include name and target properties
 export const fitnessGoals = [
   { 
     id: 1, 
@@ -117,7 +119,9 @@ export const fitnessGoals = [
       current: 82,
       target: 77,
       unit: "kg"
-    }
+    },
+    name: "Daily Steps",
+    target: 10000
   },
   { 
     id: 2, 
@@ -130,7 +134,9 @@ export const fitnessGoals = [
       current: 7,
       target: 10,
       unit: "km"
-    }
+    },
+    name: "Calories Burned",
+    target: 500
   },
   { 
     id: 3, 
@@ -143,7 +149,24 @@ export const fitnessGoals = [
       current: 80,
       target: 100,
       unit: "kg"
-    }
+    },
+    name: "Distance",
+    target: 8
+  },
+  { 
+    id: 4, 
+    title: "Improve Endurance", 
+    description: "Increase active minutes",
+    startDate: "2023-06-01",
+    targetDate: "2023-09-01",
+    progress: 40,
+    metrics: {
+      current: 40,
+      target: 60,
+      unit: "mins"
+    },
+    name: "Active Minutes",
+    target: 60
   }
 ];
 
@@ -215,3 +238,49 @@ export const achievements = [
     progress: 65
   }
 ];
+
+// Add missing functions needed by components
+export const dailyActivities = [
+  { date: "2023-05-25", steps: 7500, caloriesBurned: 320, distance: 5.2 },
+  { date: "2023-05-26", steps: 8200, caloriesBurned: 350, distance: 5.7 },
+  { date: "2023-05-27", steps: 6800, caloriesBurned: 290, distance: 4.8 },
+  { date: "2023-05-28", steps: 9100, caloriesBurned: 380, distance: 6.3 },
+  { date: "2023-05-29", steps: 8500, caloriesBurned: 360, distance: 5.9 },
+  { date: "2023-05-30", steps: 7900, caloriesBurned: 340, distance: 5.5 },
+  { date: "2023-05-31", steps: 8700, caloriesBurned: 370, distance: 6.1 },
+  { date: "2023-06-01", steps: 9300, caloriesBurned: 400, distance: 6.5 },
+  { date: "2023-06-02", steps: 8100, caloriesBurned: 345, distance: 5.6 },
+  { date: "2023-06-03", steps: 8900, caloriesBurned: 375, distance: 6.2 },
+  { date: "2023-06-04", steps: 9500, caloriesBurned: 410, distance: 6.7 },
+  { date: "2023-06-05", steps: 7800, caloriesBurned: 330, distance: 5.4 }
+];
+
+export const getTodayActivity = () => {
+  // Return the most recent activity
+  return {
+    steps: 9500,
+    caloriesBurned: 410,
+    distance: 6.7,
+    activeMinutes: 65
+  };
+};
+
+export const getStreakCount = () => {
+  // Simulate a streak count
+  return 12;
+};
+
+export const getWeeklyStats = () => {
+  return {
+    totalSteps: 59800,
+    totalCaloriesBurned: 2250,
+    totalDistance: 41.5,
+    totalActiveMinutes: 385,
+    workoutsCompleted: 4,
+    bestDay: "Thursday"
+  };
+};
+
+export const calculateCompletion = (current: number, goal: number) => {
+  return Math.min(100, Math.round((current / goal) * 100));
+};
