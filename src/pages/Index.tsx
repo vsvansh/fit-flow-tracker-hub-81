@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "@/components/ui/use-toast";
@@ -78,6 +77,7 @@ const Index = () => {
     });
   }, []);
 
+  
   return (
     <div className="min-h-[calc(100vh-64px)] bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 transition-all duration-300">
       <div className="container mx-auto px-4 py-6 max-w-7xl">
@@ -117,7 +117,7 @@ const Index = () => {
           initial="hidden"
           animate="visible"
         >
-          {/* Summary Cards */}
+          
           <motion.div 
             variants={itemVariants} 
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6"
@@ -223,7 +223,7 @@ const Index = () => {
             </Card>
           </motion.div>
 
-          {/* Activity Summary */}
+          
           <motion.div variants={itemVariants} className="mb-6">
             <ActivitySummary 
               steps={todayActivity.steps}
@@ -237,7 +237,7 @@ const Index = () => {
             />
           </motion.div>
           
-          {/* Main Content Tabs */}
+          
           <motion.div variants={itemVariants}>
             <Tabs 
               defaultValue="activity" 

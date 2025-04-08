@@ -8,17 +8,37 @@ import { Progress } from "@/components/ui/progress";
 import { fitnessGoals } from "@/utils/fitnessData";
 import { Target, Check, X } from "lucide-react";
 
+// Add an interface to match the shape of the goals
+interface Goal {
+  id: number;
+  title: string;
+  description: string;
+  startDate: string;
+  targetDate: string;
+  progress: number;
+  metrics: {
+    current: number;
+    target: number;
+    unit: string;
+  };
+  name: string;
+  target: number;
+  period?: string; // Make period optional
+  current?: number; // Add current as an optional property
+  unit?: string; // Add unit as an optional property
+}
+
 const GoalsSetting = () => {
-  const [goals, setGoals] = useState(fitnessGoals);
-  const [editingGoalId, setEditingGoalId] = useState<string | null>(null);
+  const [goals, setGoals] = useState<Goal[]>(fitnessGoals as Goal[]);
+  const [editingGoalId, setEditingGoalId] = useState<number | null>(null);
   const [editTarget, setEditTarget] = useState<number>(0);
 
-  const handleEditClick = (goalId: string, currentTarget: number) => {
+  const handleEditClick = (goalId: number, currentTarget: number) => {
     setEditingGoalId(goalId);
     setEditTarget(currentTarget);
   };
 
-  const handleSaveClick = (goalId: string) => {
+  const handleSaveClick = (goalId: number) => {
     setGoals(
       goals.map((goal) =>
         goal.id === goalId ? { ...goal, target: editTarget } : goal
@@ -31,8 +51,8 @@ const GoalsSetting = () => {
     setEditingGoalId(null);
   };
 
-  // Filter goals to show only daily ones
-  const dailyGoals = goals.filter(goal => goal.period === "daily");
+  // Filter goals to show only daily ones, or show all if no period specified
+  const dailyGoals = goals.filter(goal => goal.period === "daily" || !goal.period);
 
   return (
     <Card className="shadow">
@@ -51,7 +71,7 @@ const GoalsSetting = () => {
                   <h3 className="font-medium">{goal.name}</h3>
                   {editingGoalId !== goal.id ? (
                     <p className="text-sm text-gray-600">
-                      Target: {goal.target} {goal.unit}
+                      Target: {goal.target} {goal.metrics.unit}
                     </p>
                   ) : (
                     <div className="flex items-center mt-2">
@@ -65,7 +85,7 @@ const GoalsSetting = () => {
                         onChange={(e) => setEditTarget(Number(e.target.value))}
                         className="w-24 h-8"
                       />
-                      <span className="ml-2 text-xs text-gray-500">{goal.unit}</span>
+                      <span className="ml-2 text-xs text-gray-500">{goal.metrics.unit}</span>
                     </div>
                   )}
                 </div>
@@ -105,11 +125,11 @@ const GoalsSetting = () => {
               {/* Progress bar */}
               <div className="mt-2">
                 <div className="flex justify-between text-xs text-gray-500 mb-1">
-                  <span>{goal.current} {goal.unit}</span>
-                  <span>{goal.target} {goal.unit}</span>
+                  <span>{goal.metrics.current} {goal.metrics.unit}</span>
+                  <span>{goal.target} {goal.metrics.unit}</span>
                 </div>
                 <Progress 
-                  value={Math.min((goal.current / goal.target) * 100, 100)}
+                  value={Math.min((goal.metrics.current / goal.target) * 100, 100)}
                   className={`h-2 ${
                     goal.name === "Daily Steps"
                       ? "bg-gray-100 [&>div]:bg-blue-500"
@@ -121,7 +141,7 @@ const GoalsSetting = () => {
                   }`}
                 />
                 <p className="text-xs text-right mt-1 font-medium">
-                  {Math.round((goal.current / goal.target) * 100)}% completed
+                  {Math.round((goal.metrics.current / goal.target) * 100)}% completed
                 </p>
               </div>
             </div>

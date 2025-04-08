@@ -1,4 +1,3 @@
-
 export const userProfile = {
   name: "Alex Johnson",
   email: "alex.johnson@example.com",
@@ -106,7 +105,6 @@ export const weightHistory = [
   { date: "2023-06-05", weight: 82 }
 ];
 
-// Updated fitnessGoals to include name and target properties
 export const fitnessGoals = [
   { 
     id: 1, 
@@ -239,7 +237,6 @@ export const achievements = [
   }
 ];
 
-// Add missing functions needed by components
 export const dailyActivities = [
   { date: "2023-05-25", steps: 7500, caloriesBurned: 320, distance: 5.2 },
   { date: "2023-05-26", steps: 8200, caloriesBurned: 350, distance: 5.7 },
@@ -256,7 +253,6 @@ export const dailyActivities = [
 ];
 
 export const getTodayActivity = () => {
-  // Return the most recent activity
   return {
     steps: 9500,
     caloriesBurned: 410,
@@ -266,7 +262,6 @@ export const getTodayActivity = () => {
 };
 
 export const getStreakCount = () => {
-  // Simulate a streak count
   return 12;
 };
 
@@ -277,7 +272,10 @@ export const getWeeklyStats = () => {
     totalDistance: 41.5,
     totalActiveMinutes: 385,
     workoutsCompleted: 4,
-    bestDay: "Thursday"
+    bestDay: "Thursday",
+    averageSteps: 8543,
+    averageCalories: 321,
+    averageDistance: 5.9
   };
 };
 
