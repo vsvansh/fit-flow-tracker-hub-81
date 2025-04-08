@@ -129,6 +129,33 @@ const Challenges = () => {
     { rank: 8, name: "Sophie Chen", avatar: "/placeholder.svg", score: 7890 },
   ];
   
+  // Form state for new challenge
+  const [newChallenge, setNewChallenge] = useState({
+    title: "",
+    description: "",
+    type: "daily",
+    goal: 1000,
+    unit: "steps",
+    deadline: ""
+  });
+
+  // Handle new challenge input changes
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    setNewChallenge(prev => ({
+      ...prev,
+      [id]: id === "goal" ? parseInt(value) : value
+    }));
+  };
+
+  // Handle select changes
+  const handleSelectChange = (field: string, value: string) => {
+    setNewChallenge(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+  
   // Filter challenges based on active tab
   const filteredChallenges = activeTab === "all" 
     ? challenges 
@@ -145,10 +172,46 @@ const Challenges = () => {
   
   const createChallenge = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Create new challenge
+    const newChallengeData: Challenge = {
+      id: (challenges.length + 1).toString(),
+      title: newChallenge.title,
+      description: newChallenge.description,
+      type: newChallenge.type as "daily" | "weekly" | "custom",
+      progress: 0,
+      goal: newChallenge.goal,
+      unit: newChallenge.unit,
+      deadline: newChallenge.deadline,
+      completed: false,
+      category: newChallenge.unit === "steps" ? "steps" : 
+               newChallenge.unit === "km" ? "distance" :
+               newChallenge.unit === "cal" ? "calories" : "other"
+    };
+    
+    setChallenges([...challenges, newChallengeData]);
     setDialogOpen(false);
+    
+    // Reset form
+    setNewChallenge({
+      title: "",
+      description: "",
+      type: "daily",
+      goal: 1000,
+      unit: "steps",
+      deadline: ""
+    });
+    
     toast({
       title: "Challenge created!",
       description: "Your new challenge has been created successfully.",
+    });
+  };
+
+  const registerForEvent = (index: number) => {
+    toast({
+      title: "Registration successful!",
+      description: "You've registered for the event. We'll send you more details soon.",
     });
   };
   
@@ -223,20 +286,59 @@ const Challenges = () => {
                     <div className="space-y-4 py-4">
                       <div className="space-y-2">
                         <Label htmlFor="title">Challenge Title</Label>
-                        <Input id="title" placeholder="Enter challenge title" required />
+                        <Input 
+                          id="title" 
+                          placeholder="Enter challenge title" 
+                          required 
+                          value={newChallenge.title}
+                          onChange={handleInputChange}
+                        />
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="description">Description</Label>
-                        <Input id="description" placeholder="Describe your challenge" required />
+                        <Input 
+                          id="description" 
+                          placeholder="Describe your challenge" 
+                          required 
+                          value={newChallenge.description}
+                          onChange={handleInputChange}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="type">Type</Label>
+                        <Select 
+                          value={newChallenge.type}
+                          onValueChange={(value) => handleSelectChange("type", value)}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select challenge type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="daily">Daily</SelectItem>
+                            <SelectItem value="weekly">Weekly</SelectItem>
+                            <SelectItem value="custom">Custom</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <Label htmlFor="goal">Goal</Label>
-                          <Input id="goal" type="number" min="1" placeholder="Goal amount" required />
+                          <Input 
+                            id="goal" 
+                            type="number" 
+                            min="1" 
+                            placeholder="Goal amount" 
+                            required 
+                            value={newChallenge.goal}
+                            onChange={handleInputChange}
+                          />
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="unit">Unit</Label>
-                          <Select defaultValue="steps">
+                          <Select 
+                            value={newChallenge.unit}
+                            onValueChange={(value) => handleSelectChange("unit", value)}
+                          >
                             <SelectTrigger id="unit">
                               <SelectValue placeholder="Select unit" />
                             </SelectTrigger>
@@ -251,7 +353,13 @@ const Challenges = () => {
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="deadline">Deadline</Label>
-                        <Input id="deadline" type="date" required />
+                        <Input 
+                          id="deadline" 
+                          type="date" 
+                          required 
+                          value={newChallenge.deadline}
+                          onChange={handleInputChange}
+                        />
                       </div>
                       <div className="flex items-center space-x-2">
                         <Switch id="public" />
@@ -281,76 +389,85 @@ const Challenges = () => {
                 </TabsList>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {filteredChallenges.map((challenge) => (
-                    <Card key={challenge.id} className={`overflow-hidden border ${
-                      challenge.completed 
-                        ? "border-green-200 dark:border-green-900" 
-                        : "border-gray-200 dark:border-gray-700"
-                    }`}>
-                      <div className={`h-2 ${
-                        challenge.category === "steps" ? "bg-blue-500" :
-                        challenge.category === "distance" ? "bg-green-500" :
-                        challenge.category === "calories" ? "bg-orange-500" :
-                        challenge.category === "streaks" ? "bg-purple-500" : "bg-brand-500"
-                      }`}></div>
-                      <div className="p-4">
-                        <div className="flex items-start justify-between">
-                          <div className="flex flex-col">
-                            <div className="flex items-center">
-                              <span className="text-sm font-medium">{challenge.title}</span>
-                              {challenge.completed && (
-                                <CheckCircle className="ml-1 h-4 w-4 text-green-500" />
-                              )}
-                            </div>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">{challenge.type}</span>
-                          </div>
-                          
-                          <div className="flex items-center text-xs text-gray-500 dark:text-gray-400">
-                            <Flag className="mr-1 h-3 w-3" />
-                            <span>{challenge.deadline}</span>
-                          </div>
-                        </div>
-                        
-                        <p className="mt-2 text-xs text-gray-600 dark:text-gray-300">
-                          {challenge.description}
-                        </p>
-                        
-                        <div className="mt-4">
-                          <div className="flex justify-between text-xs mb-1">
-                            <span>{challenge.progress} {challenge.unit}</span>
-                            <span>{challenge.goal} {challenge.unit}</span>
-                          </div>
-                          <Progress 
-                            value={(challenge.progress / challenge.goal) * 100} 
-                            className={`h-1.5 ${
-                              challenge.completed 
-                                ? "[&>div]:bg-green-500" 
-                                : challenge.category === "steps" ? "[&>div]:bg-blue-500" :
-                                  challenge.category === "distance" ? "[&>div]:bg-green-500" :
-                                  challenge.category === "calories" ? "[&>div]:bg-orange-500" :
-                                  challenge.category === "streaks" ? "[&>div]:bg-purple-500" : "[&>div]:bg-brand-500"
-                            }`}
-                          />
-                          
-                          <div className="flex justify-between items-center mt-4">
-                            {challenge.participants && (
-                              <div className="flex items-center text-xs text-gray-500">
-                                <Users className="h-3 w-3 mr-1" />
-                                <span>{challenge.participants} participants</span>
+                    <motion.div
+                      key={challenge.id}
+                      whileHover={{ 
+                        y: -5,
+                        transition: { duration: 0.2 }
+                      }}
+                      className="challenge-card"
+                    >
+                      <Card className={`overflow-hidden border ${
+                        challenge.completed 
+                          ? "border-green-200 dark:border-green-900" 
+                          : "border-gray-200 dark:border-gray-700"
+                      }`}>
+                        <div className={`h-2 ${
+                          challenge.category === "steps" ? "bg-blue-500" :
+                          challenge.category === "distance" ? "bg-green-500" :
+                          challenge.category === "calories" ? "bg-orange-500" :
+                          challenge.category === "streaks" ? "bg-purple-500" : "bg-brand-500"
+                        }`}></div>
+                        <div className="p-4">
+                          <div className="flex items-start justify-between">
+                            <div className="flex flex-col">
+                              <div className="flex items-center">
+                                <span className="text-sm font-medium">{challenge.title}</span>
+                                {challenge.completed && (
+                                  <CheckCircle className="ml-1 h-4 w-4 text-green-500" />
+                                )}
                               </div>
-                            )}
+                              <span className="text-xs text-gray-500 dark:text-gray-400">{challenge.type}</span>
+                            </div>
                             
-                            <Button 
-                              size="sm" 
-                              variant={challenge.completed ? "outline" : "default"} 
-                              className={challenge.completed ? "pointer-events-none" : ""}
-                              onClick={() => !challenge.completed && joinChallenge(challenge.id)}
-                            >
-                              {challenge.completed ? "Completed" : "Join Challenge"}
-                            </Button>
+                            <div className="flex items-center text-xs text-gray-500 dark:text-gray-400">
+                              <Flag className="mr-1 h-3 w-3" />
+                              <span>{challenge.deadline}</span>
+                            </div>
+                          </div>
+                          
+                          <p className="mt-2 text-xs text-gray-600 dark:text-gray-300">
+                            {challenge.description}
+                          </p>
+                          
+                          <div className="mt-4">
+                            <div className="flex justify-between text-xs mb-1">
+                              <span>{challenge.progress} {challenge.unit}</span>
+                              <span>{challenge.goal} {challenge.unit}</span>
+                            </div>
+                            <Progress 
+                              value={(challenge.progress / challenge.goal) * 100} 
+                              className={`h-1.5 ${
+                                challenge.completed 
+                                  ? "[&>div]:bg-green-500" 
+                                  : challenge.category === "steps" ? "[&>div]:bg-blue-500" :
+                                    challenge.category === "distance" ? "[&>div]:bg-green-500" :
+                                    challenge.category === "calories" ? "[&>div]:bg-orange-500" :
+                                    challenge.category === "streaks" ? "[&>div]:bg-purple-500" : "[&>div]:bg-brand-500"
+                              }`}
+                            />
+                            
+                            <div className="flex justify-between items-center mt-4">
+                              {challenge.participants && (
+                                <div className="flex items-center text-xs text-gray-500">
+                                  <Users className="h-3 w-3 mr-1" />
+                                  <span>{challenge.participants} participants</span>
+                                </div>
+                              )}
+                              
+                              <Button 
+                                size="sm" 
+                                variant={challenge.completed ? "outline" : "default"} 
+                                className={challenge.completed ? "pointer-events-none" : ""}
+                                onClick={() => !challenge.completed && joinChallenge(challenge.id)}
+                              >
+                                {challenge.completed ? "Completed" : "Join Challenge"}
+                              </Button>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </Card>
+                      </Card>
+                    </motion.div>
                   ))}
                 </div>
                 
@@ -390,13 +507,17 @@ const Challenges = () => {
                   </thead>
                   <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                     {leaderboard.map((entry) => (
-                      <tr key={entry.rank} className={entry.isUser ? "bg-blue-50 dark:bg-blue-900/20" : ""}>
+                      <tr 
+                        key={entry.rank} 
+                        className={`${entry.isUser ? "bg-blue-50 dark:bg-blue-900/20" : ""} 
+                                   transition-colors duration-200 hover:bg-gray-50 dark:hover:bg-gray-800/70`}
+                      >
                         <td className="py-3 px-4 text-sm">
                           {entry.rank <= 3 ? (
                             <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full ${
-                              entry.rank === 1 ? "bg-amber-100 text-amber-600" : 
-                              entry.rank === 2 ? "bg-gray-100 text-gray-600" : 
-                              "bg-orange-100 text-orange-600"
+                              entry.rank === 1 ? "bg-amber-100 text-amber-600 dark:bg-amber-900/50 dark:text-amber-300" : 
+                              entry.rank === 2 ? "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300" : 
+                              "bg-orange-100 text-orange-600 dark:bg-orange-900/50 dark:text-orange-300"
                             }`}>
                               {entry.rank}
                             </span>
@@ -406,7 +527,7 @@ const Challenges = () => {
                         </td>
                         <td className="py-3 px-4">
                           <div className="flex items-center">
-                            <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 mr-3">
+                            <div className="h-8 w-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-500 dark:text-gray-400 mr-3">
                               {entry.avatar ? (
                                 <img src={entry.avatar} alt={entry.name} className="h-8 w-8 rounded-full" />
                               ) : (
@@ -414,7 +535,7 @@ const Challenges = () => {
                               )}
                             </div>
                             <span className={`text-sm ${entry.isUser ? "font-semibold" : ""}`}>
-                              {entry.name} {entry.isUser && <span className="text-xs text-blue-600">(You)</span>}
+                              {entry.name} {entry.isUser && <span className="text-xs text-blue-600 dark:text-blue-400">(You)</span>}
                             </span>
                           </div>
                         </td>
@@ -423,7 +544,15 @@ const Challenges = () => {
                         </td>
                         <td className="py-3 px-4 text-center">
                           {!entry.isUser && (
-                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="h-8 w-8 p-0 hover:bg-gray-100 dark:hover:bg-gray-800"
+                              onClick={() => toast({
+                                title: "User profile",
+                                description: `Viewing profile of ${entry.name}`,
+                              })}
+                            >
                               <ArrowRight className="h-4 w-4" />
                             </Button>
                           )}
@@ -435,7 +564,13 @@ const Challenges = () => {
               </div>
               
               <div className="mt-4 text-center">
-                <Button variant="outline">
+                <Button 
+                  variant="outline"
+                  onClick={() => toast({
+                    title: "Leaderboard",
+                    description: "Viewing complete leaderboard",
+                  })}
+                >
                   View Complete Leaderboard
                 </Button>
               </div>
@@ -473,19 +608,33 @@ const Challenges = () => {
                     icon: <Target className="h-10 w-10 text-purple-500" />,
                   }
                 ].map((event, idx) => (
-                  <Card key={idx} className="bg-gray-50 dark:bg-gray-800 border-none shadow-none">
-                    <CardContent className="p-6 flex flex-col items-center text-center">
-                      <div className="mb-4 p-3 rounded-full bg-white dark:bg-gray-700">
-                        {event.icon}
-                      </div>
-                      <h3 className="font-semibold mb-1">{event.title}</h3>
-                      <p className="text-sm text-blue-600 dark:text-blue-400 mb-2">{event.date}</p>
-                      <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">{event.desc}</p>
-                      <Button variant="outline" size="sm">
-                        Register
-                      </Button>
-                    </CardContent>
-                  </Card>
+                  <motion.div
+                    key={idx}
+                    whileHover={{ 
+                      y: -5,
+                      boxShadow: "0 10px 25px rgba(0, 0, 0, 0.1)",
+                      transition: { duration: 0.2 }
+                    }}
+                  >
+                    <Card className="bg-gray-50 dark:bg-gray-800 border-none shadow-none h-full">
+                      <CardContent className="p-6 flex flex-col items-center text-center h-full">
+                        <div className="mb-4 p-3 rounded-full bg-white dark:bg-gray-700">
+                          {event.icon}
+                        </div>
+                        <h3 className="font-semibold mb-1">{event.title}</h3>
+                        <p className="text-sm text-blue-600 dark:text-blue-400 mb-2">{event.date}</p>
+                        <p className="text-sm text-gray-600 dark:text-gray-300 mb-4 flex-grow">{event.desc}</p>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => registerForEvent(idx)}
+                          className="mt-auto hover:bg-primary hover:text-primary-foreground transition-colors"
+                        >
+                          Register
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
                 ))}
               </div>
             </CardContent>

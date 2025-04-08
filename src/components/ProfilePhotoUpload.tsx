@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { Avatar, AvatarImage, AvatarFallback } from "./ui/avatar";
 import { Button } from "./ui/button";
-import { Camera, X } from "lucide-react";
+import { Camera, X, Save } from "lucide-react";
 import { toast } from "./ui/use-toast";
 
 interface ProfilePhotoUploadProps {
@@ -19,11 +19,14 @@ const ProfilePhotoUpload = ({
   showUploadButton = true,
 }: ProfilePhotoUploadProps) => {
   const [image, setImage] = useState<string>(initialImage);
+  const [tempImage, setTempImage] = useState<string>(initialImage);
   const [isHovering, setIsHovering] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false);
   
   useEffect(() => {
     if (initialImage !== image && initialImage) {
       setImage(initialImage);
+      setTempImage(initialImage);
     }
   }, [initialImage]);
 
@@ -42,24 +45,35 @@ const ProfilePhotoUpload = ({
       const reader = new FileReader();
       reader.onload = () => {
         const imageUrl = reader.result as string;
-        setImage(imageUrl);
-        onImageChange?.(imageUrl);
-        toast({
-          title: "Profile photo updated",
-          description: "Your profile photo has been updated successfully.",
-        });
+        setTempImage(imageUrl);
+        setHasChanges(true);
       };
       reader.readAsDataURL(file);
     }
   };
 
-  const removeImage = () => {
-    setImage("");
-    onImageChange?.("");
+  const saveImage = () => {
+    setImage(tempImage);
+    onImageChange?.(tempImage);
+    setHasChanges(false);
     toast({
-      title: "Profile photo removed",
-      description: "Your profile photo has been removed.",
+      title: "Profile photo updated",
+      description: "Your profile photo has been saved successfully.",
     });
+  };
+
+  const cancelChanges = () => {
+    setTempImage(image);
+    setHasChanges(false);
+    toast({
+      title: "Changes discarded",
+      description: "Your profile photo changes have been discarded.",
+    });
+  };
+
+  const removeImage = () => {
+    setTempImage("");
+    setHasChanges(true);
   };
 
   const sizeClasses = {
@@ -78,7 +92,7 @@ const ProfilePhotoUpload = ({
       >
         <Avatar className={`${sizeClasses[size]} border-2 border-gray-200 dark:border-gray-700`}>
           <AvatarImage 
-            src={image || "/placeholder.svg"} 
+            src={tempImage || "/placeholder.svg"} 
             alt="Profile" 
             className="object-cover"
           />
@@ -88,7 +102,7 @@ const ProfilePhotoUpload = ({
           </AvatarFallback>
         </Avatar>
         
-        {isHovering && image && (
+        {isHovering && tempImage && (
           <button
             onClick={removeImage}
             className="absolute top-0 right-0 bg-destructive text-destructive-foreground p-1 rounded-full shadow-md hover:bg-destructive/90 transition-colors"
@@ -108,17 +122,40 @@ const ProfilePhotoUpload = ({
             onChange={handleImageChange}
             className="hidden"
           />
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={() => document.getElementById("profile-photo")?.click()}
-            className="flex items-center gap-2"
-          >
-            <Camera className="h-4 w-4" />
-            {image ? "Change Photo" : "Upload Photo"}
-          </Button>
           
-          {image && (
+          {hasChanges ? (
+            <>
+              <Button 
+                variant="default" 
+                size="sm"
+                onClick={saveImage}
+                className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
+              >
+                <Save className="h-4 w-4" />
+                Save Photo
+              </Button>
+              
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={cancelChanges}
+              >
+                Cancel
+              </Button>
+            </>
+          ) : (
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => document.getElementById("profile-photo")?.click()}
+              className="flex items-center gap-2"
+            >
+              <Camera className="h-4 w-4" />
+              {image ? "Change Photo" : "Upload Photo"}
+            </Button>
+          )}
+          
+          {image && !hasChanges && (
             <Button
               variant="ghost"
               size="sm"

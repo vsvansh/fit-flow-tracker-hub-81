@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -15,8 +15,27 @@ import { extendedUserProfile } from "@/utils/profileExtension";
 export default function Profile() {
   const [profile, setProfile] = useState(extendedUserProfile);
   const [isEditing, setIsEditing] = useState(false);
+  const [selectedFitnessGoals, setSelectedFitnessGoals] = useState<string[]>(profile.fitnessGoals || []);
+  const [selectedDietaryPreferences, setSelectedDietaryPreferences] = useState<string[]>(profile.dietaryPreferences || []);
+  const [formValues, setFormValues] = useState({
+    name: profile.name,
+    email: profile.email,
+    age: profile.age,
+    gender: profile.gender,
+    height: profile.height,
+    weight: profile.weight,
+    goalWeight: profile.goalWeight,
+  });
   
   const handleProfileUpdate = () => {
+    const updatedProfile = {
+      ...profile,
+      ...formValues,
+    };
+    
+    setProfile(updatedProfile);
+    localStorage.setItem('userProfile', JSON.stringify(updatedProfile));
+    
     toast({
       title: "Profile updated",
       description: "Your profile has been updated successfully.",
@@ -24,14 +43,81 @@ export default function Profile() {
     setIsEditing(false);
   };
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    setFormValues(prev => ({
+      ...prev,
+      [id]: id === 'age' || id === 'height' || id === 'weight' || id === 'goalWeight' ? Number(value) : value
+    }));
+  };
+
   const handleImageChange = (imageUrl: string) => {
-    setProfile(prev => ({ ...prev, profilePic: imageUrl }));
+    const updatedProfile = { ...profile, profilePic: imageUrl };
+    setProfile(updatedProfile);
+    localStorage.setItem('userProfile', JSON.stringify(updatedProfile));
   };
   
   const calculateBMI = () => {
-    const heightInM = profile.height / 100;
-    return (profile.weight / (heightInM * heightInM)).toFixed(1);
+    const heightInM = formValues.height / 100;
+    return (formValues.weight / (heightInM * heightInM)).toFixed(1);
   };
+  
+  const toggleFitnessGoal = (goal: string) => {
+    setSelectedFitnessGoals(prev => {
+      if (prev.includes(goal)) {
+        return prev.filter(g => g !== goal);
+      } else {
+        return [...prev, goal];
+      }
+    });
+  };
+  
+  const toggleDietaryPreference = (preference: string) => {
+    setSelectedDietaryPreferences(prev => {
+      if (prev.includes(preference)) {
+        return prev.filter(p => p !== preference);
+      } else {
+        return [...prev, preference];
+      }
+    });
+  };
+  
+  const savePreferences = () => {
+    const updatedProfile = {
+      ...profile,
+      goalWeight: formValues.goalWeight,
+      fitnessGoals: selectedFitnessGoals,
+      dietaryPreferences: selectedDietaryPreferences
+    };
+    
+    setProfile(updatedProfile);
+    localStorage.setItem('userProfile', JSON.stringify(updatedProfile));
+    
+    toast({
+      title: "Preferences updated",
+      description: "Your goals and preferences have been saved."
+    });
+  };
+
+  useEffect(() => {
+    // Load profile from localStorage on component mount if available
+    const savedProfile = localStorage.getItem('userProfile');
+    if (savedProfile) {
+      const parsedProfile = JSON.parse(savedProfile);
+      setProfile(parsedProfile);
+      setFormValues({
+        name: parsedProfile.name,
+        email: parsedProfile.email,
+        age: parsedProfile.age,
+        gender: parsedProfile.gender,
+        height: parsedProfile.height,
+        weight: parsedProfile.weight,
+        goalWeight: parsedProfile.goalWeight,
+      });
+      setSelectedFitnessGoals(parsedProfile.fitnessGoals || []);
+      setSelectedDietaryPreferences(parsedProfile.dietaryPreferences || []);
+    }
+  }, []);
 
   return (
     <div className="container py-8">
@@ -67,11 +153,11 @@ export default function Profile() {
               <div className="grid grid-cols-2 gap-4 mt-2">
                 <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-md text-center">
                   <p className="text-sm font-medium text-blue-700 dark:text-blue-300">Weight</p>
-                  <p className="text-2xl font-bold">{profile.weight} kg</p>
+                  <p className="text-2xl font-bold">{formValues.weight} kg</p>
                 </div>
                 <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-md text-center">
                   <p className="text-sm font-medium text-green-700 dark:text-green-300">Height</p>
-                  <p className="text-2xl font-bold">{profile.height} cm</p>
+                  <p className="text-2xl font-bold">{formValues.height} cm</p>
                 </div>
                 <div className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-md text-center">
                   <p className="text-sm font-medium text-amber-700 dark:text-amber-300">BMI</p>
@@ -116,7 +202,8 @@ export default function Profile() {
                       <Label htmlFor="name">Full Name</Label>
                       <Input 
                         id="name" 
-                        defaultValue={profile.name}
+                        value={formValues.name}
+                        onChange={handleInputChange}
                         readOnly={!isEditing}
                         className={!isEditing ? "bg-muted" : ""} 
                       />
@@ -126,7 +213,8 @@ export default function Profile() {
                       <Input 
                         id="email" 
                         type="email" 
-                        defaultValue={profile.email}
+                        value={formValues.email}
+                        onChange={handleInputChange}
                         readOnly={!isEditing}
                         className={!isEditing ? "bg-muted" : ""}  
                       />
@@ -136,7 +224,8 @@ export default function Profile() {
                       <Input 
                         id="age" 
                         type="number" 
-                        defaultValue={profile.age}
+                        value={formValues.age}
+                        onChange={handleInputChange}
                         readOnly={!isEditing}
                         className={!isEditing ? "bg-muted" : ""}  
                       />
@@ -145,7 +234,8 @@ export default function Profile() {
                       <Label htmlFor="gender">Gender</Label>
                       <Input 
                         id="gender" 
-                        defaultValue={profile.gender}
+                        value={formValues.gender}
+                        onChange={handleInputChange}
                         readOnly={!isEditing}
                         className={!isEditing ? "bg-muted" : ""}  
                       />
@@ -155,7 +245,8 @@ export default function Profile() {
                       <Input 
                         id="height" 
                         type="number" 
-                        defaultValue={profile.height}
+                        value={formValues.height}
+                        onChange={handleInputChange}
                         readOnly={!isEditing}
                         className={!isEditing ? "bg-muted" : ""}  
                       />
@@ -165,7 +256,8 @@ export default function Profile() {
                       <Input 
                         id="weight" 
                         type="number" 
-                        defaultValue={profile.weight}
+                        value={formValues.weight}
+                        onChange={handleInputChange}
                         readOnly={!isEditing}
                         className={!isEditing ? "bg-muted" : ""}  
                       />
@@ -193,7 +285,8 @@ export default function Profile() {
                       <Input 
                         id="goalWeight" 
                         type="number" 
-                        defaultValue={profile.goalWeight} 
+                        value={formValues.goalWeight}
+                        onChange={handleInputChange}
                       />
                     </div>
                     
@@ -204,10 +297,11 @@ export default function Profile() {
                           <div 
                             key={goal} 
                             className={`p-3 border rounded-md text-center cursor-pointer transition-colors ${
-                              profile.fitnessGoals?.includes(goal) 
+                              selectedFitnessGoals.includes(goal) 
                                 ? "bg-primary text-primary-foreground" 
                                 : "bg-background hover:bg-muted"
                             }`}
+                            onClick={() => toggleFitnessGoal(goal)}
                           >
                             {goal}
                           </div>
@@ -222,10 +316,11 @@ export default function Profile() {
                           <div 
                             key={diet} 
                             className={`p-3 border rounded-md text-center cursor-pointer transition-colors ${
-                              profile.dietaryPreferences?.includes(diet) 
+                              selectedDietaryPreferences.includes(diet) 
                                 ? "bg-primary text-primary-foreground" 
                                 : "bg-background hover:bg-muted"
                             }`}
+                            onClick={() => toggleDietaryPreference(diet)}
                           >
                             {diet}
                           </div>
@@ -235,12 +330,7 @@ export default function Profile() {
                   </div>
                 </CardContent>
                 <CardFooter>
-                  <Button onClick={() => {
-                    toast({
-                      title: "Preferences updated",
-                      description: "Your goals and preferences have been saved."
-                    });
-                  }}>Save Preferences</Button>
+                  <Button onClick={savePreferences}>Save Preferences</Button>
                 </CardFooter>
               </Card>
             </TabsContent>

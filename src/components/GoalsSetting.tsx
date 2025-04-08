@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { fitnessGoals } from "@/utils/fitnessData";
 import { Target, Check, X } from "lucide-react";
+import { toast } from "@/components/ui/use-toast";
 
 // Add an interface to match the shape of the goals
 interface Goal {
@@ -29,9 +30,40 @@ interface Goal {
 }
 
 const GoalsSetting = () => {
-  const [goals, setGoals] = useState<Goal[]>(fitnessGoals as Goal[]);
+  const [goals, setGoals] = useState<Goal[]>([]);
   const [editingGoalId, setEditingGoalId] = useState<number | null>(null);
   const [editTarget, setEditTarget] = useState<number>(0);
+  const [animatedGoals, setAnimatedGoals] = useState<{ [key: number]: boolean }>({});
+
+  // Load goals from localStorage or use default
+  useEffect(() => {
+    const savedGoals = localStorage.getItem('fitnessGoals');
+    if (savedGoals) {
+      setGoals(JSON.parse(savedGoals));
+    } else {
+      setGoals(fitnessGoals as Goal[]);
+    }
+  }, []);
+
+  // Save goals to localStorage when they change
+  useEffect(() => {
+    if (goals.length > 0) {
+      localStorage.setItem('fitnessGoals', JSON.stringify(goals));
+    }
+  }, [goals]);
+
+  // Animate progress bars when they come into view
+  useEffect(() => {
+    const animationDelay = setTimeout(() => {
+      const animatedState: { [key: number]: boolean } = {};
+      goals.forEach(goal => {
+        animatedState[goal.id] = true;
+      });
+      setAnimatedGoals(animatedState);
+    }, 500);
+    
+    return () => clearTimeout(animationDelay);
+  }, [goals]);
 
   const handleEditClick = (goalId: number, currentTarget: number) => {
     setEditingGoalId(goalId);
@@ -39,12 +71,34 @@ const GoalsSetting = () => {
   };
 
   const handleSaveClick = (goalId: number) => {
+    if (editTarget <= 0) {
+      toast({
+        title: "Invalid target",
+        description: "Target value must be greater than zero.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     setGoals(
       goals.map((goal) =>
-        goal.id === goalId ? { ...goal, target: editTarget } : goal
+        goal.id === goalId ? { 
+          ...goal, 
+          target: editTarget,
+          metrics: {
+            ...goal.metrics,
+            target: editTarget
+          }
+        } : goal
       )
     );
+    
     setEditingGoalId(null);
+    
+    toast({
+      title: "Goal updated",
+      description: "Your fitness goal has been updated successfully."
+    });
   };
 
   const handleCancelClick = () => {
@@ -55,7 +109,7 @@ const GoalsSetting = () => {
   const dailyGoals = goals.filter(goal => goal.period === "daily" || !goal.period);
 
   return (
-    <Card className="shadow">
+    <Card className="shadow hover:shadow-md transition-all duration-300 dark:bg-gray-800/50">
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <CardTitle className="text-xl font-bold">Daily Goals</CardTitle>
@@ -65,12 +119,12 @@ const GoalsSetting = () => {
       <CardContent>
         <div className="space-y-4">
           {dailyGoals.map((goal) => (
-            <div key={goal.id} className="border-b pb-3">
+            <div key={goal.id} className="border-b pb-3 dark:border-gray-700">
               <div className="flex justify-between items-center">
                 <div>
                   <h3 className="font-medium">{goal.name}</h3>
                   {editingGoalId !== goal.id ? (
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
                       Target: {goal.target} {goal.metrics.unit}
                     </p>
                   ) : (
@@ -84,8 +138,9 @@ const GoalsSetting = () => {
                         value={editTarget}
                         onChange={(e) => setEditTarget(Number(e.target.value))}
                         className="w-24 h-8"
+                        min="1"
                       />
-                      <span className="ml-2 text-xs text-gray-500">{goal.metrics.unit}</span>
+                      <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">{goal.metrics.unit}</span>
                     </div>
                   )}
                 </div>
@@ -124,25 +179,27 @@ const GoalsSetting = () => {
               
               {/* Progress bar */}
               <div className="mt-2">
-                <div className="flex justify-between text-xs text-gray-500 mb-1">
+                <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mb-1">
                   <span>{goal.metrics.current} {goal.metrics.unit}</span>
                   <span>{goal.target} {goal.metrics.unit}</span>
                 </div>
                 <Progress 
-                  value={Math.min((goal.metrics.current / goal.target) * 100, 100)}
+                  value={animatedGoals[goal.id] ? Math.min((goal.metrics.current / goal.target) * 100, 100) : 0}
                   className={`h-2 ${
                     goal.name === "Daily Steps"
-                      ? "bg-gray-100 [&>div]:bg-blue-500"
+                      ? "bg-gray-100 dark:bg-gray-700 [&>div]:bg-blue-500"
                       : goal.name === "Calories Burned"
-                      ? "bg-gray-100 [&>div]:bg-orange-500"
+                      ? "bg-gray-100 dark:bg-gray-700 [&>div]:bg-orange-500"
                       : goal.name === "Distance"
-                      ? "bg-gray-100 [&>div]:bg-green-500"
-                      : "bg-gray-100 [&>div]:bg-purple-500"
+                      ? "bg-gray-100 dark:bg-gray-700 [&>div]:bg-green-500"
+                      : "bg-gray-100 dark:bg-gray-700 [&>div]:bg-purple-500"
                   }`}
                 />
-                <p className="text-xs text-right mt-1 font-medium">
-                  {Math.round((goal.metrics.current / goal.target) * 100)}% completed
-                </p>
+                <div className="flex justify-end">
+                  <p className="text-xs mt-1 font-medium bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-blue-400">
+                    {Math.round((goal.metrics.current / goal.target) * 100)}% completed
+                  </p>
+                </div>
               </div>
             </div>
           ))}
