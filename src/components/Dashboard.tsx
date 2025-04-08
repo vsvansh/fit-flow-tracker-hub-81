@@ -1,43 +1,65 @@
 
 import { format } from "date-fns";
-import { getTodayActivity, fitnessGoals } from "@/utils/fitnessData";
+import { getTodayActivity, fitnessGoals, getStreakCount } from "@/utils/fitnessData";
 import ActivitySummary from "./ActivitySummary";
 import ActivityChart from "./ActivityChart";
 import GoalsSetting from "./GoalsSetting";
-import { Calendar, Heart, Clock } from "lucide-react";
+import UserProfile from "./UserProfile";
+import StatsInsight from "./StatsInsight";
+import Achievements from "./Achievements";
+import { Calendar, Heart, Clock, Footprints, TrendingUp, Award } from "lucide-react";
 
 const Dashboard = () => {
   const today = format(new Date(), "EEEE, MMMM d, yyyy");
   const todayActivity = getTodayActivity();
+  const streakCount = getStreakCount();
   
   // Find goals
   const stepsGoal = fitnessGoals.find(goal => goal.name === "Daily Steps")?.target || 10000;
   const caloriesGoal = fitnessGoals.find(goal => goal.name === "Calories Burned")?.target || 500;
   const distanceGoal = fitnessGoals.find(goal => goal.name === "Distance")?.target || 8;
+  const activeMinutesGoal = fitnessGoals.find(goal => goal.name === "Active Minutes")?.target || 60;
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+    <div className="container mx-auto px-4 py-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
         <div>
-          <h1 className="text-3xl font-bold mb-1">Fitness Dashboard</h1>
+          <h1 className="text-3xl font-bold mb-1 text-blue-700">Fitness Dashboard</h1>
           <div className="flex items-center text-gray-500">
             <Calendar className="w-4 h-4 mr-1" />
             <span>{today}</span>
           </div>
         </div>
-        <div className="mt-4 md:mt-0 flex items-center space-x-4">
-          <div className="flex items-center">
-            <Clock className="w-5 h-5 text-blue-500 mr-2" />
+        <div className="mt-4 md:mt-0 flex flex-wrap items-center gap-4">
+          <div className="flex items-center bg-blue-50 p-2 rounded-lg shadow-sm">
+            <Clock className="w-5 h-5 text-blue-600 mr-2" />
             <div>
-              <p className="text-sm text-gray-500">Today's Activity</p>
-              <p className="font-bold">{todayActivity.steps.toLocaleString()} steps</p>
+              <p className="text-xs text-gray-500">Steps</p>
+              <p className="font-bold text-blue-700">{todayActivity.steps.toLocaleString()}</p>
             </div>
           </div>
-          <div className="flex items-center">
+          
+          <div className="flex items-center bg-orange-50 p-2 rounded-lg shadow-sm">
             <Heart className="w-5 h-5 text-red-500 mr-2" />
             <div>
-              <p className="text-sm text-gray-500">Calories</p>
-              <p className="font-bold">{todayActivity.caloriesBurned} cal</p>
+              <p className="text-xs text-gray-500">Calories</p>
+              <p className="font-bold text-red-600">{todayActivity.caloriesBurned}</p>
+            </div>
+          </div>
+          
+          <div className="flex items-center bg-green-50 p-2 rounded-lg shadow-sm">
+            <Footprints className="w-5 h-5 text-green-600 mr-2" />
+            <div>
+              <p className="text-xs text-gray-500">Distance</p>
+              <p className="font-bold text-green-700">{todayActivity.distance} km</p>
+            </div>
+          </div>
+          
+          <div className="flex items-center bg-amber-50 p-2 rounded-lg shadow-sm">
+            <Award className="w-5 h-5 text-amber-600 mr-2" />
+            <div>
+              <p className="text-xs text-gray-500">Streak</p>
+              <p className="font-bold text-amber-700">{streakCount} days</p>
             </div>
           </div>
         </div>
@@ -48,9 +70,11 @@ const Dashboard = () => {
           steps={todayActivity.steps}
           caloriesBurned={todayActivity.caloriesBurned}
           distance={todayActivity.distance}
+          activeMinutes={todayActivity.activeMinutes || 0}
           stepsGoal={stepsGoal}
           caloriesGoal={caloriesGoal}
           distanceGoal={distanceGoal}
+          activeMinutesGoal={activeMinutesGoal}
         />
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -58,9 +82,18 @@ const Dashboard = () => {
             <ActivityChart />
           </div>
           <div className="md:col-span-1">
+            <UserProfile />
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <StatsInsight />
+          <div className="grid grid-cols-1 gap-6">
             <GoalsSetting />
           </div>
         </div>
+        
+        <Achievements />
       </div>
     </div>
   );

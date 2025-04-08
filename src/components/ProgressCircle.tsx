@@ -50,9 +50,22 @@ const ProgressCircle = ({
     "bg-blue-500": "stroke-blue-500",
     "bg-green-500": "stroke-green-500",
     "bg-orange-500": "stroke-orange-500",
+    "bg-red-500": "stroke-red-500",
+    "bg-purple-500": "stroke-purple-500",
+    "bg-yellow-500": "stroke-yellow-500",
+    "bg-pink-500": "stroke-pink-500",
+    "bg-indigo-500": "stroke-indigo-500",
   };
 
   const strokeColor = colorVariants[color as keyof typeof colorVariants] || "stroke-blue-500";
+  
+  // Calculate text color based on progress
+  const getTextColor = () => {
+    if (percentage >= 100) return "text-green-600";
+    if (percentage >= 75) return "text-blue-600";
+    if (percentage >= 50) return "text-orange-500";
+    return "text-red-500";
+  };
 
   return (
     <div className="flex flex-col items-center justify-center">
@@ -83,7 +96,7 @@ const ProgressCircle = ({
           />
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className={cn("font-bold", fontSizeClasses[size])}>
+          <span className={cn("font-bold", fontSizeClasses[size], getTextColor())}>
             {value}
           </span>
           <span className="text-xs text-gray-500">{unit}</span>
