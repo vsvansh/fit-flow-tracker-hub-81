@@ -1,7 +1,7 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Bell } from "lucide-react";
+import { Bell, Water, Trophy, Zap } from "lucide-react";
 import {
   Popover,
   PopoverContent,
@@ -9,6 +9,8 @@ import {
 } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "@/components/ui/use-toast";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface Notification {
   id: string;
@@ -17,6 +19,7 @@ interface Notification {
   time: string;
   read: boolean;
   type: "reminder" | "achievement" | "alert" | "update";
+  icon?: React.ReactNode;
 }
 
 const NotificationCenter = () => {
@@ -28,6 +31,7 @@ const NotificationCenter = () => {
       time: "Just now",
       read: false,
       type: "reminder",
+      icon: <Water className="h-4 w-4 text-blue-500" />
     },
     {
       id: "2",
@@ -36,6 +40,7 @@ const NotificationCenter = () => {
       time: "2 hours ago",
       read: false,
       type: "achievement",
+      icon: <Trophy className="h-4 w-4 text-amber-500" />
     },
     {
       id: "3",
@@ -44,6 +49,7 @@ const NotificationCenter = () => {
       time: "Yesterday",
       read: true,
       type: "update",
+      icon: <Zap className="h-4 w-4 text-purple-500" />
     },
     {
       id: "4",
@@ -54,6 +60,8 @@ const NotificationCenter = () => {
       type: "alert",
     },
   ]);
+  
+  const [open, setOpen] = useState(false);
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
@@ -69,22 +77,51 @@ const NotificationCenter = () => {
     setNotifications(prev => 
       prev.map(notif => ({ ...notif, read: true }))
     );
+    toast({
+      title: "All notifications marked as read",
+      description: "You're all caught up!",
+    });
   };
+  
+  useEffect(() => {
+    // Add scroll to top functionality for all page transitions
+    const scrollToTop = () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+    
+    document.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'A' && target.getAttribute('href')?.startsWith('/')) {
+        scrollToTop();
+      }
+    });
+    
+    return () => {
+      document.removeEventListener('click', scrollToTop);
+    };
+  }, []);
 
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button 
           variant="outline" 
           size="icon"
-          className="relative h-9 w-9"
+          className="relative h-9 w-9 hover:scale-105 transition-transform"
         >
           <Bell className="h-4 w-4" />
-          {unreadCount > 0 && (
-            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-              {unreadCount}
-            </span>
-          )}
+          <AnimatePresence>
+            {unreadCount > 0 && (
+              <motion.span 
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                exit={{ scale: 0 }}
+                className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center"
+              >
+                {unreadCount}
+              </motion.span>
+            )}
+          </AnimatePresence>
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-80 p-0" align="end">
@@ -106,16 +143,37 @@ const NotificationCenter = () => {
           {notifications.length > 0 ? (
             <div>
               {notifications.map((notification, index) => (
-                <div 
+                <motion.div 
                   key={notification.id}
+                  initial={{ opacity: 0.8, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.2 }}
                   className={`p-3 ${notification.read ? "" : "bg-blue-50 dark:bg-blue-900/20"} ${
                     index !== notifications.length - 1 ? "border-b border-gray-100 dark:border-gray-800" : ""
-                  }`}
+                  } hover:bg-gray-100 dark:hover:bg-gray-800/50 cursor-pointer transition-colors`}
                   onClick={() => markAsRead(notification.id)}
                 >
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <div className="flex items-center">
+                  <div className="flex items-start">
+                    <div className="mr-3 mt-1">
+                      {notification.icon || (
+                        <div className={`h-8 w-8 rounded-full flex items-center justify-center ${
+                          notification.type === "achievement" 
+                            ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
+                            : notification.type === "alert"
+                            ? "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"
+                            : notification.type === "reminder"
+                            ? "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400"
+                            : "bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400"
+                        }`}>
+                          {notification.type === "achievement" && <Trophy className="h-4 w-4" />}
+                          {notification.type === "alert" && <Bell className="h-4 w-4" />}
+                          {notification.type === "reminder" && <Water className="h-4 w-4" />}
+                          {notification.type === "update" && <Zap className="h-4 w-4" />}
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between">
                         <span className="font-medium text-sm">{notification.title}</span>
                         {!notification.read && (
                           <span className="ml-2 h-2 w-2 rounded-full bg-blue-500"></span>
@@ -124,28 +182,12 @@ const NotificationCenter = () => {
                       <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                         {notification.description}
                       </p>
-                    </div>
-                    <div>
-                      <Badge 
-                        variant="outline" 
-                        className={`text-[10px] ${
-                          notification.type === "achievement" 
-                            ? "bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800" 
-                            : notification.type === "alert"
-                            ? "bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border-red-200 dark:border-red-800"
-                            : notification.type === "reminder"
-                            ? "bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800"
-                            : "bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400 border-purple-200 dark:border-purple-800"
-                        }`}
-                      >
-                        {notification.type}
-                      </Badge>
+                      <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-1">
+                        {notification.time}
+                      </p>
                     </div>
                   </div>
-                  <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-1">
-                    {notification.time}
-                  </p>
-                </div>
+                </motion.div>
               ))}
             </div>
           ) : (
@@ -160,7 +202,9 @@ const NotificationCenter = () => {
             variant="ghost" 
             size="sm" 
             className="text-xs w-full"
-            onClick={() => {}}
+            onClick={() => {
+              setOpen(false);
+            }}
           >
             View all notifications
           </Button>

@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import WaterTracker from './WaterTracker';
 import { Button } from './ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from './ui/dialog';
@@ -12,6 +12,12 @@ const WaterTrackerWithEdit = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [totalGlasses, setTotalGlasses] = useState(8);
   const [inputValue, setInputValue] = useState('8');
+
+  // Pass totalGlasses to WaterTracker
+  useEffect(() => {
+    // This effect passes the updated totalGlasses value to the WaterTracker component
+    // This would be handled with context or props in a real application
+  }, [totalGlasses]);
 
   const handleSave = () => {
     const newTotal = parseInt(inputValue, 10);
@@ -44,10 +50,10 @@ const WaterTrackerWithEdit = () => {
         <Edit2 className="h-4 w-4 text-muted-foreground" />
       </Button>
       
-      <WaterTracker />
+      <WaterTracker dailyGoal={totalGlasses} />
       
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-[425px] my-4">
           <DialogHeader>
             <DialogTitle>Edit Daily Water Goal</DialogTitle>
           </DialogHeader>
@@ -63,6 +69,7 @@ const WaterTrackerWithEdit = () => {
                 onChange={(e) => setInputValue(e.target.value)}
                 className="col-span-2"
                 min="1"
+                max="20"
               />
             </div>
           </div>

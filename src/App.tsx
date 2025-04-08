@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { ThemeProvider } from "@/providers/ThemeProvider";
 import { AnimatePresence, motion } from "framer-motion";
+import { useEffect } from "react";
 
 import Index from "./pages/Index";
 import Profile from "./pages/Profile";
@@ -25,6 +26,11 @@ const queryClient = new QueryClient();
 // Wrap the routes with AnimatePresence for page transitions
 const AnimatedRoutes = () => {
   const location = useLocation();
+  
+  // Scroll to top when route changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [location.pathname]);
   
   return (
     <AnimatePresence mode="wait">
@@ -52,7 +58,7 @@ const AnimatedRoutes = () => {
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <ThemeProvider>
+    <ThemeProvider defaultTheme="dark">
       <TooltipProvider>
         <Toaster />
         <Sonner />

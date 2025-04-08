@@ -61,31 +61,43 @@ const Achievements = () => {
           {badges.map((badge, index) => (
             <div 
               key={index} 
-              className={`p-3 rounded-lg border ${badge.achieved ? 'bg-amber-50 border-amber-200' : 'bg-gray-50 border-gray-200'}`}
+              className={`p-3 rounded-lg border transition-transform duration-300 hover:scale-105 hover:shadow-md ${
+                badge.achieved 
+                  ? 'bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800' 
+                  : 'bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700'
+              }`}
             >
               <div className="flex flex-col items-center text-center p-2">
-                <div className={`rounded-full p-3 ${badge.achieved ? 'bg-amber-100' : 'bg-gray-100'}`}>
+                <div className={`rounded-full p-3 ${
+                  badge.achieved 
+                    ? 'bg-amber-100 dark:bg-amber-900/50' 
+                    : 'bg-gray-100 dark:bg-gray-800'
+                }`}>
                   {badge.icon}
                 </div>
-                <h3 className={`mt-2 font-semibold ${badge.achieved ? 'text-amber-700' : 'text-gray-700'}`}>
+                <h3 className={`mt-2 font-semibold ${
+                  badge.achieved 
+                    ? 'text-amber-700 dark:text-amber-400' 
+                    : 'text-gray-700 dark:text-gray-300'
+                }`}>
                   {badge.name}
                 </h3>
-                <p className="text-xs text-gray-500 mt-1">{badge.description}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{badge.description}</p>
                 
                 {!badge.achieved && badge.progress !== undefined && (
                   <div className="w-full mt-3">
-                    <div className="w-full bg-gray-200 rounded-full h-1.5">
+                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
                       <div 
-                        className="bg-blue-500 h-1.5 rounded-full" 
+                        className="bg-blue-500 h-1.5 rounded-full animate-pulse" 
                         style={{ width: `${badge.progress}%` }}
                       />
                     </div>
-                    <p className="text-xs text-gray-500 mt-1">{badge.progress}% completed</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{badge.progress}% completed</p>
                   </div>
                 )}
                 
                 {badge.achieved && (
-                  <span className="inline-block px-2 py-1 mt-2 bg-green-100 text-green-800 text-xs font-medium rounded-full">
+                  <span className="inline-block px-2 py-1 mt-2 bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-400 text-xs font-medium rounded-full">
                     Achieved
                   </span>
                 )}

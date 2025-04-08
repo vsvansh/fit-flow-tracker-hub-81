@@ -1,19 +1,31 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Droplet, Plus, Minus } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "@/components/ui/use-toast";
 
-const WaterTracker = () => {
+interface WaterTrackerProps {
+  dailyGoal?: number;
+}
+
+const WaterTracker = ({ dailyGoal = 8 }: WaterTrackerProps) => {
   const [waterIntake, setWaterIntake] = useState(0);
-  const dailyWaterGoal = 8; // glasses of water
+  const [progress, setProgress] = useState(0);
+  
+  // Update progress when water intake or goal changes
+  useEffect(() => {
+    const percentage = Math.min(100, Math.round((waterIntake / dailyGoal) * 100));
+    setProgress(0); // Reset to trigger animation
+    const timer = setTimeout(() => setProgress(percentage), 50);
+    return () => clearTimeout(timer);
+  }, [waterIntake, dailyGoal]);
   
   const addWater = () => {
-    if (waterIntake < dailyWaterGoal * 2) {
+    if (waterIntake < dailyGoal * 2) {  // Allow going over goal but cap at 2x
       setWaterIntake(prev => prev + 1);
-      if (waterIntake + 1 >= dailyWaterGoal) {
+      if (waterIntake + 1 >= dailyGoal) {
         toast({
           title: "Daily Water Goal Achieved!",
           description: "Great job staying hydrated today!",
@@ -28,13 +40,10 @@ const WaterTracker = () => {
     }
   };
   
-  const waterPercentage = Math.min(100, Math.round((waterIntake / dailyWaterGoal) * 100));
-  
-  // Calculate wave height based on water percentage
-  const waveHeight = `${100 - waterPercentage}%`;
+  const waterPercentage = Math.min(100, Math.round((waterIntake / dailyGoal) * 100));
 
   return (
-    <Card>
+    <Card className="hover:shadow-lg transition-all duration-300">
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg font-bold">Water Tracker</CardTitle>
@@ -45,12 +54,12 @@ const WaterTracker = () => {
         <div className="flex flex-col items-center">
           <div className="relative w-24 h-32 mb-4 border-2 border-blue-200 dark:border-blue-800 rounded-lg overflow-hidden">
             <div 
-              className="absolute bottom-0 w-full bg-gradient-to-b from-blue-400 to-blue-600 transition-all duration-500 ease-in-out"
+              className="absolute bottom-0 w-full bg-gradient-to-b from-blue-400 to-blue-600 transition-all duration-1000 ease-in-out"
               style={{ height: `${waterPercentage}%` }}
             />
             <div className="absolute inset-0 flex items-center justify-center text-center">
               <p className={`font-bold text-lg ${waterPercentage > 50 ? 'text-white' : 'text-blue-600 dark:text-blue-400'}`}>
-                {waterIntake}/{dailyWaterGoal}
+                {waterIntake}/{dailyGoal}
               </p>
             </div>
           </div>
@@ -74,9 +83,9 @@ const WaterTracker = () => {
             </Button>
           </div>
           
-          <Progress value={waterPercentage} className="h-2 w-full" />
+          <Progress value={progress} className="h-2 w-full" />
           <p className="text-xs text-center mt-2 text-muted-foreground">
-            {waterIntake} of {dailyWaterGoal} glasses
+            {waterIntake} of {dailyGoal} glasses
           </p>
           <p className="text-xs text-center mt-1 text-muted-foreground">
             {waterPercentage}% of daily goal
