@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -27,13 +26,13 @@ const sampleExercises = [
   { id: 10, name: 'Dancing', calories: 9, intensities: ['low', 'moderate', 'high'] },
 ];
 
-// Sample workout history
+// Sample workout history - fixing intensity to be one of the allowed types
 const sampleWorkoutHistory = [
-  { id: 1, name: 'Morning Run', type: 'Running', date: '2025-04-07', duration: 45, intensity: 'high', calories: 540 },
-  { id: 2, name: 'Strength Training', type: 'Weight Training', date: '2025-04-06', duration: 60, intensity: 'moderate', calories: 480 },
-  { id: 3, name: 'Evening Walk', type: 'Walking', date: '2025-04-06', duration: 30, intensity: 'low', calories: 150 },
-  { id: 4, name: 'Yoga Session', type: 'Yoga', date: '2025-04-05', duration: 45, intensity: 'low', calories: 180 },
-  { id: 5, name: 'Swimming Laps', type: 'Swimming', date: '2025-04-03', duration: 40, intensity: 'moderate', calories: 440 },
+  { id: 1, name: 'Morning Run', type: 'Running', date: '2025-04-07', duration: 45, intensity: 'high' as const, calories: 540 },
+  { id: 2, name: 'Strength Training', type: 'Weight Training', date: '2025-04-06', duration: 60, intensity: 'moderate' as const, calories: 480 },
+  { id: 3, name: 'Evening Walk', type: 'Walking', date: '2025-04-06', duration: 30, intensity: 'low' as const, calories: 150 },
+  { id: 4, name: 'Yoga Session', type: 'Yoga', date: '2025-04-05', duration: 45, intensity: 'low' as const, calories: 180 },
+  { id: 5, name: 'Swimming Laps', type: 'Swimming', date: '2025-04-03', duration: 40, intensity: 'moderate' as const, calories: 440 },
 ];
 
 // Sample connected devices
@@ -428,7 +427,7 @@ const ExerciseIntegration = () => {
                             <PlayCircle className="h-4 w-4 text-purple-600 dark:text-purple-400" />
                           </div>
                           <div>
-                            <p className="font-medium text-sm">{workout.name}</p>
+                            <p className="font-medium">{workout.name}</p>
                             <p className="text-xs text-muted-foreground">
                               {workout.duration} min • {workout.calories} cal
                             </p>

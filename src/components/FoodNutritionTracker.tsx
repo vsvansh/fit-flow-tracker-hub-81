@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { 
   Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter 
@@ -10,22 +9,22 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { 
-  Utensils, Coffee, Salad, Pizza, Apple, Droplet, Hamburger, 
-  Scanner, Mic, Plus, Search, Clock, BarChart3 
+  Utensils, Coffee, Salad, Pizza, Apple, Droplet, 
+  Search, Clock, BarChart3, Mic, Plus, QrCode 
 } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 
-// Sample food database
+// Sample food database - fix the category type to match FoodItem interface
 const sampleFoods = [
-  { id: 1, name: "Oatmeal", calories: 150, carbs: 27, protein: 5, fat: 2.5, category: "breakfast" },
-  { id: 2, name: "Scrambled Eggs", calories: 140, carbs: 1, protein: 12, fat: 9, category: "breakfast" },
-  { id: 3, name: "Greek Yogurt", calories: 100, carbs: 5, protein: 15, fat: 0, category: "breakfast" },
-  { id: 4, name: "Chicken Salad", calories: 350, carbs: 10, protein: 30, fat: 20, category: "lunch" },
-  { id: 5, name: "Turkey Sandwich", calories: 320, carbs: 35, protein: 20, fat: 8, category: "lunch" },
-  { id: 6, name: "Grilled Salmon", calories: 280, carbs: 0, protein: 32, fat: 15, category: "dinner" },
-  { id: 7, name: "Quinoa Bowl", calories: 420, carbs: 65, protein: 15, fat: 10, category: "dinner" },
-  { id: 8, name: "Apple", calories: 95, carbs: 25, protein: 0.5, fat: 0.3, category: "snack" },
-  { id: 9, name: "Mixed Nuts", calories: 170, carbs: 6, protein: 5, fat: 14, category: "snack" },
+  { id: 1, name: "Oatmeal", calories: 150, carbs: 27, protein: 5, fat: 2.5, category: "breakfast" as const },
+  { id: 2, name: "Scrambled Eggs", calories: 140, carbs: 1, protein: 12, fat: 9, category: "breakfast" as const },
+  { id: 3, name: "Greek Yogurt", calories: 100, carbs: 5, protein: 15, fat: 0, category: "breakfast" as const },
+  { id: 4, name: "Chicken Salad", calories: 350, carbs: 10, protein: 30, fat: 20, category: "lunch" as const },
+  { id: 5, name: "Turkey Sandwich", calories: 320, carbs: 35, protein: 20, fat: 8, category: "lunch" as const },
+  { id: 6, name: "Grilled Salmon", calories: 280, carbs: 0, protein: 32, fat: 15, category: "dinner" as const },
+  { id: 7, name: "Quinoa Bowl", calories: 420, carbs: 65, protein: 15, fat: 10, category: "dinner" as const },
+  { id: 8, name: "Apple", calories: 95, carbs: 25, protein: 0.5, fat: 0.3, category: "snack" as const },
+  { id: 9, name: "Mixed Nuts", calories: 170, carbs: 6, protein: 5, fat: 14, category: "snack" as const },
 ];
 
 // Interface for food items
@@ -133,7 +132,7 @@ const FoodNutritionTracker = () => {
     });
   };
   
-  // Simulate barcode scanning
+  // Simulate barcode scanning - replace Scanner with QrCode
   const handleBarcodeScanner = () => {
     toast({
       title: "Barcode Scanner",
@@ -222,7 +221,7 @@ const FoodNutritionTracker = () => {
                 />
               </div>
               <Button variant="outline" size="icon" onClick={handleBarcodeScanner} title="Scan Barcode">
-                <Scanner className="h-5 w-5" />
+                <QrCode className="h-5 w-5" />
               </Button>
               <Button variant="outline" size="icon" onClick={handleVoiceInput} title="Voice Input">
                 <Mic className="h-5 w-5" />

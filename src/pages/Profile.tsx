@@ -1,4 +1,3 @@
-
 import { useState, useRef } from "react";
 import { userProfile } from "@/utils/fitnessData";
 import BackToHome from "@/components/BackToHome";
@@ -33,7 +32,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { 
-  Separator, 
   Select, 
   SelectContent, 
   SelectItem, 
@@ -53,6 +51,11 @@ import {
   Camera
 } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Switch } from "@/components/ui/switch";
+import { Activity, Trophy, Flame, Award } from "lucide-react";
+import ExerciseIntegration from "@/components/ExerciseIntegration";
+import FitnessInsights from "@/components/FitnessInsights";
+import { Separator } from "@/components/ui/separator";
 
 const profileSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters" }),
@@ -761,11 +764,5 @@ const StatsDisplay = () => (
     </div>
   </div>
 );
-
-// Import the necessary components
-import { Switch } from "@/components/ui/switch";
-import { Activity, Trophy, Flame, Award } from "lucide-react";
-import ExerciseIntegration from "@/components/ExerciseIntegration";
-import FitnessInsights from "@/components/FitnessInsights";
 
 export default Profile;
