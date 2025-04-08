@@ -25,7 +25,7 @@ const ActivitySummary = ({
 }: ActivitySummaryProps) => {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-      <div className="bg-white rounded-lg shadow p-4 flex flex-col items-center">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 flex flex-col items-center">
         <ProgressCircle
           value={steps}
           max={stepsGoal}
@@ -35,7 +35,7 @@ const ActivitySummary = ({
         />
       </div>
       
-      <div className="bg-white rounded-lg shadow p-4 flex flex-col items-center">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 flex flex-col items-center">
         <ProgressCircle
           value={caloriesBurned}
           max={caloriesGoal}
@@ -45,7 +45,7 @@ const ActivitySummary = ({
         />
       </div>
       
-      <div className="bg-white rounded-lg shadow p-4 flex flex-col items-center">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 flex flex-col items-center">
         <ProgressCircle
           value={distance}
           max={distanceGoal}
@@ -55,7 +55,7 @@ const ActivitySummary = ({
         />
       </div>
 
-      <div className="bg-white rounded-lg shadow p-4 flex flex-col items-center">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 flex flex-col items-center">
         <ProgressCircle
           value={activeMinutes}
           max={activeMinutesGoal}
