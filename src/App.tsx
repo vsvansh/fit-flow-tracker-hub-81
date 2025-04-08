@@ -17,6 +17,8 @@ import Social from "./pages/Social";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import BackToTop from "./components/BackToTop";
+import Nutrition from "./pages/Nutrition";
+import FoodNutritionTracker from "./components/FoodNutritionTracker";
 
 const queryClient = new QueryClient();
 
@@ -40,6 +42,7 @@ const AnimatedRoutes = () => {
           <Route path="/activity" element={<Activity />} />
           <Route path="/challenges" element={<Challenges />} />
           <Route path="/social" element={<Social />} />
+          <Route path="/nutrition" element={<Nutrition />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </motion.div>

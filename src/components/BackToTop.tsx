@@ -40,7 +40,7 @@ const BackToTop = () => {
           <Button
             onClick={scrollToTop}
             size="icon"
-            className="rounded-full shadow-lg bg-brand-500 hover:bg-brand-600 text-white"
+            className="rounded-full shadow-lg bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white h-12 w-12"
             aria-label="Scroll to top"
           >
             <ChevronUp className="h-5 w-5" />

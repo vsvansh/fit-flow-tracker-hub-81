@@ -6,7 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CalendarIcon, ChevronRight, Award, Target, Footprints, Heart, Clock, Zap, Calendar, Users } from "lucide-react";
+import { 
+  CalendarIcon, ChevronRight, Award, Target, Footprints, 
+  Heart, Clock, Zap, Calendar, Users, Trophy 
+} from "lucide-react";
 import { getTodayActivity, fitnessGoals, getStreakCount, getWeeklyStats } from "@/utils/fitnessData";
 
 import ActivitySummary from "@/components/ActivitySummary";

@@ -12,8 +12,10 @@ import HabitTracker from "./HabitTracker";
 import SocialFeed from "./SocialFeed";
 import AIRecommendations from "./AIRecommendations";
 import WaterTracker from "./WaterTracker";
-import NotificationCenter from "./NotificationCenter";
-import { Calendar, Heart, Clock, Footprints, Award, Bell, Settings } from "lucide-react";
+import { 
+  Calendar, Heart, Clock, Footprints, Award, Bell, Settings, 
+  Trophy, Zap, Users
+} from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/providers/ThemeProvider";

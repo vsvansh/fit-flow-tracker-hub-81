@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useEffect, useState } from "react";
 
 type Theme = "dark" | "light" | "system";
@@ -43,10 +44,28 @@ export function ThemeProvider({
         : "light";
 
       root.classList.add(systemTheme);
+      
+      // Apply additional styles for dark mode
+      if (systemTheme === "dark") {
+        root.style.setProperty('--background-gradient', 'linear-gradient(to bottom, #1a1f2c, #0f172a)');
+        document.body.style.background = 'var(--background-gradient)';
+      } else {
+        root.style.removeProperty('--background-gradient');
+        document.body.style.background = '';
+      }
       return;
     }
 
     root.classList.add(theme);
+    
+    // Apply additional styles for dark mode
+    if (theme === "dark") {
+      root.style.setProperty('--background-gradient', 'linear-gradient(to bottom, #1a1f2c, #0f172a)');
+      document.body.style.background = 'var(--background-gradient)';
+    } else {
+      root.style.removeProperty('--background-gradient');
+      document.body.style.background = '';
+    }
   }, [theme]);
 
   const value = {
