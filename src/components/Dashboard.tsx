@@ -4,7 +4,7 @@ import { getTodayActivity, fitnessGoals } from "@/utils/fitnessData";
 import ActivitySummary from "./ActivitySummary";
 import ActivityChart from "./ActivityChart";
 import GoalsSetting from "./GoalsSetting";
-import { Calendar, Dumbbell, Heart, Stopwatch } from "lucide-react";
+import { Calendar, Heart, Clock } from "lucide-react";
 
 const Dashboard = () => {
   const today = format(new Date(), "EEEE, MMMM d, yyyy");
@@ -27,7 +27,7 @@ const Dashboard = () => {
         </div>
         <div className="mt-4 md:mt-0 flex items-center space-x-4">
           <div className="flex items-center">
-            <Stopwatch className="w-5 h-5 text-blue-500 mr-2" />
+            <Clock className="w-5 h-5 text-blue-500 mr-2" />
             <div>
               <p className="text-sm text-gray-500">Today's Activity</p>
               <p className="font-bold">{todayActivity.steps.toLocaleString()} steps</p>
