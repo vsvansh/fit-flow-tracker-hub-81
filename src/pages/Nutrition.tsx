@@ -1,9 +1,6 @@
 
-import { useState } from "react";
+import BackToHome from "@/components/BackToHome";
 import NutritionTracker from "@/components/NutritionTracker";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
-import { Link } from "react-router-dom";
 
 const Nutrition = () => {
   return (

@@ -1,28 +1,35 @@
 
-import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState, useEffect } from "react";
+import { 
+  Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter 
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Utensils, Search, Plus, Filter, BarChart2, Heart, Coffee, Apple, Egg, Pizza, Upload, 
-  RotateCcw, ChevronRight, Mic, ChevronDown, Trash2, Camera, BookOpen, Star, AlertTriangle 
-} from "lucide-react";
 import { Progress } from "@/components/ui/progress";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { 
+  Utensils, Coffee, Salad, Pizza, Apple, Droplet, 
+  Search, Clock, BarChart3, Mic, Plus, QrCode 
+} from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
-import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+import BackToHome from "@/components/BackToHome";
 
-type FoodCategory = "breakfast" | "lunch" | "dinner" | "snack";
+// Sample food database with corrected typing
+const sampleFoods = [
+  { id: 1, name: "Oatmeal", calories: 150, carbs: 27, protein: 5, fat: 2.5, category: "breakfast" as const },
+  { id: 2, name: "Scrambled Eggs", calories: 140, carbs: 1, protein: 12, fat: 9, category: "breakfast" as const },
+  { id: 3, name: "Greek Yogurt", calories: 100, carbs: 5, protein: 15, fat: 0, category: "breakfast" as const },
+  { id: 4, name: "Chicken Salad", calories: 350, carbs: 10, protein: 30, fat: 20, category: "lunch" as const },
+  { id: 5, name: "Turkey Sandwich", calories: 320, carbs: 35, protein: 20, fat: 8, category: "lunch" as const },
+  { id: 6, name: "Grilled Salmon", calories: 280, carbs: 0, protein: 32, fat: 15, category: "dinner" as const },
+  { id: 7, name: "Quinoa Bowl", calories: 420, carbs: 65, protein: 15, fat: 10, category: "dinner" as const },
+  { id: 8, name: "Apple", calories: 95, carbs: 25, protein: 0.5, fat: 0.3, category: "snack" as const },
+  { id: 9, name: "Mixed Nuts", calories: 170, carbs: 6, protein: 5, fat: 14, category: "snack" as const },
+];
 
+// Interface for food items
 interface FoodItem {
   id: number;
   name: string;
@@ -30,796 +37,579 @@ interface FoodItem {
   carbs: number;
   protein: number;
   fat: number;
-  category: FoodCategory;
-  time?: string;
-  isFavorite?: boolean;
+  category: "breakfast" | "lunch" | "dinner" | "snack";
+  quantity?: number;
 }
 
-interface DailyNutrition {
-  calories: {
-    consumed: number;
-    goal: number;
-  };
-  carbs: {
-    consumed: number;
-    goal: number;
-  };
-  protein: {
-    consumed: number;
-    goal: number;
-  };
-  fat: {
-    consumed: number;
-    goal: number;
-  };
-  water: {
-    consumed: number;
-    goal: number;
-  };
+// Interface for a daily food log
+interface DailyLog {
+  breakfast: FoodItem[];
+  lunch: FoodItem[];
+  dinner: FoodItem[];
+  snack: FoodItem[];
 }
 
 const NutritionTracker = () => {
-  const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("today");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [isRecording, setIsRecording] = useState(false);
-  
-  // Sample food data
-  const defaultFoods: FoodItem[] = [
-    { id: 1, name: "Oatmeal with banana", calories: 350, carbs: 60, protein: 15, fat: 7, category: "breakfast", time: "08:30", isFavorite: true },
-    { id: 2, name: "Grilled chicken salad", calories: 420, carbs: 12, protein: 45, fat: 22, category: "lunch", time: "12:45" },
-    { id: 3, name: "Protein shake", calories: 180, carbs: 5, protein: 30, fat: 3, category: "snack", time: "15:30", isFavorite: true },
-    { id: 4, name: "Salmon with vegetables", calories: 520, carbs: 25, protein: 40, fat: 28, category: "dinner", time: "19:15" },
-    { id: 5, name: "Greek yogurt", calories: 150, carbs: 8, protein: 15, fat: 4, category: "snack", time: "21:00" },
-  ];
-  
-  // Food repository for search
-  const foodRepository: FoodItem[] = [
-    ...defaultFoods,
-    { id: 6, name: "Avocado toast", calories: 320, carbs: 24, protein: 8, fat: 22, category: "breakfast" },
-    { id: 7, name: "Quinoa bowl", calories: 380, carbs: 55, protein: 12, fat: 10, category: "lunch" },
-    { id: 8, name: "Banana", calories: 105, carbs: 27, protein: 1, fat: 0, category: "snack" },
-    { id: 9, name: "Chicken stir fry", calories: 450, carbs: 30, protein: 40, fat: 15, category: "dinner" },
-    { id: 10, name: "Mixed nuts", calories: 170, carbs: 6, protein: 5, fat: 14, category: "snack" },
-  ];
-  
-  const [foods, setFoods] = useState<FoodItem[]>(defaultFoods);
-  const [searchResults, setSearchResults] = useState<FoodItem[]>([]);
-  
-  // Daily nutrition data
-  const [dailyNutrition, setDailyNutrition] = useState<DailyNutrition>({
-    calories: { consumed: 1620, goal: 2100 },
-    carbs: { consumed: 110, goal: 260 },
-    protein: { consumed: 145, goal: 160 },
-    fat: { consumed: 64, goal: 70 },
-    water: { consumed: 1500, goal: 2500 },
+  const [searchTerm, setSearchTerm] = useState("");
+  const [activeTab, setActiveTab] = useState("log");
+  const [selectedCategory, setSelectedCategory] = useState<"breakfast" | "lunch" | "dinner" | "snack">("breakfast");
+  const [dailyLog, setDailyLog] = useState<DailyLog>({
+    breakfast: [],
+    lunch: [],
+    dinner: [],
+    snack: []
   });
   
-  // Handle search
-  const handleSearch = (query: string) => {
-    setSearchQuery(query);
-    if (!query.trim()) {
-      setSearchResults([]);
-      return;
-    }
+  // Daily targets
+  const dailyCalorieTarget = 2000;
+  const dailyCarbsTarget = 250; // grams
+  const dailyProteinTarget = 120; // grams
+  const dailyFatTarget = 65; // grams
+  const dailyWaterTarget = 8; // glasses
+  const [waterIntake, setWaterIntake] = useState(3);
+  
+  // Calculate current totals
+  const calculateTotalNutrients = () => {
+    let totalCalories = 0;
+    let totalCarbs = 0;
+    let totalProtein = 0;
+    let totalFat = 0;
     
-    const filteredResults = foodRepository.filter(
-      food => food.name.toLowerCase().includes(query.toLowerCase())
-    );
-    setSearchResults(filteredResults);
+    Object.values(dailyLog).forEach(mealItems => {
+      mealItems.forEach(item => {
+        const quantity = item.quantity || 1;
+        totalCalories += item.calories * quantity;
+        totalCarbs += item.carbs * quantity;
+        totalProtein += item.protein * quantity;
+        totalFat += item.fat * quantity;
+      });
+    });
+    
+    return { totalCalories, totalCarbs, totalProtein, totalFat };
   };
   
-  // Add food item to today's log
-  const addFoodItem = (food: FoodItem, category: FoodCategory) => {
-    const newFood = {
-      ...food,
-      id: Date.now(),
-      category,
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    };
+  const { totalCalories, totalCarbs, totalProtein, totalFat } = calculateTotalNutrients();
+  
+  // Search foods from database
+  const searchFoods = () => {
+    if (searchTerm.trim() === "") return [];
     
-    setFoods([...foods, newFood]);
+    return sampleFoods.filter(food => 
+      food.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  };
+  
+  // Add food to daily log
+  const addFoodToLog = (food: FoodItem) => {
+    const updatedLog = {...dailyLog};
+    const existingItemIndex = updatedLog[selectedCategory].findIndex(item => item.id === food.id);
     
-    // Update daily nutrition
-    setDailyNutrition({
-      ...dailyNutrition,
-      calories: {
-        ...dailyNutrition.calories,
-        consumed: dailyNutrition.calories.consumed + food.calories
-      },
-      carbs: {
-        ...dailyNutrition.carbs,
-        consumed: dailyNutrition.carbs.consumed + food.carbs
-      },
-      protein: {
-        ...dailyNutrition.protein,
-        consumed: dailyNutrition.protein.consumed + food.protein
-      },
-      fat: {
-        ...dailyNutrition.fat,
-        consumed: dailyNutrition.fat.consumed + food.fat
-      }
-    });
+    if (existingItemIndex >= 0) {
+      // Increment quantity if already exists
+      updatedLog[selectedCategory][existingItemIndex].quantity = 
+        (updatedLog[selectedCategory][existingItemIndex].quantity || 1) + 1;
+    } else {
+      // Add new item with quantity = 1
+      updatedLog[selectedCategory].push({...food, quantity: 1});
+    }
+    
+    setDailyLog(updatedLog);
     
     toast({
       title: "Food added",
-      description: `${food.name} has been added to your ${category}.`
+      description: `${food.name} added to your ${selectedCategory} log.`,
     });
     
-    setSearchResults([]);
-    setSearchQuery("");
+    setSearchTerm("");
   };
   
-  // Remove food item
-  const removeFoodItem = (foodId: number) => {
-    const foodToRemove = foods.find(food => food.id === foodId);
-    if (!foodToRemove) return;
-    
-    setFoods(foods.filter(food => food.id !== foodId));
-    
-    // Update daily nutrition
-    setDailyNutrition({
-      ...dailyNutrition,
-      calories: {
-        ...dailyNutrition.calories,
-        consumed: dailyNutrition.calories.consumed - foodToRemove.calories
-      },
-      carbs: {
-        ...dailyNutrition.carbs,
-        consumed: dailyNutrition.carbs.consumed - foodToRemove.carbs
-      },
-      protein: {
-        ...dailyNutrition.protein,
-        consumed: dailyNutrition.protein.consumed - foodToRemove.protein
-      },
-      fat: {
-        ...dailyNutrition.fat,
-        consumed: dailyNutrition.fat.consumed - foodToRemove.fat
-      }
-    });
+  // Remove food from daily log
+  const removeFoodFromLog = (category: "breakfast" | "lunch" | "dinner" | "snack", foodId: number) => {
+    const updatedLog = {...dailyLog};
+    updatedLog[category] = updatedLog[category].filter(item => item.id !== foodId);
+    setDailyLog(updatedLog);
     
     toast({
       title: "Food removed",
-      description: `${foodToRemove.name} has been removed from your log.`
+      description: "Item removed from your food log.",
+      variant: "destructive"
     });
   };
   
-  // Add water intake
-  const addWater = (amount: number) => {
-    setDailyNutrition({
-      ...dailyNutrition,
-      water: {
-        ...dailyNutrition.water,
-        consumed: Math.min(dailyNutrition.water.consumed + amount, dailyNutrition.water.goal)
-      }
+  // Simulate barcode scanning
+  const handleBarcodeScanner = () => {
+    toast({
+      title: "Barcode Scanner",
+      description: "Scanning for food product... (Feature simulation)",
     });
     
-    toast({
-      title: "Water logged",
-      description: `Added ${amount}ml to your water intake.`
-    });
+    // Simulate finding a product after scanning
+    setTimeout(() => {
+      const randomFood = sampleFoods[Math.floor(Math.random() * sampleFoods.length)];
+      addFoodToLog(randomFood);
+    }, 1500);
   };
   
-  // Handle voice input
-  const toggleVoiceInput = () => {
-    if (!isRecording) {
-      setIsRecording(true);
+  // Simulate voice input
+  const handleVoiceInput = () => {
+    toast({
+      title: "Voice Input Active",
+      description: "Listening for food description... (Feature simulation)",
+    });
+    
+    // Simulate voice recognition result
+    setTimeout(() => {
+      const randomFood = sampleFoods[Math.floor(Math.random() * sampleFoods.length)];
+      setSearchTerm(randomFood.name);
+    }, 1500);
+  };
+  
+  // Get meal icon based on category
+  const getMealIcon = (category: string) => {
+    switch (category) {
+      case "breakfast": return <Coffee className="h-5 w-5 text-orange-500" />;
+      case "lunch": return <Salad className="h-5 w-5 text-green-500" />;
+      case "dinner": return <Utensils className="h-5 w-5 text-blue-500" />;
+      case "snack": return <Apple className="h-5 w-5 text-red-500" />;
+      default: return <Pizza className="h-5 w-5" />;
+    }
+  };
+
+  // Water intake handlers
+  const addWaterGlass = () => {
+    if (waterIntake < dailyWaterTarget) {
+      setWaterIntake(prev => prev + 1);
       toast({
-        title: "Voice recording started",
-        description: "Please say the food you want to log."
+        title: "Water added",
+        description: "One glass of water added to your daily log.",
       });
-      
-      // Simulate voice recognition after a delay
-      setTimeout(() => {
-        setIsRecording(false);
-        setSearchQuery("Greek yogurt with honey");
-        setSearchResults([
-          { 
-            id: 11, 
-            name: "Greek yogurt with honey", 
-            calories: 220, 
-            carbs: 25, 
-            protein: 20, 
-            fat: 5, 
-            category: "snack" 
-          }
-        ]);
-        
-        toast({
-          title: "Voice input detected",
-          description: "We found 'Greek yogurt with honey'."
-        });
-      }, 3000);
-    } else {
-      setIsRecording(false);
+    }
+  };
+
+  const removeWaterGlass = () => {
+    if (waterIntake > 0) {
+      setWaterIntake(prev => prev - 1);
       toast({
-        title: "Voice recording stopped",
-        description: "Voice input cancelled."
+        description: "One glass of water removed from your daily log.",
+        variant: "destructive"
       });
     }
   };
   
-  // Handle barcode scanner
-  const openBarcodeScanner = () => {
-    toast({
-      title: "Barcode scanner",
-      description: "Camera opened. Please scan a food item barcode."
-    });
-    
-    // Simulate scanning after a delay
-    setTimeout(() => {
-      toast({
-        title: "Barcode scanned",
-        description: "Found: Protein bar (200 calories)"
-      });
-      
-      setSearchResults([
-        { 
-          id: 12, 
-          name: "Protein bar", 
-          calories: 200, 
-          carbs: 20, 
-          protein: 15, 
-          fat: 8, 
-          category: "snack" 
-        }
-      ]);
-    }, 2000);
-  };
-  
-  // Toggle favorite status
-  const toggleFavorite = (foodId: number) => {
-    setFoods(foods.map(food => 
-      food.id === foodId ? { ...food, isFavorite: !food.isFavorite } : food
-    ));
-    
-    const foodName = foods.find(food => food.id === foodId)?.name;
-    toast({
-      title: `${foodName}`,
-      description: foods.find(food => food.id === foodId)?.isFavorite 
-        ? "Removed from favorites" 
-        : "Added to favorites"
-    });
-  };
-  
-  // Calculate macronutrient percentages
-  const calculateMacroPercentage = () => {
-    const totalCals = dailyNutrition.carbs.consumed * 4 + 
-      dailyNutrition.protein.consumed * 4 + 
-      dailyNutrition.fat.consumed * 9;
-    
-    if (totalCals === 0) return { carbs: 0, protein: 0, fat: 0 };
-    
-    return {
-      carbs: Math.round((dailyNutrition.carbs.consumed * 4 / totalCals) * 100),
-      protein: Math.round((dailyNutrition.protein.consumed * 4 / totalCals) * 100),
-      fat: Math.round((dailyNutrition.fat.consumed * 9 / totalCals) * 100)
-    };
-  };
-  
-  const macroPercentages = calculateMacroPercentage();
-  
   return (
-    <div className="container mx-auto px-4 py-6">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold gradient-text">Food & Nutrition</h1>
-        <div className="flex gap-2">
-          <Button 
-            variant="outline"
-            onClick={() => toast({
-              title: "Synced with fitness devices",
-              description: "Your nutrition data has been updated."
-            })}
-          >
-            <RotateCcw className="h-4 w-4 mr-2" />
-            Sync
-          </Button>
-          <Button onClick={() => navigate("/nutrition/insights")}>
-            <BarChart2 className="h-4 w-4 mr-2" />
-            Insights
-          </Button>
-        </div>
-      </div>
+    <div className="container py-8">
+      <BackToHome />
       
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-6">
         <div className="lg:col-span-2">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="today">Today</TabsTrigger>
-              <TabsTrigger value="meals">Meals & Recipes</TabsTrigger>
-              <TabsTrigger value="history">History</TabsTrigger>
-            </TabsList>
+          <Card className="shadow">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="text-xl font-bold">Food & Nutrition Tracker</CardTitle>
+                  <CardDescription>Log meals and track your nutrition</CardDescription>
+                </div>
+                <div className="h-10 w-10 rounded-full bg-gradient-to-br from-green-100 to-green-200 dark:from-green-900/40 dark:to-green-800/40 flex items-center justify-center">
+                  <Utensils className="h-5 w-5 text-green-600 dark:text-green-400" />
+                </div>
+              </div>
+            </CardHeader>
             
-            <TabsContent value="today" className="space-y-4">
-              <Card className="overflow-hidden">
-                <CardHeader className="bg-muted/40 pb-2">
-                  <div className="flex justify-between items-center">
-                    <CardTitle className="text-lg">Add Food</CardTitle>
-                    <div className="flex gap-2">
-                      <Button 
-                        variant="ghost" 
-                        size="icon"
-                        onClick={toggleVoiceInput}
-                        className={isRecording ? "bg-red-500/20 text-red-500" : ""}
-                      >
-                        <Mic className={`h-4 w-4 ${isRecording ? "animate-pulse" : ""}`} />
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="icon"
-                        onClick={openBarcodeScanner}
-                      >
-                        <Camera className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                  
-                  <div className="flex gap-2 mt-2">
-                    <div className="flex-1 relative">
-                      <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        placeholder="Search for a food..."
-                        className="pl-8"
-                        value={searchQuery}
-                        onChange={(e) => handleSearch(e.target.value)}
-                      />
-                    </div>
-                    <Button variant="outline" size="icon">
-                      <Filter className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </CardHeader>
+            <CardContent>
+              <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="space-y-4">
+                <TabsList className="grid grid-cols-3 w-full">
+                  <TabsTrigger value="log">Food Log</TabsTrigger>
+                  <TabsTrigger value="nutrition">Nutrition</TabsTrigger>
+                  <TabsTrigger value="insights">Insights</TabsTrigger>
+                </TabsList>
                 
-                <CardContent className="p-0">
-                  {searchQuery && searchResults.length > 0 ? (
-                    <div className="py-2 divide-y">
-                      {searchResults.map((food) => (
-                        <div key={food.id} className="flex items-center justify-between p-3 hover:bg-muted/30">
-                          <div>
-                            <p className="font-medium">{food.name}</p>
-                            <p className="text-sm text-muted-foreground">
-                              {food.calories} cal • {food.carbs}g carbs • {food.protein}g protein • {food.fat}g fat
-                            </p>
-                          </div>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm">
-                                Add <ChevronDown className="ml-1 h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => addFoodItem(food, "breakfast")}>
-                                <Coffee className="mr-2 h-4 w-4" /> Breakfast
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => addFoodItem(food, "lunch")}>
-                                <Utensils className="mr-2 h-4 w-4" /> Lunch
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => addFoodItem(food, "dinner")}>
-                                <Utensils className="mr-2 h-4 w-4" /> Dinner
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => addFoodItem(food, "snack")}>
-                                <Apple className="mr-2 h-4 w-4" /> Snack
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </div>
-                      ))}
-                    </div>
-                  ) : searchQuery ? (
-                    <div className="py-8 text-center">
-                      <p className="text-muted-foreground">No foods found matching "{searchQuery}"</p>
+                <TabsContent value="log" className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                    {(["breakfast", "lunch", "dinner", "snack"] as const).map((category) => (
                       <Button 
-                        variant="link" 
-                        onClick={() => {
-                          toast({
-                            title: "Custom food creation",
-                            description: "You can create custom foods and recipes."
-                          });
-                        }}
+                        key={category}
+                        variant={selectedCategory === category ? "default" : "outline"}
+                        className={`flex items-center justify-center gap-2 capitalize ${
+                          selectedCategory === category ? "bg-blue-600 hover:bg-blue-700" : ""
+                        }`}
+                        onClick={() => setSelectedCategory(category)}
                       >
-                        Create custom food
+                        {getMealIcon(category)}
+                        {category}
                       </Button>
-                    </div>
-                  ) : (
-                    <div className="divide-y">
-                      {["breakfast", "lunch", "dinner", "snack"].map((category) => {
-                        const categoryFoods = foods.filter(food => food.category === category);
-                        const categoryTotal = categoryFoods.reduce((sum, food) => sum + food.calories, 0);
-                        const mealIcon = 
-                          category === "breakfast" ? <Coffee className="h-5 w-5" /> :
-                          category === "snack" ? <Apple className="h-5 w-5" /> : 
-                          <Utensils className="h-5 w-5" />;
-                        
-                        return (
-                          <div key={category} className="py-3 px-4">
-                            <div className="flex items-center justify-between mb-2">
-                              <div className="flex items-center">
-                                <div className="mr-3 text-muted-foreground">
-                                  {mealIcon}
-                                </div>
-                                <div>
-                                  <h3 className="font-medium capitalize">{category}</h3>
-                                  <p className="text-sm text-muted-foreground">
-                                    {categoryTotal} calories
-                                  </p>
-                                </div>
-                              </div>
-                              <Button 
-                                variant="ghost" 
-                                size="sm"
-                                className="text-xs"
-                                onClick={() => {
-                                  setSearchQuery("");
-                                  toast({
-                                    title: `Add food to ${category}`,
-                                    description: "Search for a food or scan a barcode."
-                                  });
-                                }}
-                              >
-                                <Plus className="mr-1 h-3 w-3" /> Add Food
-                              </Button>
-                            </div>
-                            
-                            {categoryFoods.length > 0 ? (
-                              <div className="space-y-2 pl-8">
-                                {categoryFoods.map((food) => (
-                                  <motion.div 
-                                    key={food.id}
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    className="flex items-center justify-between group"
-                                  >
-                                    <div className="flex-1">
-                                      <div className="flex items-center">
-                                        <span className="text-sm font-medium">{food.name}</span>
-                                        {food.isFavorite && (
-                                          <Star className="ml-1 h-3 w-3 fill-yellow-400 text-yellow-400" />
-                                        )}
-                                        <span className="text-xs text-muted-foreground ml-2">
-                                          {food.time}
-                                        </span>
-                                      </div>
-                                      <p className="text-xs text-muted-foreground">
-                                        {food.calories} cal • {food.carbs}g C • {food.protein}g P • {food.fat}g F
-                                      </p>
-                                    </div>
-                                    <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                      <Button 
-                                        variant="ghost" 
-                                        size="icon"
-                                        className="h-8 w-8"
-                                        onClick={() => toggleFavorite(food.id)}
-                                      >
-                                        <Star className={`h-3.5 w-3.5 ${food.isFavorite ? "fill-yellow-400 text-yellow-400" : ""}`} />
-                                      </Button>
-                                      <Button 
-                                        variant="ghost" 
-                                        size="icon" 
-                                        className="h-8 w-8 text-red-500"
-                                        onClick={() => removeFoodItem(food.id)}
-                                      >
-                                        <Trash2 className="h-3.5 w-3.5" />
-                                      </Button>
-                                    </div>
-                                  </motion.div>
-                                ))}
-                              </div>
-                            ) : (
-                              <div className="pl-8 py-2 text-sm text-muted-foreground italic">
-                                No foods logged for {category}
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
-            
-            <TabsContent value="meals" className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Saved Meals & Recipes</CardTitle>
-                  <CardDescription>Create and manage your favorite meals</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <h3 className="font-medium">My Saved Meals</h3>
-                    <Button onClick={() => {
-                      toast({
-                        title: "Create new meal",
-                        description: "Build a custom meal from your favorite foods."
-                      });
-                    }}>
-                      <Plus className="mr-2 h-4 w-4" /> Create New
-                    </Button>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {[
-                      { name: "Breakfast Bowl", calories: 420, items: ["Oatmeal", "Banana", "Almond Butter", "Chia Seeds"] },
-                      { name: "Post-Workout Shake", calories: 310, items: ["Protein Powder", "Banana", "Almond Milk", "Spinach"] },
-                      { name: "Chicken & Veggie Lunch", calories: 550, items: ["Grilled Chicken", "Mixed Vegetables", "Brown Rice", "Olive Oil"] },
-                      { name: "Quick Protein Snack", calories: 180, items: ["Greek Yogurt", "Berries", "Honey"] },
-                    ].map((meal, i) => (
-                      <Card key={i} className="flex hover:shadow-md transition-shadow cursor-pointer">
-                        <div className="w-1/3 bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                          <BookOpen className="h-10 w-10 text-gray-400" />
-                        </div>
-                        <div className="w-2/3 p-3">
-                          <h4 className="font-medium">{meal.name}</h4>
-                          <p className="text-sm text-muted-foreground">{meal.calories} calories</p>
-                          <p className="text-xs text-gray-500 mt-1 line-clamp-1">
-                            {meal.items.join(", ")}
-                          </p>
-                        </div>
-                      </Card>
                     ))}
                   </div>
                   
-                  <div className="pt-4">
-                    <h3 className="font-medium mb-3">Suggested Meals</h3>
-                    <div className="border rounded-lg divide-y">
-                      {[
-                        { name: "High Protein Breakfast", calories: 480, type: "For muscle recovery" },
-                        { name: "Low-carb Dinner Option", calories: 350, type: "For evening meals" },
-                        { name: "Balanced Lunch Bowl", calories: 520, type: "Perfect macros distribution" },
-                      ].map((suggestion, i) => (
-                        <div key={i} className="p-3 flex justify-between items-center hover:bg-muted/20">
-                          <div>
-                            <p className="font-medium">{suggestion.name}</p>
-                            <div className="flex items-center text-sm text-muted-foreground">
-                              <span>{suggestion.calories} calories</span>
-                              <Badge variant="outline" className="ml-2 text-xs">{suggestion.type}</Badge>
-                            </div>
-                          </div>
-                          <Button variant="ghost" size="sm">
-                            View <ChevronRight className="ml-1 h-4 w-4" />
-                          </Button>
-                        </div>
-                      ))}
+                  <div className="flex items-center gap-2 mt-4 mb-2">
+                    <div className="relative flex-1">
+                      <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        placeholder="Search for foods..."
+                        className="pl-8"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                      />
                     </div>
+                    <Button variant="outline" size="icon" onClick={handleBarcodeScanner} title="Scan Barcode">
+                      <QrCode className="h-5 w-5" />
+                    </Button>
+                    <Button variant="outline" size="icon" onClick={handleVoiceInput} title="Voice Input">
+                      <Mic className="h-5 w-5" />
+                    </Button>
                   </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-            
-            <TabsContent value="history" className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Nutrition History</CardTitle>
-                  <CardDescription>View your past nutrition data</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-6">
-                    <div className="flex justify-between items-center">
-                      <h3 className="font-medium">Recent Days</h3>
-                      <Button variant="outline">
-                        <Filter className="mr-2 h-4 w-4" /> Filter
-                      </Button>
-                    </div>
-                    
-                    <div className="space-y-4">
-                      {[
-                        { date: "Yesterday", calories: 1950, target: 2100, status: "under" },
-                        { date: "Monday, Apr 7", calories: 2250, target: 2100, status: "over" },
-                        { date: "Sunday, Apr 6", calories: 1840, target: 2100, status: "under" },
-                        { date: "Saturday, Apr 5", calories: 2080, target: 2100, status: "on-target" },
-                        { date: "Friday, Apr 4", calories: 2340, target: 2100, status: "over" },
-                      ].map((day, i) => (
-                        <div key={i} className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium">{day.date}</p>
-                            <p className="text-sm text-muted-foreground">
-                              {day.calories} / {day.target} calories
-                            </p>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            {day.status === "over" && (
-                              <Badge variant="outline" className="text-orange-500 border-orange-200 bg-orange-50 dark:bg-orange-950 dark:border-orange-800">
-                                <AlertTriangle className="h-3 w-3 mr-1" /> Over target
-                              </Badge>
-                            )}
-                            {day.status === "under" && (
-                              <Badge variant="outline" className="text-blue-500 border-blue-200 bg-blue-50 dark:bg-blue-950 dark:border-blue-800">
-                                Under target
-                              </Badge>
-                            )}
-                            {day.status === "on-target" && (
-                              <Badge variant="outline" className="text-green-500 border-green-200 bg-green-50 dark:bg-green-950 dark:border-green-800">
-                                On target
-                              </Badge>
-                            )}
-                            <Button variant="ghost" size="sm">
-                              View <ChevronRight className="ml-1 h-4 w-4" />
+                  
+                  {searchTerm && (
+                    <div className="border rounded-lg p-3 space-y-2 max-h-48 overflow-y-auto">
+                      <p className="text-sm text-muted-foreground">Search results:</p>
+                      {searchFoods().length > 0 ? (
+                        searchFoods().map(food => (
+                          <div key={food.id} className="flex items-center justify-between border-b pb-2">
+                            <div>
+                              <p className="font-medium">{food.name}</p>
+                              <div className="flex flex-wrap gap-2 mt-1">
+                                <Badge variant="secondary" className="text-xs">
+                                  {food.calories} cal
+                                </Badge>
+                                <span className="text-xs text-muted-foreground">
+                                  C: {food.carbs}g | P: {food.protein}g | F: {food.fat}g
+                                </span>
+                              </div>
+                            </div>
+                            <Button size="sm" onClick={() => addFoodToLog(food)}>
+                              <Plus className="h-4 w-4 mr-1" /> Add
                             </Button>
                           </div>
+                        ))
+                      ) : (
+                        <p className="text-sm italic text-center py-3">No foods found. Try a different search term.</p>
+                      )}
+                    </div>
+                  )}
+                  
+                  <div className="mt-4">
+                    <h3 className="font-medium flex items-center gap-2 mb-2 capitalize">
+                      {getMealIcon(selectedCategory)} {selectedCategory} Items
+                    </h3>
+                    
+                    {dailyLog[selectedCategory].length > 0 ? (
+                      <div className="border rounded-lg divide-y">
+                        {dailyLog[selectedCategory].map(food => (
+                          <div key={food.id} className="flex items-center justify-between p-3">
+                            <div>
+                              <div className="flex items-center">
+                                <p className="font-medium">{food.name}</p>
+                                {food.quantity && food.quantity > 1 && (
+                                  <Badge variant="outline" className="ml-2">
+                                    x{food.quantity}
+                                  </Badge>
+                                )}
+                              </div>
+                              <div className="flex flex-wrap gap-2 mt-1">
+                                <Badge variant="secondary" className="text-xs">
+                                  {food.calories * (food.quantity || 1)} cal
+                                </Badge>
+                                <span className="text-xs text-muted-foreground">
+                                  C: {food.carbs * (food.quantity || 1)}g | P: {food.protein * (food.quantity || 1)}g | F: {food.fat * (food.quantity || 1)}g
+                                </span>
+                              </div>
+                            </div>
+                            <Button size="sm" variant="ghost" className="text-red-500 hover:text-red-700 hover:bg-red-50" 
+                              onClick={() => removeFoodFromLog(selectedCategory, food.id)}>
+                              Remove
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="border rounded-lg p-6 text-center">
+                        <p className="text-muted-foreground">No {selectedCategory} items added yet.</p>
+                        <Button variant="outline" className="mt-2" onClick={() => setSearchTerm("a")}>
+                          <Plus className="h-4 w-4 mr-1" /> Add Food
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </TabsContent>
+                
+                <TabsContent value="nutrition">
+                  <div className="space-y-6">
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <p className="font-medium">Daily Calories</p>
+                        <div className="flex items-center">
+                          <span className="font-medium text-xl">{totalCalories}</span>
+                          <span className="text-sm text-muted-foreground ml-1">/ {dailyCalorieTarget} cal</span>
                         </div>
-                      ))}
+                      </div>
+                      <Progress value={(totalCalories / dailyCalorieTarget) * 100} className="h-2" />
+                      <div className="flex justify-between text-xs text-muted-foreground">
+                        <span>0</span>
+                        <span>{Math.round((totalCalories / dailyCalorieTarget) * 100)}% consumed</span>
+                        <span>{dailyCalorieTarget}</span>
+                      </div>
                     </div>
                     
-                    <Button variant="outline" className="w-full">
-                      View Full History
-                    </Button>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <p className="font-medium flex items-center text-blue-600">
+                            <Badge className="mr-1 bg-blue-100 text-blue-600 hover:bg-blue-200 border-blue-200">C</Badge>
+                            Carbs
+                          </p>
+                          <span className="text-sm">{totalCarbs}g / {dailyCarbsTarget}g</span>
+                        </div>
+                        <Progress value={(totalCarbs / dailyCarbsTarget) * 100} className="h-2 bg-blue-100 [&>div]:bg-blue-500" />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <p className="font-medium flex items-center text-red-600">
+                            <Badge className="mr-1 bg-red-100 text-red-600 hover:bg-red-200 border-red-200">P</Badge>
+                            Protein
+                          </p>
+                          <span className="text-sm">{totalProtein}g / {dailyProteinTarget}g</span>
+                        </div>
+                        <Progress value={(totalProtein / dailyProteinTarget) * 100} className="h-2 bg-red-100 [&>div]:bg-red-500" />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <p className="font-medium flex items-center text-amber-600">
+                            <Badge className="mr-1 bg-amber-100 text-amber-600 hover:bg-amber-200 border-amber-200">F</Badge>
+                            Fat
+                          </p>
+                          <span className="text-sm">{totalFat}g / {dailyFatTarget}g</span>
+                        </div>
+                        <Progress value={(totalFat / dailyFatTarget) * 100} className="h-2 bg-amber-100 [&>div]:bg-amber-500" />
+                      </div>
+                    </div>
+                    
+                    <div className="p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
+                      <h4 className="font-medium mb-2 flex items-center">
+                        <BarChart3 className="h-4 w-4 mr-1 text-blue-600" /> 
+                        Macronutrient Distribution
+                      </h4>
+                      <div className="h-6 w-full rounded-full overflow-hidden bg-gray-100 dark:bg-gray-800 flex">
+                        <div 
+                          className="h-full bg-blue-500" 
+                          style={{ width: `${Math.round((totalCarbs * 4 / totalCalories) * 100) || 0}%` }}
+                        ></div>
+                        <div 
+                          className="h-full bg-red-500" 
+                          style={{ width: `${Math.round((totalProtein * 4 / totalCalories) * 100) || 0}%` }}
+                        ></div>
+                        <div 
+                          className="h-full bg-amber-500" 
+                          style={{ width: `${Math.round((totalFat * 9 / totalCalories) * 100) || 0}%` }}
+                        ></div>
+                      </div>
+                      <div className="flex justify-between mt-2 text-xs">
+                        <span className="text-blue-600">{Math.round((totalCarbs * 4 / totalCalories) * 100) || 0}% Carbs</span>
+                        <span className="text-red-600">{Math.round((totalProtein * 4 / totalCalories) * 100) || 0}% Protein</span>
+                        <span className="text-amber-600">{Math.round((totalFat * 9 / totalCalories) * 100) || 0}% Fat</span>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      {Object.entries(dailyLog).map(([category, foods]) => {
+                        const categoryCalories = foods.reduce((sum, food) => sum + food.calories * (food.quantity || 1), 0);
+                        return (
+                          <Card key={category} className="border shadow-sm">
+                            <CardHeader className="p-3 pb-0">
+                              <CardTitle className="text-sm flex items-center capitalize">
+                                {getMealIcon(category)} {category}
+                              </CardTitle>
+                            </CardHeader>
+                            <CardContent className="p-3 pt-1">
+                              <p className="text-lg font-bold">{categoryCalories} cal</p>
+                              <Progress 
+                                value={(categoryCalories / dailyCalorieTarget) * 100} 
+                                className="h-1.5 mt-1" 
+                              />
+                            </CardContent>
+                          </Card>
+                        );
+                      })}
+                    </div>
                   </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
+                </TabsContent>
+                
+                <TabsContent value="insights">
+                  <div className="space-y-4">
+                    <div className="p-4 border rounded-lg space-y-1 bg-green-50 dark:bg-green-900/10">
+                      <h3 className="font-medium">Calorie Budget</h3>
+                      {totalCalories < dailyCalorieTarget ? (
+                        <p className="text-sm">
+                          You have {dailyCalorieTarget - totalCalories} calories remaining for today.
+                        </p>
+                      ) : (
+                        <p className="text-sm text-red-500">
+                          You've exceeded your daily calorie budget by {totalCalories - dailyCalorieTarget} calories.
+                        </p>
+                      )}
+                    </div>
+                    
+                    <div className="p-4 border rounded-lg space-y-1">
+                      <h3 className="font-medium">Smart Insights</h3>
+                      <ul className="text-sm space-y-2">
+                        <li className="flex">
+                          <span className="text-blue-500 mr-2">•</span>
+                          Your protein intake is at {Math.round((totalProtein / dailyProteinTarget) * 100)}% of your daily goal.
+                        </li>
+                        <li className="flex">
+                          <span className="text-blue-500 mr-2">•</span>
+                          At this pace, you're likely to meet your weekly nutrition targets.
+                        </li>
+                        <li className="flex">
+                          <span className="text-blue-500 mr-2">•</span>
+                          Consider adding more vegetables to increase your fiber intake.
+                        </li>
+                      </ul>
+                    </div>
+                    
+                    <div className="p-4 border rounded-lg">
+                      <h3 className="font-medium mb-2">Recent Trends</h3>
+                      <div className="h-40 w-full bg-gray-100 dark:bg-gray-800 rounded-lg flex items-end justify-between p-4">
+                        {[1180, 1420, 1650, 1890, 2100, 1940, totalCalories].map((cal, index) => (
+                          <div key={index} className="flex flex-col items-center">
+                            <div 
+                              className="w-8 bg-blue-500 dark:bg-blue-400 rounded-t" 
+                              style={{ height: `${(cal / dailyCalorieTarget) * 100}px`, maxHeight: '100px' }}
+                            ></div>
+                            <span className="text-xs mt-1">{["M", "T", "W", "T", "F", "S", "S"][index]}</span>
+                          </div>
+                        ))}
+                      </div>
+                      <p className="text-xs text-center mt-2 text-muted-foreground">Last 7 days calorie intake</p>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="p-4 border rounded-lg">
+                        <h3 className="font-medium flex items-center">
+                          <Clock className="h-4 w-4 mr-1" /> Meal Timing
+                        </h3>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          Most calories consumed during lunch (42%)
+                        </p>
+                      </div>
+                      
+                      <div className="p-4 border rounded-lg">
+                        <h3 className="font-medium flex items-center">
+                          <Droplet className="h-4 w-4 mr-1" /> Hydration
+                        </h3>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          {waterIntake} of {dailyWaterTarget} glasses consumed today
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </TabsContent>
+              </Tabs>
+            </CardContent>
+            
+            <CardFooter className="flex justify-between border-t pt-4">
+              <Button variant="outline" className="text-sm">
+                View Detailed Reports
+              </Button>
+              <Button className="bg-green-600 hover:bg-green-700 text-white" onClick={() => setSearchTerm("a")}>
+                Add New Food
+              </Button>
+            </CardFooter>
+          </Card>
         </div>
         
-        <div className="space-y-6">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="flex items-center justify-between">
-                <span>Daily Summary</span>
-                <Badge variant="outline" className="font-normal">
-                  Apr 8, 2025
-                </Badge>
-              </CardTitle>
+        <div>
+          <Card className="shadow">
+            <CardHeader>
+              <CardTitle className="text-lg">Water Intake</CardTitle>
+              <CardDescription>Track your daily hydration</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <div className="flex justify-between mb-1">
-                  <span className="text-sm font-medium">Calories</span>
-                  <span className="text-sm">
-                    {dailyNutrition.calories.consumed} / {dailyNutrition.calories.goal}
-                  </span>
-                </div>
-                <Progress 
-                  value={(dailyNutrition.calories.consumed / dailyNutrition.calories.goal) * 100} 
-                  className="h-2"
-                />
-              </div>
-              
-              <div className="grid grid-cols-3 gap-2 pt-2">
-                <div className="space-y-1">
-                  <span className="text-xs font-medium">Carbs</span>
-                  <div className="bg-blue-100 dark:bg-blue-900/30 rounded-md p-2">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-sm font-medium text-blue-700 dark:text-blue-400">{macroPercentages.carbs}%</span>
-                      <span className="text-xs text-blue-600 dark:text-blue-300">
-                        {dailyNutrition.carbs.consumed}g
-                      </span>
-                    </div>
-                    <Progress 
-                      value={(dailyNutrition.carbs.consumed / dailyNutrition.carbs.goal) * 100} 
-                      className="h-1.5 bg-blue-200 dark:bg-blue-800"
-                      indicatorColor="bg-blue-500"
-                    />
-                  </div>
-                </div>
-                
-                <div className="space-y-1">
-                  <span className="text-xs font-medium">Protein</span>
-                  <div className="bg-red-100 dark:bg-red-900/30 rounded-md p-2">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-sm font-medium text-red-700 dark:text-red-400">{macroPercentages.protein}%</span>
-                      <span className="text-xs text-red-600 dark:text-red-300">
-                        {dailyNutrition.protein.consumed}g
-                      </span>
-                    </div>
-                    <Progress 
-                      value={(dailyNutrition.protein.consumed / dailyNutrition.protein.goal) * 100} 
-                      className="h-1.5 bg-red-200 dark:bg-red-800"
-                      indicatorColor="bg-red-500"
-                    />
-                  </div>
-                </div>
-                
-                <div className="space-y-1">
-                  <span className="text-xs font-medium">Fat</span>
-                  <div className="bg-yellow-100 dark:bg-yellow-900/30 rounded-md p-2">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-sm font-medium text-yellow-700 dark:text-yellow-400">{macroPercentages.fat}%</span>
-                      <span className="text-xs text-yellow-600 dark:text-yellow-300">
-                        {dailyNutrition.fat.consumed}g
-                      </span>
-                    </div>
-                    <Progress 
-                      value={(dailyNutrition.fat.consumed / dailyNutrition.fat.goal) * 100} 
-                      className="h-1.5 bg-yellow-200 dark:bg-yellow-800"
-                      indicatorColor="bg-yellow-500"
-                    />
+            <CardContent className="flex flex-col items-center">
+              <div className="relative w-36 h-36 mb-4">
+                <div className="absolute inset-0 rounded-full border-4 border-gray-100 dark:border-gray-800"></div>
+                <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100">
+                  <path
+                    d="M 50,50 m 0,-46 a 46,46 0 1 1 0,92 a 46,46 0 1 1 0,-92"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="8"
+                    strokeDasharray={`${(waterIntake / dailyWaterTarget) * 289} 289`}
+                    strokeLinecap="round"
+                    className="text-blue-500 transform -rotate-90"
+                  />
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-center">
+                    <p className="text-3xl font-bold">{waterIntake}/{dailyWaterTarget}</p>
+                    <p className="text-sm text-muted-foreground">glasses</p>
                   </div>
                 </div>
               </div>
               
-              <div className="pt-2">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm font-medium">Water Intake</span>
-                  <span className="text-sm">
-                    {dailyNutrition.water.consumed} / {dailyNutrition.water.goal} ml
-                  </span>
-                </div>
-                <Progress 
-                  value={(dailyNutrition.water.consumed / dailyNutrition.water.goal) * 100} 
-                  className="h-2 bg-blue-100 dark:bg-blue-900/30"
-                  indicatorColor="bg-blue-500"
-                />
-                <div className="flex justify-between mt-3 gap-2">
-                  {[200, 330, 500].map((amount) => (
-                    <Button 
-                      key={amount} 
-                      variant="outline" 
-                      size="sm" 
-                      className="flex-1 text-xs"
-                      onClick={() => addWater(amount)}
-                    >
-                      +{amount}ml
-                    </Button>
+              <div className="flex justify-center gap-3 mt-2">
+                <Button
+                  onClick={removeWaterGlass}
+                  variant="outline"
+                  size="icon"
+                  className="rounded-full"
+                  disabled={waterIntake <= 0}
+                >
+                  -
+                </Button>
+                <Button
+                  onClick={addWaterGlass}
+                  variant="default"
+                  size="icon"
+                  className="rounded-full bg-blue-500 hover:bg-blue-600"
+                  disabled={waterIntake >= dailyWaterTarget}
+                >
+                  +
+                </Button>
+              </div>
+              
+              <div className="w-full mt-6 space-y-2">
+                <div className="grid grid-cols-8 gap-1">
+                  {Array.from({ length: dailyWaterTarget }).map((_, i) => (
+                    <div
+                      key={i}
+                      className={`aspect-square rounded-full transition-colors ${
+                        i < waterIntake
+                          ? "bg-blue-500"
+                          : "bg-gray-200 dark:bg-gray-700"
+                      }`}
+                    />
                   ))}
                 </div>
+                <p className="text-xs text-center text-muted-foreground">
+                  {waterIntake < dailyWaterTarget
+                    ? `${dailyWaterTarget - waterIntake} more glass${
+                        dailyWaterTarget - waterIntake === 1 ? "" : "es"
+                      } to go!`
+                    : "Daily goal reached! 🎉"}
+                </p>
               </div>
             </CardContent>
           </Card>
           
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base">Calorie Budget</CardTitle>
+          <Card className="mt-6 shadow">
+            <CardHeader>
+              <CardTitle className="text-lg">Nutrition Tips</CardTitle>
+              <CardDescription>Personalized recommendations</CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm">Base Metabolism</span>
-                  <span className="text-sm font-medium">1,680 cal</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm">+ Activity</span>
-                  <span className="text-sm font-medium">+420 cal</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm">Food Intake</span>
-                  <span className="text-sm font-medium text-red-600 dark:text-red-400">-{dailyNutrition.calories.consumed} cal</span>
-                </div>
-                <div className="flex justify-between items-center pt-2 border-t">
-                  <span className="text-sm font-medium">Remaining</span>
-                  <span className="text-base font-semibold">
-                    {2100 - dailyNutrition.calories.consumed} cal
-                  </span>
-                </div>
-                
-                {dailyNutrition.calories.consumed > dailyNutrition.calories.goal && (
-                  <div className="bg-red-50 dark:bg-red-950/50 border border-red-100 dark:border-red-900 rounded-md p-2 mt-2 flex items-center text-red-800 dark:text-red-300">
-                    <AlertTriangle className="h-4 w-4 mr-2 flex-shrink-0" />
-                    <p className="text-xs">
-                      You've exceeded your daily calorie goal by {dailyNutrition.calories.consumed - dailyNutrition.calories.goal} calories.
-                    </p>
-                  </div>
-                )}
-                
-                {dailyNutrition.calories.consumed < dailyNutrition.calories.goal * 0.5 && (
-                  <div className="bg-amber-50 dark:bg-amber-950/50 border border-amber-100 dark:border-amber-900 rounded-md p-2 mt-2 flex items-center text-amber-800 dark:text-amber-300">
-                    <AlertTriangle className="h-4 w-4 mr-2 flex-shrink-0" />
-                    <p className="text-xs">
-                      You're significantly under your daily calorie goal. Make sure you're eating enough.
-                    </p>
-                  </div>
-                )}
+            <CardContent className="space-y-4">
+              <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <h4 className="font-medium text-blue-700 dark:text-blue-300">Protein Intake</h4>
+                <p className="text-sm mt-1">Try to increase your protein intake by adding lean meats, eggs, or plant-based proteins to your meals.</p>
               </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base">Quick Add</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 gap-2">
-                <Button variant="outline" className="justify-start" onClick={() => openBarcodeScanner()}>
-                  <Camera className="mr-2 h-4 w-4" /> Scan Barcode
-                </Button>
-                <Button variant="outline" className="justify-start" onClick={() => toggleVoiceInput()}>
-                  <Mic className="mr-2 h-4 w-4" /> Voice Input
-                </Button>
-                <Button variant="outline" className="justify-start" onClick={() => navigate("/nutrition/upload")}>
-                  <Upload className="mr-2 h-4 w-4" /> Upload Photo
-                </Button>
-                <Button variant="outline" className="justify-start" onClick={() => navigate("/nutrition/recent")}>
-                  <Heart className="mr-2 h-4 w-4" /> Favorites
-                </Button>
+              
+              <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                <h4 className="font-medium text-green-700 dark:text-green-300">More Vegetables</h4>
+                <p className="text-sm mt-1">Add more leafy greens to increase fiber intake and improve gut health.</p>
+              </div>
+              
+              <div className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
+                <h4 className="font-medium text-amber-700 dark:text-amber-300">Healthy Fats</h4>
+                <p className="text-sm mt-1">Include sources of healthy fats like avocados, nuts, and olive oil in your diet.</p>
               </div>
             </CardContent>
           </Card>

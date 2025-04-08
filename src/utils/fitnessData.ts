@@ -1,205 +1,217 @@
-
-import { subDays, format, addDays } from "date-fns";
-
-// Generate dynamic fitness data for the past 30 days
-const generateDailyActivity = (days: number = 30) => {
-  const today = new Date();
-  const dailyActivities = [];
-
-  for (let i = days - 1; i >= 0; i--) {
-    const date = subDays(today, i);
-    const formattedDate = format(date, "yyyy-MM-dd");
-    
-    // Generate somewhat realistic data with some variance
-    const dayOfWeek = date.getDay(); // 0 is Sunday, 6 is Saturday
-    const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-    
-    // Base values
-    let steps = Math.floor(Math.random() * 3000) + 7000; // 7000-10000 base steps
-    
-    // Add variance based on weekday/weekend
-    if (isWeekend) {
-      steps += Math.floor(Math.random() * 2000); // More active on weekends
-    } else if (dayOfWeek === 1 || dayOfWeek === 5) {
-      steps -= Math.floor(Math.random() * 1500); // Less active on Monday and Friday
-    }
-    
-    // Most recent days tend to have more data (improvement trend)
-    if (i < 7) {
-      steps += Math.floor(Math.random() * 1500);
-    }
-    
-    // Randomize a bit
-    steps = Math.max(3000, Math.min(15000, steps + Math.floor(Math.random() * 2000 - 1000)));
-    
-    // Calculate derived metrics
-    const distance = parseFloat((steps * 0.0008).toFixed(1)); // km
-    const caloriesBurned = Math.floor(steps * 0.05); // calories
-    const activeMinutes = Math.floor(steps / 200); // active minutes
-    
-    dailyActivities.push({
-      date: formattedDate,
-      steps,
-      distance,
-      caloriesBurned,
-      activeMinutes,
-    });
-  }
-
-  return dailyActivities;
-};
-
-// User profile data
 export const userProfile = {
-  name: "Alex Thompson",
-  email: "alex.thompson@example.com",
-  gender: "male" as const,
+  name: "Alex Johnson",
+  email: "alex.johnson@example.com",
   age: 32,
+  gender: "Male",
   height: 178, // cm
-  weight: 76, // kg
-  activityLevel: "moderate" as const,
-  joinDate: "2023-11-15",
+  weight: 82, // kg
+  activityLevel: "moderate",
+  joinDate: "Jan 2023",
+  profilePic: "/placeholder.svg",
+  goalWeight: 75, // in kg
+  dietaryPreferences: ["Low carb", "High protein"],
+  allergies: [],
+  fitnessGoals: ["Build muscle", "Improve endurance"],
 };
 
-// Fitness goals
-export const fitnessGoals = [
+export const workoutHistory = [
   {
-    id: "1",
-    name: "Daily Steps",
-    target: 10000,
-    current: 8431,
-    unit: "steps",
-    period: "daily",
+    id: 1,
+    date: "2023-06-01",
+    type: "Strength",
+    duration: 45,
+    caloriesBurned: 320,
+    exercises: [
+      { name: "Bench Press", sets: 3, reps: 10, weight: 70 },
+      { name: "Squats", sets: 3, reps: 12, weight: 100 },
+      { name: "Deadlifts", sets: 3, reps: 8, weight: 120 }
+    ]
   },
   {
-    id: "2",
-    name: "Calories Burned",
-    target: 500,
-    current: 423,
-    unit: "cal",
-    period: "daily",
+    id: 2,
+    date: "2023-06-03",
+    type: "Cardio",
+    duration: 30,
+    caloriesBurned: 280,
+    exercises: [
+      { name: "Running", distance: 5, pace: "5:30" },
+    ]
   },
   {
-    id: "3",
-    name: "Distance",
-    target: 8,
-    current: 6.2,
-    unit: "km",
-    period: "daily",
-  },
-  {
-    id: "4",
-    name: "Active Minutes",
-    target: 60,
-    current: 42,
-    unit: "min",
-    period: "daily",
-  },
-  {
-    id: "5",
-    name: "Weekly Distance",
-    target: 40,
-    current: 28.5,
-    unit: "km",
-    period: "weekly",
-  },
+    id: 3,
+    date: "2023-06-05",
+    type: "Strength",
+    duration: 50,
+    caloriesBurned: 350,
+    exercises: [
+      { name: "Pull-ups", sets: 3, reps: 8, weight: 0 },
+      { name: "Shoulder Press", sets: 3, reps: 10, weight: 45 },
+      { name: "Rows", sets: 3, reps: 12, weight: 60 }
+    ]
+  }
 ];
 
-// Generate the daily activities
-export const dailyActivities = generateDailyActivity();
+export const nutritionHistory = [
+  {
+    date: "2023-06-01",
+    calories: 2100,
+    protein: 140,
+    carbs: 180,
+    fat: 70,
+    water: 2000,
+    meals: [
+      {
+        name: "Breakfast",
+        foods: [
+          { name: "Oatmeal", calories: 150, protein: 5, carbs: 27, fat: 2.5 },
+          { name: "Banana", calories: 105, protein: 1.3, carbs: 27, fat: 0.4 }
+        ]
+      },
+      {
+        name: "Lunch",
+        foods: [
+          { name: "Chicken Salad", calories: 350, protein: 30, carbs: 10, fat: 20 },
+          { name: "Whole Grain Bread", calories: 80, protein: 3, carbs: 15, fat: 1 }
+        ]
+      }
+    ]
+  },
+  {
+    date: "2023-06-02",
+    calories: 1950,
+    protein: 130,
+    carbs: 160,
+    fat: 65,
+    water: 2200,
+    meals: []
+  },
+  {
+    date: "2023-06-03",
+    calories: 2200,
+    protein: 145,
+    carbs: 190,
+    fat: 75,
+    water: 1800,
+    meals: []
+  }
+];
 
-// Get today's activity
-export const getTodayActivity = () => {
-  // This could fetch from API in a real app
-  return {
-    steps: 8431,
-    distance: 6.2,
-    caloriesBurned: 423,
-    activeMinutes: 42,
-  };
-};
+export const weightHistory = [
+  { date: "2023-05-01", weight: 85 },
+  { date: "2023-05-08", weight: 84.5 },
+  { date: "2023-05-15", weight: 84 },
+  { date: "2023-05-22", weight: 83.2 },
+  { date: "2023-05-29", weight: 82.7 },
+  { date: "2023-06-05", weight: 82 }
+];
 
-// Get streak count
-export const getStreakCount = () => {
-  // This would be calculated based on real data
-  return 7;
-};
-
-// Calculate completion percentage
-export const calculateCompletion = (current: number, goal: number) => {
-  return Math.min(100, Math.round((current / goal) * 100));
-};
-
-// Get weekly statistics
-export const getWeeklyStats = () => {
-  const lastSevenDays = dailyActivities.slice(-7);
-  
-  const totalSteps = lastSevenDays.reduce((sum, day) => sum + day.steps, 0);
-  const totalCalories = lastSevenDays.reduce((sum, day) => sum + day.caloriesBurned, 0);
-  const totalDistance = lastSevenDays.reduce((sum, day) => sum + day.distance, 0);
-  
-  return {
-    totalSteps,
-    totalCalories,
-    totalDistance,
-    averageSteps: Math.round(totalSteps / 7),
-    averageCalories: Math.round(totalCalories / 7),
-    averageDistance: parseFloat((totalDistance / 7).toFixed(1)),
-  };
-};
-
-// Get best performing day of the week
-export const getBestDay = () => {
-  const lastSevenDays = dailyActivities.slice(-7);
-  let bestDay = lastSevenDays[0];
-  
-  for (const day of lastSevenDays) {
-    if (day.steps > bestDay.steps) {
-      bestDay = day;
+export const fitnessGoals = [
+  { 
+    id: 1, 
+    title: "Lose 5kg", 
+    description: "Reach target weight of 77kg",
+    startDate: "2023-05-01",
+    targetDate: "2023-08-01",
+    progress: 60,
+    metrics: {
+      current: 82,
+      target: 77,
+      unit: "kg"
+    }
+  },
+  { 
+    id: 2, 
+    title: "Run 10km", 
+    description: "Complete a 10km run without stopping",
+    startDate: "2023-05-15",
+    targetDate: "2023-07-15",
+    progress: 70,
+    metrics: {
+      current: 7,
+      target: 10,
+      unit: "km"
+    }
+  },
+  { 
+    id: 3, 
+    title: "Bench Press 100kg", 
+    description: "Increase strength to bench press 100kg",
+    startDate: "2023-06-01",
+    targetDate: "2023-09-01",
+    progress: 40,
+    metrics: {
+      current: 80,
+      target: 100,
+      unit: "kg"
     }
   }
-  
-  const date = new Date(bestDay.date);
-  return format(date, "EEEE"); // Return day name
+];
+
+export const upcomingWorkouts = [
+  {
+    id: 1,
+    title: "Upper Body Strength",
+    date: "2023-06-10T09:00:00",
+    duration: 45,
+    type: "Strength",
+    description: "Focus on chest, shoulders, and triceps"
+  },
+  {
+    id: 2,
+    title: "HIIT Cardio",
+    date: "2023-06-12T18:30:00",
+    duration: 30,
+    type: "Cardio",
+    description: "High intensity interval training"
+  },
+  {
+    id: 3,
+    title: "Lower Body Strength",
+    date: "2023-06-14T09:00:00",
+    duration: 50,
+    type: "Strength",
+    description: "Focus on quads, hamstrings, and calves"
+  }
+];
+
+export const activitySummary = {
+  weeklyCaloriesBurned: 1850,
+  weeklyWorkouts: 4,
+  weeklyActiveMinutes: 280,
+  monthlyTrend: "+12%"
 };
 
-// Additional data generators for future use
-export const getFutureChallenges = () => {
-  const today = new Date();
-  
-  return [
-    {
-      id: "c1",
-      title: "Spring Step Challenge",
-      description: "Reach 300,000 steps in the next 30 days",
-      startDate: format(today, "yyyy-MM-dd"),
-      endDate: format(addDays(today, 30), "yyyy-MM-dd"),
-      goal: 300000,
-      unit: "steps",
-      participants: 156,
-      joined: false,
-    },
-    {
-      id: "c2",
-      title: "Weekend Warrior",
-      description: "Complete 30,000 steps this weekend",
-      startDate: format(addDays(today, 5 - today.getDay()), "yyyy-MM-dd"), // Next Saturday
-      endDate: format(addDays(today, 6 - today.getDay()), "yyyy-MM-dd"), // Next Sunday
-      goal: 30000,
-      unit: "steps",
-      participants: 47,
-      joined: true,
-    },
-    {
-      id: "c3",
-      title: "Marathon Prep",
-      description: "Log 100km of distance over the next 2 weeks",
-      startDate: format(today, "yyyy-MM-dd"),
-      endDate: format(addDays(today, 14), "yyyy-MM-dd"),
-      goal: 100,
-      unit: "km",
-      participants: 28,
-      joined: false,
-    },
-  ];
-};
+export const achievements = [
+  {
+    id: 1,
+    title: "Early Bird",
+    description: "Complete 5 workouts before 8am",
+    icon: "sunrise",
+    dateEarned: "2023-05-20",
+    progress: 100
+  },
+  {
+    id: 2,
+    title: "Consistency King",
+    description: "Work out 4 times per week for a month",
+    icon: "calendar",
+    dateEarned: "2023-06-01",
+    progress: 100
+  },
+  {
+    id: 3,
+    title: "Strength Milestone",
+    description: "Deadlift 150kg",
+    icon: "dumbbell",
+    dateEarned: null,
+    progress: 80
+  },
+  {
+    id: 4,
+    title: "Marathon Runner",
+    description: "Run a total of 100km",
+    icon: "running",
+    dateEarned: null,
+    progress: 65
+  }
+];

@@ -1,346 +1,305 @@
 
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useToast } from "@/components/ui/use-toast";
-import { ArrowLeft, Save, User, Activity, Bell, Home } from "lucide-react";
-import { Link } from "react-router-dom";
-import { userProfile } from "@/utils/fitnessData";
+import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/Switch";
+import BackToHome from "@/components/BackToHome";
+import { toast } from "@/components/ui/use-toast";
 import ProfilePhotoUpload from "@/components/ProfilePhotoUpload";
+import { extendedUserProfile } from "@/utils/profileExtension";
 
-const Profile = () => {
-  const { toast } = useToast();
-  const navigate = useNavigate();
-  const [profileData, setProfileData] = useState({
-    name: userProfile.name,
-    email: userProfile.email || "user@example.com",
-    height: userProfile.height || 175,
-    weight: userProfile.weight || 70,
-    age: userProfile.age || 30,
-    activityLevel: userProfile.activityLevel || "moderate",
-    goalWeight: userProfile.goalWeight || 65,
-    goalDate: "2025-12-31"
-  });
-  const [profileImage, setProfileImage] = useState<string>(userProfile.profilePic || "");
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setProfileData({
-      ...profileData,
-      [name]: value
-    });
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+export default function Profile() {
+  const [profile, setProfile] = useState(extendedUserProfile);
+  const [isEditing, setIsEditing] = useState(false);
+  
+  const handleProfileUpdate = () => {
     toast({
       title: "Profile updated",
-      description: "Your profile has been updated successfully."
+      description: "Your profile has been updated successfully.",
     });
+    setIsEditing(false);
+  };
+
+  const handleImageChange = (imageUrl: string) => {
+    setProfile(prev => ({ ...prev, profilePic: imageUrl }));
+  };
+  
+  const calculateBMI = () => {
+    const heightInM = profile.height / 100;
+    return (profile.weight / (heightInM * heightInM)).toFixed(1);
   };
 
   return (
-    <div className="container mx-auto px-4 py-6 max-w-4xl">
-      <div className="flex items-center mb-6">
-        <Link to="/" className="mr-4">
-          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-        </Link>
-        <h1 className="text-3xl font-bold">My Profile</h1>
-      </div>
+    <div className="container py-8">
+      <BackToHome />
       
-      <Tabs defaultValue="profile" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="profile" className="flex items-center gap-2">
-            <User className="h-4 w-4" />
-            <span>Profile</span>
-          </TabsTrigger>
-          <TabsTrigger value="activity" className="flex items-center gap-2">
-            <Activity className="h-4 w-4" />
-            <span>Activity</span>
-          </TabsTrigger>
-          <TabsTrigger value="notifications" className="flex items-center gap-2">
-            <Bell className="h-4 w-4" />
-            <span>Notifications</span>
-          </TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="profile">
-          <Card>
-            <CardHeader>
-              <CardTitle>Personal Information</CardTitle>
-              <CardDescription>
-                Update your personal details and preferences
-              </CardDescription>
+      <div className="flex flex-col md:flex-row gap-8 mt-6">
+        <div className="w-full md:w-1/3">
+          <Card className="mb-6">
+            <CardHeader className="pb-2">
+              <CardTitle>Profile</CardTitle>
+              <CardDescription>Manage your personal information</CardDescription>
             </CardHeader>
-            <form onSubmit={handleSubmit}>
-              <CardContent className="space-y-6">
-                <div className="flex justify-center mb-4">
-                  <ProfilePhotoUpload 
-                    initialImage={profileImage} 
-                    onImageChange={setProfileImage}
-                    size="xl" 
-                  />
+            <CardContent className="flex flex-col items-center">
+              <ProfilePhotoUpload 
+                initialImage={profile.profilePic} 
+                onImageChange={handleImageChange}
+                size="xl"
+              />
+              <div className="text-center mt-4">
+                <h3 className="text-xl font-bold">{profile.name}</h3>
+                <p className="text-sm text-muted-foreground">{profile.email}</p>
+                <p className="text-sm text-muted-foreground mt-1">Member since {profile.joinDate}</p>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle>Health Overview</CardTitle>
+              <CardDescription>Your current health stats</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-4 mt-2">
+                <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-md text-center">
+                  <p className="text-sm font-medium text-blue-700 dark:text-blue-300">Weight</p>
+                  <p className="text-2xl font-bold">{profile.weight} kg</p>
                 </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="name">Name</Label>
-                    <Input
-                      id="name"
-                      name="name"
-                      value={profileData.name}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      name="email"
-                      type="email"
-                      value={profileData.email}
-                      onChange={handleInputChange}
-                    />
-                  </div>
+                <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-md text-center">
+                  <p className="text-sm font-medium text-green-700 dark:text-green-300">Height</p>
+                  <p className="text-2xl font-bold">{profile.height} cm</p>
                 </div>
-                
-                <Separator />
-                
-                <div>
-                  <h3 className="text-lg font-medium">Physical Information</h3>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    This helps us calculate your calories and fitness goals
-                  </p>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-md text-center">
+                  <p className="text-sm font-medium text-amber-700 dark:text-amber-300">BMI</p>
+                  <p className="text-2xl font-bold">{calculateBMI()}</p>
+                </div>
+                <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-md text-center">
+                  <p className="text-sm font-medium text-purple-700 dark:text-purple-300">Activity</p>
+                  <p className="text-lg font-bold capitalize">{profile.activityLevel}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="w-full md:w-2/3">
+          <Tabs defaultValue="personal" className="w-full">
+            <TabsList className="grid grid-cols-3 mb-6">
+              <TabsTrigger value="personal">Personal Info</TabsTrigger>
+              <TabsTrigger value="goals">Goals & Preferences</TabsTrigger>
+              <TabsTrigger value="settings">Settings</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="personal">
+              <Card>
+                <CardHeader>
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <CardTitle>Personal Information</CardTitle>
+                      <CardDescription>Update your personal details</CardDescription>
+                    </div>
+                    <Button 
+                      variant={isEditing ? "ghost" : "outline"} 
+                      onClick={() => setIsEditing(!isEditing)}
+                    >
+                      {isEditing ? "Cancel" : "Edit"}
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                      <Label htmlFor="height">Height (cm)</Label>
-                      <Input
-                        id="height"
-                        name="height"
-                        type="number"
-                        value={profileData.height}
-                        onChange={handleInputChange}
+                      <Label htmlFor="name">Full Name</Label>
+                      <Input 
+                        id="name" 
+                        defaultValue={profile.name}
+                        readOnly={!isEditing}
+                        className={!isEditing ? "bg-muted" : ""} 
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="weight">Current Weight (kg)</Label>
-                      <Input
-                        id="weight"
-                        name="weight"
-                        type="number"
-                        value={profileData.weight}
-                        onChange={handleInputChange}
+                      <Label htmlFor="email">Email</Label>
+                      <Input 
+                        id="email" 
+                        type="email" 
+                        defaultValue={profile.email}
+                        readOnly={!isEditing}
+                        className={!isEditing ? "bg-muted" : ""}  
                       />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="age">Age</Label>
-                      <Input
-                        id="age"
-                        name="age"
-                        type="number"
-                        value={profileData.age}
-                        onChange={handleInputChange}
+                      <Input 
+                        id="age" 
+                        type="number" 
+                        defaultValue={profile.age}
+                        readOnly={!isEditing}
+                        className={!isEditing ? "bg-muted" : ""}  
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="gender">Gender</Label>
+                      <Input 
+                        id="gender" 
+                        defaultValue={profile.gender}
+                        readOnly={!isEditing}
+                        className={!isEditing ? "bg-muted" : ""}  
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="height">Height (cm)</Label>
+                      <Input 
+                        id="height" 
+                        type="number" 
+                        defaultValue={profile.height}
+                        readOnly={!isEditing}
+                        className={!isEditing ? "bg-muted" : ""}  
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="weight">Weight (kg)</Label>
+                      <Input 
+                        id="weight" 
+                        type="number" 
+                        defaultValue={profile.weight}
+                        readOnly={!isEditing}
+                        className={!isEditing ? "bg-muted" : ""}  
                       />
                     </div>
                   </div>
-                </div>
-                
-                <Separator />
-                
-                <div>
-                  <h3 className="text-lg font-medium">Fitness Goals</h3>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Set your targets to track your progress
-                  </p>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="activityLevel">Activity Level</Label>
-                      <select
-                        id="activityLevel"
-                        name="activityLevel"
-                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                        value={profileData.activityLevel}
-                        onChange={handleInputChange}
-                      >
-                        <option value="sedentary">Sedentary</option>
-                        <option value="light">Lightly Active</option>
-                        <option value="moderate">Moderately Active</option>
-                        <option value="active">Active</option>
-                        <option value="veryActive">Very Active</option>
-                      </select>
-                    </div>
+                </CardContent>
+                {isEditing && (
+                  <CardFooter>
+                    <Button onClick={handleProfileUpdate}>Save Changes</Button>
+                  </CardFooter>
+                )}
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="goals">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Goals & Preferences</CardTitle>
+                  <CardDescription>Set your fitness goals and dietary preferences</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-6">
                     <div className="space-y-2">
                       <Label htmlFor="goalWeight">Goal Weight (kg)</Label>
-                      <Input
-                        id="goalWeight"
-                        name="goalWeight"
-                        type="number"
-                        value={profileData.goalWeight}
-                        onChange={handleInputChange}
+                      <Input 
+                        id="goalWeight" 
+                        type="number" 
+                        defaultValue={profile.goalWeight} 
                       />
                     </div>
+                    
                     <div className="space-y-2">
-                      <Label htmlFor="goalDate">Target Date</Label>
-                      <Input
-                        id="goalDate"
-                        name="goalDate"
-                        type="date"
-                        value={profileData.goalDate}
-                        onChange={handleInputChange}
-                      />
+                      <Label>Fitness Goals</Label>
+                      <div className="grid grid-cols-2 gap-2">
+                        {["Lose weight", "Build muscle", "Improve endurance", "Maintain health"].map(goal => (
+                          <div 
+                            key={goal} 
+                            className={`p-3 border rounded-md text-center cursor-pointer transition-colors ${
+                              profile.fitnessGoals?.includes(goal) 
+                                ? "bg-primary text-primary-foreground" 
+                                : "bg-background hover:bg-muted"
+                            }`}
+                          >
+                            {goal}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label>Dietary Preferences</Label>
+                      <div className="grid grid-cols-2 gap-2">
+                        {["Low carb", "High protein", "Vegetarian", "Vegan", "Keto", "Paleo"].map(diet => (
+                          <div 
+                            key={diet} 
+                            className={`p-3 border rounded-md text-center cursor-pointer transition-colors ${
+                              profile.dietaryPreferences?.includes(diet) 
+                                ? "bg-primary text-primary-foreground" 
+                                : "bg-background hover:bg-muted"
+                            }`}
+                          >
+                            {diet}
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
-                </div>
-              </CardContent>
-              <CardFooter className="flex justify-between">
-                <Button variant="outline" type="button" onClick={() => navigate("/")}>
-                  <Home className="mr-2 h-4 w-4" />
-                  Return to Dashboard
-                </Button>
-                <Button type="submit">
-                  <Save className="mr-2 h-4 w-4" />
-                  Save Changes
-                </Button>
-              </CardFooter>
-            </form>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="activity">
-          <Card>
-            <CardHeader>
-              <CardTitle>Activity Preferences</CardTitle>
-              <CardDescription>
-                Customize your activity tracking and workout preferences
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <h3 className="text-lg font-medium">Preferred Activities</h3>
-                <p className="text-sm text-muted-foreground mb-2">
-                  Select your favorite activities for personalized recommendations
-                </p>
-                
-                <div className="flex flex-wrap gap-2">
-                  {["Running", "Walking", "Cycling", "Swimming", "Yoga", "Weight Training", "HIIT", "Pilates", "Dance", "Basketball"].map((activity) => (
-                    <Button
-                      key={activity}
-                      variant="outline"
-                      className="m-1"
-                      onClick={() => {
-                        toast({
-                          title: `${activity} added to favorites`,
-                          description: "Your activity preferences have been updated."
-                        });
-                      }}
-                    >
-                      {activity}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-              
-              <Separator />
-              
-              <div className="space-y-2">
-                <h3 className="text-lg font-medium">Workout Schedule</h3>
-                <p className="text-sm text-muted-foreground mb-2">
-                  Set your regular workout days for reminders
-                </p>
-                
-                <div className="flex flex-wrap gap-2">
-                  {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"].map((day) => (
-                    <Button
-                      key={day}
-                      variant="outline"
-                      className="m-1"
-                      onClick={() => {
-                        toast({
-                          title: `${day} added to workout schedule`,
-                          description: "Your workout schedule has been updated."
-                        });
-                      }}
-                    >
-                      {day}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="notifications">
-          <Card>
-            <CardHeader>
-              <CardTitle>Notification Settings</CardTitle>
-              <CardDescription>
-                Configure how and when you want to receive notifications
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-medium">Notification Types</h3>
-                    
-                    {["Workout Reminders", "Goal Achievements", "Friend Activity", "New Challenges", "Water Reminders"].map((notif) => (
-                      <div key={notif} className="flex items-center space-x-2">
-                        <input
-                          type="checkbox"
-                          id={notif.replace(/\s+/g, '-').toLowerCase()}
-                          className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
-                          defaultChecked
-                        />
-                        <Label htmlFor={notif.replace(/\s+/g, '-').toLowerCase()}>{notif}</Label>
+                </CardContent>
+                <CardFooter>
+                  <Button onClick={() => {
+                    toast({
+                      title: "Preferences updated",
+                      description: "Your goals and preferences have been saved."
+                    });
+                  }}>Save Preferences</Button>
+                </CardFooter>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="settings">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Account Settings</CardTitle>
+                  <CardDescription>Manage your account settings and preferences</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium">Email Notifications</h4>
+                        <p className="text-sm text-muted-foreground">Receive emails about your account activity</p>
                       </div>
-                    ))}
-                  </div>
-                  
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-medium">Notification Channels</h3>
-                    
-                    {["Email", "Push Notifications", "SMS", "In-app"].map((channel) => (
-                      <div key={channel} className="flex items-center space-x-2">
-                        <input
-                          type="checkbox"
-                          id={channel.replace(/\s+/g, '-').toLowerCase()}
-                          className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
-                          defaultChecked={channel === "Email" || channel === "In-app"}
-                        />
-                        <Label htmlFor={channel.replace(/\s+/g, '-').toLowerCase()}>{channel}</Label>
+                      <Switch defaultChecked />
+                    </div>
+                    <Separator />
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium">Push Notifications</h4>
+                        <p className="text-sm text-muted-foreground">Receive push notifications on this device</p>
                       </div>
-                    ))}
+                      <Switch defaultChecked />
+                    </div>
+                    <Separator />
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium">Workout Reminders</h4>
+                        <p className="text-sm text-muted-foreground">Get reminded about upcoming scheduled workouts</p>
+                      </div>
+                      <Switch defaultChecked />
+                    </div>
+                    <Separator />
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium">Data Privacy</h4>
+                        <p className="text-sm text-muted-foreground">Allow sharing anonymized fitness data for improvements</p>
+                      </div>
+                      <Switch />
+                    </div>
                   </div>
-                </div>
-              </div>
-              
-              <Button 
-                className="mt-6"
-                onClick={() => {
-                  toast({
-                    title: "Notification settings updated",
-                    description: "Your notification preferences have been saved."
-                  });
-                }}
-              >
-                Save Notification Preferences
-              </Button>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+                </CardContent>
+                <CardFooter className="flex justify-between">
+                  <Button variant="outline">Reset All Settings</Button>
+                  <Button onClick={() => {
+                    toast({
+                      title: "Settings saved",
+                      description: "Your account settings have been updated."
+                    });
+                  }}>Save Settings</Button>
+                </CardFooter>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        </div>
+      </div>
     </div>
   );
-};
-
-export default Profile;
+}
