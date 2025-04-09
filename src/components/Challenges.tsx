@@ -5,6 +5,16 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Award, Trophy, Target, Users, Plus, CheckCircle } from "lucide-react";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { launchConfetti } from "@/utils/confettiUtil";
+import { toast } from "@/components/ui/use-toast";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 interface Challenge {
   id: string;
@@ -17,12 +27,13 @@ interface Challenge {
   deadline?: string;
   participants?: number;
   completed: boolean;
+  joined?: boolean;
 }
 
 const Challenges = () => {
   const [filter, setFilter] = useState<string>("all");
-  
-  const challenges: Challenge[] = [
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [challenges, setChallenges] = useState<Challenge[]>([
     {
       id: "1",
       title: "Morning Steps",
@@ -33,6 +44,7 @@ const Challenges = () => {
       unit: "steps",
       deadline: "Today, 8:00 AM",
       completed: false,
+      joined: false,
     },
     {
       id: "2",
@@ -45,6 +57,7 @@ const Challenges = () => {
       deadline: "Sunday",
       participants: 8,
       completed: false,
+      joined: false,
     },
     {
       id: "3",
@@ -56,6 +69,7 @@ const Challenges = () => {
       unit: "cal",
       deadline: "Today",
       completed: true,
+      joined: true,
     },
     {
       id: "4",
@@ -68,14 +82,48 @@ const Challenges = () => {
       deadline: "3 days left",
       participants: 12,
       completed: false,
+      joined: false,
     },
-  ];
+  ]);
   
   const filteredChallenges = filter === "all" 
     ? challenges 
     : filter === "completed" 
       ? challenges.filter(c => c.completed)
       : challenges.filter(c => !c.completed);
+
+  const handleJoinChallenge = (id: string) => {
+    setChallenges(challenges.map(challenge => 
+      challenge.id === id 
+        ? { ...challenge, joined: true } 
+        : challenge
+    ));
+    
+    launchConfetti({
+      particleCount: 80,
+      spread: 60,
+      origin: { y: 0.6 }
+    });
+    
+    toast({
+      title: "Challenge Joined!",
+      description: "You've successfully joined the challenge. Good luck!",
+    });
+  };
+  
+  const handleCreateChallenge = () => {
+    setIsCreateDialogOpen(true);
+  };
+  
+  const handleCreateChallengeSubmit = () => {
+    // In a real app, this would create a new challenge based on form data
+    setIsCreateDialogOpen(false);
+    
+    toast({
+      title: "Challenge Created",
+      description: "Your new challenge has been created successfully.",
+    });
+  };
 
   return (
     <Card className="shadow">
@@ -98,7 +146,7 @@ const Challenges = () => {
             <ToggleGroupItem value="completed" className="text-xs">Completed</ToggleGroupItem>
           </ToggleGroup>
           
-          <Button size="sm" variant="outline" className="h-8">
+          <Button size="sm" variant="outline" className="h-8" onClick={handleCreateChallenge}>
             <Plus className="h-3.5 w-3.5 mr-1" /> New Challenge
           </Button>
         </div>
@@ -147,6 +195,25 @@ const Challenges = () => {
                       : "bg-gray-100 [&>div]:bg-blue-500"
                   }`}
                 />
+                
+                <div className="mt-3 flex justify-end">
+                  {!challenge.completed && (
+                    challenge.joined ? (
+                      <Button size="sm" variant="outline" className="h-7 text-xs bg-green-50 text-green-600 border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800">
+                        <CheckCircle className="h-3 w-3 mr-1" /> Joined
+                      </Button>
+                    ) : (
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        className="h-7 text-xs"
+                        onClick={() => handleJoinChallenge(challenge.id)}
+                      >
+                        Join Challenge
+                      </Button>
+                    )
+                  )}
+                </div>
               </div>
             </div>
           ))}
@@ -156,12 +223,72 @@ const Challenges = () => {
           <div className="text-center py-8">
             <Trophy className="mx-auto h-10 w-10 text-muted-foreground/50" />
             <p className="mt-2 text-muted-foreground">No challenges found</p>
-            <Button variant="outline" size="sm" className="mt-4">
+            <Button variant="outline" size="sm" className="mt-4" onClick={handleCreateChallenge}>
               <Plus className="h-3.5 w-3.5 mr-1" /> Create Challenge
             </Button>
           </div>
         )}
       </CardContent>
+      
+      {/* Create Challenge Dialog */}
+      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+        <DialogContent className="sm:max-w-md p-6 sm:p-6">
+          <DialogHeader className="mb-4">
+            <DialogTitle>Create New Challenge</DialogTitle>
+            <DialogDescription>
+              Design a new fitness challenge for yourself or to share with others.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-2">
+            <div className="grid gap-2">
+              <Label htmlFor="challenge-title">Challenge Name</Label>
+              <Input id="challenge-title" placeholder="Enter challenge name" />
+            </div>
+            
+            <div className="grid gap-2">
+              <Label htmlFor="challenge-description">Description</Label>
+              <Input id="challenge-description" placeholder="Describe your challenge" />
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="challenge-goal">Goal</Label>
+                <Input id="challenge-goal" type="number" placeholder="Goal amount" />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="challenge-unit">Unit</Label>
+                <Input id="challenge-unit" placeholder="e.g., steps, km, calories" />
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label>Challenge Type</Label>
+                <ToggleGroup type="single" defaultValue="daily" className="justify-start">
+                  <ToggleGroupItem value="daily" className="text-xs">Daily</ToggleGroupItem>
+                  <ToggleGroupItem value="weekly" className="text-xs">Weekly</ToggleGroupItem>
+                  <ToggleGroupItem value="custom" className="text-xs">Custom</ToggleGroupItem>
+                </ToggleGroup>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="challenge-deadline">Deadline</Label>
+                <Input id="challenge-deadline" placeholder="e.g., 7 days" />
+              </div>
+            </div>
+          </div>
+          
+          <DialogFooter className="mt-4">
+            <Button 
+              type="button"
+              variant="default"
+              onClick={handleCreateChallengeSubmit}
+            >
+              Create Challenge
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 };

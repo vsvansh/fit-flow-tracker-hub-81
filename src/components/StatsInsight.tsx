@@ -3,13 +3,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getWeeklyStats, getStreakCount } from "@/utils/fitnessData";
 import { BarChart, Bar, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts";
 import { Award, TrendingUp, Zap, BarChart as BarChartIcon } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { launchConfetti } from "@/utils/confettiUtil";
 
 const StatsInsight = () => {
   const weeklyStats = getWeeklyStats();
   const streakCount = getStreakCount();
   const [activeBar, setActiveBar] = useState<string | null>(null);
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   // Find best performing day based on steps
   const getBestDay = () => {
@@ -41,8 +42,9 @@ const StatsInsight = () => {
     fill: "#10B981"
   }];
 
-  const handleBarHover = (name: string) => {
+  const handleBarHover = (name: string, index: number) => {
     setActiveBar(name);
+    setHoveredIndex(index);
   };
 
   const handleBarClick = (name: string) => {
@@ -52,6 +54,21 @@ const StatsInsight = () => {
       spread: 50,
       origin: { y: 0.5 }
     });
+  };
+  
+  const customBarLabel = ({ x, y, width, height, value, index }: any) => {
+    return (
+      <text 
+        x={x + width / 2} 
+        y={y - 8} 
+        fill={hoveredIndex === index ? "#000" : "#666"}
+        textAnchor="middle" 
+        dominantBaseline="middle"
+        className="text-xs font-medium"
+      >
+        {value}
+      </text>
+    );
   };
 
   return (
@@ -67,7 +84,7 @@ const StatsInsight = () => {
           <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg transform transition-all duration-300 hover:scale-105 hover:shadow-md">
             <div className="flex items-center">
               <Award className="h-5 w-5 text-blue-500 mr-2" />
-              <span className="text-sm font-medium text-blue-600">Streak</span>
+              <span className="text-sm font-medium text-blue-600 dark:text-blue-400">Streak</span>
             </div>
             <p className="text-2xl font-bold mt-1 text-slate-950 dark:text-slate-100">{streakCount} days</p>
             <p className="text-xs text-gray-500 dark:text-gray-400">Goal achievement</p>
@@ -75,7 +92,7 @@ const StatsInsight = () => {
           <div className="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg transform transition-all duration-300 hover:scale-105 hover:shadow-md">
             <div className="flex items-center">
               <TrendingUp className="h-5 w-5 text-green-500 mr-2" />
-              <span className="text-sm font-medium text-green-500">Best Day</span>
+              <span className="text-sm font-medium text-green-500 dark:text-green-400">Best Day</span>
             </div>
             <p className="text-2xl font-bold mt-1 text-slate-950 dark:text-slate-100">{getBestDay()}</p>
             <p className="text-xs text-gray-500 dark:text-gray-400">Highest steps</p>
@@ -83,7 +100,7 @@ const StatsInsight = () => {
           <div className="bg-orange-50 dark:bg-orange-900/20 p-3 rounded-lg transform transition-all duration-300 hover:scale-105 hover:shadow-md">
             <div className="flex items-center">
               <Zap className="h-5 w-5 text-orange-500 mr-2" />
-              <span className="text-sm font-medium text-orange-500">Weekly Avg</span>
+              <span className="text-sm font-medium text-orange-500 dark:text-orange-400">Weekly Avg</span>
             </div>
             <p className="text-2xl font-bold mt-1 text-slate-950 dark:text-slate-100">{weeklyStats.averageSteps}</p>
             <p className="text-xs text-gray-500 dark:text-gray-400">Daily steps</p>
@@ -95,37 +112,49 @@ const StatsInsight = () => {
             <BarChart 
               data={performanceData} 
               margin={{
-                top: 5,
+                top: 25,
                 right: 20,
                 left: 0,
                 bottom: 5
               }}
-              onMouseLeave={() => setActiveBar(null)}
+              onMouseLeave={() => {
+                setActiveBar(null);
+                setHoveredIndex(null);
+              }}
             >
-              <XAxis dataKey="name" />
+              <XAxis dataKey="name" stroke="currentColor" />
               <YAxis hide />
               <Tooltip 
                 formatter={(value, name) => [value, `${name} ${name === 'Distance' ? '(km)' : ''}`]} 
                 labelFormatter={() => 'Average'} 
                 cursor={{fill: 'transparent'}}
+                contentStyle={{
+                  borderRadius: "0.5rem", 
+                  border: "none", 
+                  boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)",
+                  backgroundColor: "var(--background)",
+                  color: "var(--foreground)"
+                }}
               />
               <Bar 
                 dataKey="current" 
                 fill="#3B82F6"
                 radius={[4, 4, 0, 0]} 
-                className={`transition-transform duration-300`}
-                onMouseEnter={(data) => handleBarHover(data.name)}
+                className="transition-all duration-300"
+                label={customBarLabel}
+                onMouseEnter={(data, index) => handleBarHover(data.name, index)}
                 onClick={(data) => handleBarClick(data.name)}
-                style={{
-                  filter: activeBar ? 'drop-shadow(0 0 6px rgba(59, 130, 246, 0.4))' : 'none',
-                  transform: `translateY(${activeBar ? -5 : 0}px)`
-                }}
+                style={(entry, index) => ({
+                  filter: hoveredIndex === index ? 'drop-shadow(0 0 6px rgba(59, 130, 246, 0.4))' : 'none',
+                  transform: `translateY(${hoveredIndex === index ? -5 : 0}px)`,
+                  fill: hoveredIndex === index ? '#60a5fa' : entry.fill
+                })}
               />
               <Bar 
                 dataKey="target" 
+                className="dark:fill-gray-700"
                 fill="#E5E7EB" 
                 radius={[4, 4, 0, 0]}
-                className="dark:fill-gray-700"
               />
             </BarChart>
           </ResponsiveContainer>

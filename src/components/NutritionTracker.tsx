@@ -1,5 +1,4 @@
-
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { 
   Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter 
 } from "@/components/ui/card";
@@ -9,14 +8,25 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Slider } from "@/components/ui/slider";
 import { 
   Utensils, Coffee, Salad, Pizza, Apple, Droplet, 
-  Search, Clock, BarChart3, Mic, Plus, QrCode 
+  Search, Clock, BarChart3, Mic, Plus, QrCode, X, Camera, Settings, Check
 } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
+import { useNavigate } from "react-router-dom";
 import BackToHome from "@/components/BackToHome";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog";
+import { launchConfetti } from "@/utils/confettiUtil";
 
-// Sample food database with corrected typing
 const sampleFoods = [
   { id: 1, name: "Oatmeal", calories: 150, carbs: 27, protein: 5, fat: 2.5, category: "breakfast" as const },
   { id: 2, name: "Scrambled Eggs", calories: 140, carbs: 1, protein: 12, fat: 9, category: "breakfast" as const },
@@ -29,7 +39,6 @@ const sampleFoods = [
   { id: 9, name: "Mixed Nuts", calories: 170, carbs: 6, protein: 5, fat: 14, category: "snack" as const },
 ];
 
-// Interface for food items
 interface FoodItem {
   id: number;
   name: string;
@@ -41,7 +50,6 @@ interface FoodItem {
   quantity?: number;
 }
 
-// Interface for a daily food log
 interface DailyLog {
   breakfast: FoodItem[];
   lunch: FoodItem[];
@@ -60,7 +68,14 @@ const NutritionTracker = () => {
     snack: []
   });
   
-  // Daily targets
+  const [isBarcodeScannerOpen, setIsBarcodeScannerOpen] = useState(false);
+  const [isVoiceInputActive, setIsVoiceInputActive] = useState(false);
+  const [isWaterGoalDialogOpen, setIsWaterGoalDialogOpen] = useState(false);
+  const [waterGoal, setWaterGoal] = useState(8);
+  const [tempWaterGoal, setTempWaterGoal] = useState(8);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const navigate = useNavigate();
+  
   const dailyCalorieTarget = 2000;
   const dailyCarbsTarget = 250; // grams
   const dailyProteinTarget = 120; // grams
@@ -68,7 +83,6 @@ const NutritionTracker = () => {
   const dailyWaterTarget = 8; // glasses
   const [waterIntake, setWaterIntake] = useState(3);
   
-  // Calculate current totals
   const calculateTotalNutrients = () => {
     let totalCalories = 0;
     let totalCarbs = 0;
@@ -90,7 +104,6 @@ const NutritionTracker = () => {
   
   const { totalCalories, totalCarbs, totalProtein, totalFat } = calculateTotalNutrients();
   
-  // Search foods from database
   const searchFoods = () => {
     if (searchTerm.trim() === "") return [];
     
@@ -99,17 +112,14 @@ const NutritionTracker = () => {
     );
   };
   
-  // Add food to daily log
   const addFoodToLog = (food: FoodItem) => {
     const updatedLog = {...dailyLog};
     const existingItemIndex = updatedLog[selectedCategory].findIndex(item => item.id === food.id);
     
     if (existingItemIndex >= 0) {
-      // Increment quantity if already exists
       updatedLog[selectedCategory][existingItemIndex].quantity = 
         (updatedLog[selectedCategory][existingItemIndex].quantity || 1) + 1;
     } else {
-      // Add new item with quantity = 1
       updatedLog[selectedCategory].push({...food, quantity: 1});
     }
     
@@ -123,7 +133,6 @@ const NutritionTracker = () => {
     setSearchTerm("");
   };
   
-  // Remove food from daily log
   const removeFoodFromLog = (category: "breakfast" | "lunch" | "dinner" | "snack", foodId: number) => {
     const updatedLog = {...dailyLog};
     updatedLog[category] = updatedLog[category].filter(item => item.id !== foodId);
@@ -136,35 +145,82 @@ const NutritionTracker = () => {
     });
   };
   
-  // Simulate barcode scanning
   const handleBarcodeScanner = () => {
-    toast({
-      title: "Barcode Scanner",
-      description: "Scanning for food product... (Feature simulation)",
-    });
+    setIsBarcodeScannerOpen(true);
     
-    // Simulate finding a product after scanning
     setTimeout(() => {
-      const randomFood = sampleFoods[Math.floor(Math.random() * sampleFoods.length)];
-      addFoodToLog(randomFood);
+      toast({
+        title: "Barcode Detected",
+        description: "Scanning product...",
+      });
+      
+      setTimeout(() => {
+        setIsBarcodeScannerOpen(false);
+        const randomFood = sampleFoods[Math.floor(Math.random() * sampleFoods.length)];
+        addFoodToLog(randomFood);
+      }, 2000);
     }, 1500);
   };
   
-  // Simulate voice input
+  const handleCloseBarcodeScanner = () => {
+    setIsBarcodeScannerOpen(false);
+    
+    if (videoRef.current && videoRef.current.srcObject) {
+      const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
+      tracks.forEach(track => track.stop());
+    }
+  };
+  
   const handleVoiceInput = () => {
+    setIsVoiceInputActive(true);
+    
     toast({
       title: "Voice Input Active",
-      description: "Listening for food description... (Feature simulation)",
+      description: "Listening for food description...",
     });
     
-    // Simulate voice recognition result
     setTimeout(() => {
+      setIsVoiceInputActive(false);
       const randomFood = sampleFoods[Math.floor(Math.random() * sampleFoods.length)];
       setSearchTerm(randomFood.name);
-    }, 1500);
+      
+      toast({
+        title: "Voice Recognized",
+        description: `Heard: "${randomFood.name}"`,
+      });
+    }, 2000);
   };
   
-  // Get meal icon based on category
+  const handleOpenWaterGoalDialog = () => {
+    setTempWaterGoal(waterGoal);
+    setIsWaterGoalDialogOpen(true);
+  };
+  
+  const handleSaveWaterGoal = () => {
+    setWaterGoal(tempWaterGoal);
+    setDailyWaterTarget(tempWaterGoal);
+    setIsWaterGoalDialogOpen(false);
+    
+    toast({
+      title: "Water Goal Updated",
+      description: `Your daily water goal is now set to ${tempWaterGoal} glasses.`,
+    });
+  };
+  
+  const handleViewDetailedReport = () => {
+    navigate("/nutrition/reports");
+    
+    toast({
+      title: "Detailed Reports",
+      description: "This feature will be available in the next update.",
+    });
+  };
+  
+  const handleAddNewFood = () => {
+    setSearchTerm("a");
+    setActiveTab("log");
+  };
+
   const getMealIcon = (category: string) => {
     switch (category) {
       case "breakfast": return <Coffee className="h-5 w-5 text-orange-500" />;
@@ -175,7 +231,6 @@ const NutritionTracker = () => {
     }
   };
 
-  // Water intake handlers
   const addWaterGlass = () => {
     if (waterIntake < dailyWaterTarget) {
       setWaterIntake(prev => prev + 1);
@@ -195,7 +250,7 @@ const NutritionTracker = () => {
       });
     }
   };
-  
+
   return (
     <div className="container py-8">
       <BackToHome />
@@ -250,10 +305,22 @@ const NutritionTracker = () => {
                         onChange={(e) => setSearchTerm(e.target.value)}
                       />
                     </div>
-                    <Button variant="outline" size="icon" onClick={handleBarcodeScanner} title="Scan Barcode">
+                    <Button 
+                      variant="outline" 
+                      size="icon" 
+                      onClick={handleBarcodeScanner} 
+                      title="Scan Barcode"
+                      className={isBarcodeScannerOpen ? "bg-blue-100 text-blue-600" : ""}
+                    >
                       <QrCode className="h-5 w-5" />
                     </Button>
-                    <Button variant="outline" size="icon" onClick={handleVoiceInput} title="Voice Input">
+                    <Button 
+                      variant="outline" 
+                      size="icon" 
+                      onClick={handleVoiceInput} 
+                      title="Voice Input"
+                      className={isVoiceInputActive ? "bg-red-100 text-red-600 animate-pulse" : ""}
+                    >
                       <Mic className="h-5 w-5" />
                     </Button>
                   </div>
@@ -508,10 +575,17 @@ const NutritionTracker = () => {
             </CardContent>
             
             <CardFooter className="flex justify-between border-t pt-4">
-              <Button variant="outline" className="text-sm">
+              <Button 
+                variant="outline" 
+                className="text-sm"
+                onClick={handleViewDetailedReport}
+              >
                 View Detailed Reports
               </Button>
-              <Button className="bg-green-600 hover:bg-green-700 text-white" onClick={() => setSearchTerm("a")}>
+              <Button 
+                className="bg-green-600 hover:bg-green-700 text-white"
+                onClick={handleAddNewFood}
+              >
                 Add New Food
               </Button>
             </CardFooter>
@@ -521,20 +595,34 @@ const NutritionTracker = () => {
         <div>
           <Card className="shadow">
             <CardHeader>
-              <CardTitle className="text-lg">Water Intake</CardTitle>
-              <CardDescription>Track your daily hydration</CardDescription>
+              <div className="flex justify-between items-center">
+                <div>
+                  <CardTitle className="text-lg">Water Intake</CardTitle>
+                  <CardDescription>Track your daily hydration</CardDescription>
+                </div>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="h-8 w-8 p-0 rounded-full"
+                  onClick={handleOpenWaterGoalDialog}
+                >
+                  <Settings className="h-4 w-4" />
+                </Button>
+              </div>
             </CardHeader>
             <CardContent className="flex flex-col items-center">
               <div className="relative w-36 h-36 mb-4">
                 <div className="absolute inset-0 rounded-full border-4 border-gray-100 dark:border-gray-800"></div>
                 <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100">
-                  <path
-                    d="M 50,50 m 0,-46 a 46,46 0 1 1 0,92 a 46,46 0 1 1 0,-92"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="8"
-                    strokeDasharray={`${(waterIntake / dailyWaterTarget) * 289} 289`}
-                    strokeLinecap="round"
+                  <circle 
+                    cx="50" 
+                    cy="50" 
+                    r="46" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    strokeWidth="8" 
+                    strokeDasharray={`${(waterIntake / dailyWaterTarget) * 289} 289`} 
+                    strokeLinecap="round" 
                     className="text-blue-500 transform -rotate-90"
                   />
                 </svg>
@@ -615,6 +703,90 @@ const NutritionTracker = () => {
           </Card>
         </div>
       </div>
+
+      <Dialog open={isBarcodeScannerOpen} onOpenChange={setIsBarcodeScannerOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Scan Barcode</DialogTitle>
+            <DialogDescription>
+              Hold a barcode in front of your camera.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="relative aspect-video border rounded-md overflow-hidden bg-black">
+            <video 
+              ref={videoRef} 
+              className="w-full h-full object-cover"
+              autoPlay 
+              playsInline
+            ></video>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-2/3 h-1/4 border-2 border-red-500 rounded-lg animate-pulse"></div>
+            </div>
+          </div>
+          
+          <DialogFooter className="sm:justify-between">
+            <DialogClose asChild>
+              <Button 
+                type="button" 
+                variant="secondary" 
+                onClick={handleCloseBarcodeScanner}
+              >
+                Cancel
+              </Button>
+            </DialogClose>
+            <div className="text-sm text-gray-500 dark:text-gray-400">
+              Scanning...
+            </div>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isWaterGoalDialogOpen} onOpenChange={setIsWaterGoalDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Set Daily Water Goal</DialogTitle>
+            <DialogDescription>
+              Adjust your daily water intake goal.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="py-6 space-y-6">
+            <div className="text-center">
+              <p className="text-6xl font-bold text-blue-500">{tempWaterGoal}</p>
+              <p className="text-sm text-gray-500 mt-1">glasses per day</p>
+            </div>
+            
+            <div className="px-4">
+              <Slider
+                defaultValue={[tempWaterGoal]}
+                max={16}
+                min={1}
+                step={1}
+                onValueChange={(value) => setTempWaterGoal(value[0])}
+              />
+              <div className="flex justify-between mt-2 text-xs text-gray-500">
+                <span>1</span>
+                <span>4</span>
+                <span>8</span>
+                <span>12</span>
+                <span>16</span>
+              </div>
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button 
+              type="button" 
+              variant="default" 
+              className="bg-blue-600 hover:bg-blue-700"
+              onClick={handleSaveWaterGoal}
+            >
+              Save Goal
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

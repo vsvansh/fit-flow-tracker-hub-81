@@ -23,6 +23,7 @@ import SocialFeed from "@/components/SocialFeed";
 import AIRecommendations from "@/components/AIRecommendations";
 import WaterTracker from "@/components/WaterTracker";
 import { motion } from "framer-motion";
+import { launchConfetti } from "@/utils/confetti";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -77,7 +78,23 @@ const Index = () => {
     });
   }, []);
 
+  const handleJoinChallenge = () => {
+    launchConfetti({
+      particleCount: 100,
+      spread: 60,
+      origin: { y: 0.6 }
+    });
+    
+    toast({
+      title: "Challenge Joined!",
+      description: "You've successfully joined the challenge. Good luck!",
+    });
+  };
   
+  const handleViewDetailedReport = () => {
+    navigate("/activity");
+  };
+
   return (
     <div className="min-h-[calc(100vh-64px)] bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 transition-all duration-300">
       <div className="container mx-auto px-4 py-6 max-w-7xl">
@@ -357,7 +374,7 @@ const Index = () => {
                   <Button 
                     variant="outline" 
                     className="w-full"
-                    onClick={() => navigate("/activity")}
+                    onClick={handleViewDetailedReport}
                   >
                     View Detailed Report
                   </Button>
@@ -402,7 +419,12 @@ const Index = () => {
                           <h3 className="font-medium mb-1">{event.title}</h3>
                           <p className="text-xs text-blue-600 dark:text-blue-400 mb-1">{event.date}</p>
                           <p className="text-xs text-gray-600 dark:text-gray-300">{event.desc}</p>
-                          <Button variant="outline" size="sm" className="mt-2 h-7 text-xs">
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="mt-2 h-7 text-xs"
+                            onClick={handleJoinChallenge}
+                          >
                             Join Now
                           </Button>
                         </div>

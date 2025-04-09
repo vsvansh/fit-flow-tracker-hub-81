@@ -1,512 +1,544 @@
+
 import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Slider } from "@/components/ui/slider";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
-import { Bell, Globe, Lock, Smartphone, Volume2, Droplet, Moon, Zap, ArrowLeft } from "lucide-react";
-import { toast } from "@/components/ui/use-toast";
-import { Link } from "react-router-dom";
-import { useTheme } from "@/providers/ThemeProvider";
+import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Activity } from "lucide-react";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { ArrowLeft, Home, BellDot, Lock, UserCog, Monitor, Moon, SunMedium, Languages, Bell, Globe, Eye } from "lucide-react";
+import { toast } from "@/components/ui/use-toast";
+import { launchConfetti } from "@/utils/confettiUtil";
 
 const Settings = () => {
-  const { theme, setTheme } = useTheme();
-  const [units, setUnits] = useState({
-    distance: "km",
-    weight: "kg",
-    height: "cm",
+  const navigate = useNavigate();
+  const [isUpdating, setIsUpdating] = useState(false);
+  
+  // Example settings state - in a real app, these would be fetched from your backend
+  const [settings, setSettings] = useState({
+    // Notifications
+    emailNotifications: true,
+    pushNotifications: true,
+    activityReminders: true,
+    challengeNotifications: true,
+    
+    // Privacy
+    profileVisibility: "public",
+    shareActivity: true,
+    showInLeaderboards: true,
+    dataSharing: "minimal",
+    
+    // Preferences
+    theme: "system",
+    language: "en",
+    units: "metric",
+    dateFormat: "mm/dd/yyyy",
+    
+    // Accessibility
+    fontScale: [1],
+    reduceMotion: false,
+    highContrast: false,
+    screenReader: false
   });
   
-  const handleUnitChange = (type: keyof typeof units, value: string) => {
-    setUnits(prev => ({
-      ...prev,
-      [type]: value
-    }));
+  const saveSettings = () => {
+    setIsUpdating(true);
     
-    toast({
-      title: `${type.charAt(0).toUpperCase() + type.slice(1)} unit updated`,
-      description: `Your measurement preference has been changed to ${value}`,
+    // Simulate an API request
+    setTimeout(() => {
+      setIsUpdating(false);
+      
+      toast({
+        title: "Settings saved",
+        description: "Your settings have been updated successfully.",
+      });
+      
+      // Show confetti when settings are saved
+      launchConfetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 }
+      });
+    }, 800);
+  };
+  
+  // Handle settings changes
+  const handleSwitchChange = (field: string) => {
+    setSettings({
+      ...settings,
+      [field]: !settings[field as keyof typeof settings]
     });
   };
   
-  const handleToggle = (setting: string, value: boolean) => {
-    toast({
-      title: `${setting} ${value ? 'enabled' : 'disabled'}`,
-      description: `You have ${value ? 'enabled' : 'disabled'} ${setting.toLowerCase()}`,
+  const handleRadioChange = (field: string, value: string) => {
+    setSettings({
+      ...settings,
+      [field]: value
     });
   };
-
+  
+  const handleSelectChange = (field: string, value: string) => {
+    setSettings({
+      ...settings,
+      [field]: value
+    });
+  };
+  
+  const handleSliderChange = (field: string, value: number[]) => {
+    setSettings({
+      ...settings,
+      [field]: value
+    });
+  };
+  
   return (
-    <div className="container mx-auto px-4 py-6">
-      <div className="flex items-center mb-6">
-        <Link to="/" className="mr-4">
-          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+    <div className="min-h-[calc(100vh-64px)] bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 transition-all duration-300">
+      <div className="container px-4 py-8 mx-auto max-w-7xl">
+        <div className="flex items-center mb-6 space-x-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="gap-1"
+            onClick={() => navigate("/")}
+          >
             <ArrowLeft className="h-4 w-4" />
+            <span>Back to Dashboard</span>
           </Button>
-        </Link>
-        <h1 className="text-3xl font-bold">Settings</h1>
+          <span className="text-gray-500 dark:text-gray-400">/</span>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="gap-1"
+            onClick={() => navigate("/")}
+          >
+            <Home className="h-4 w-4" />
+          </Button>
+          <span className="text-gray-500 dark:text-gray-400">/</span>
+          <span className="text-gray-600 dark:text-gray-300">Settings</span>
+        </div>
+        
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <h1 className="text-3xl font-bold mt-4 mb-8 text-center gradient-text">
+            Account Settings
+          </h1>
+        </motion.div>
+        
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="grid grid-cols-1 md:grid-cols-6 gap-8"
+        >
+          <Card className="md:col-span-6">
+            <Tabs defaultValue="notifications" className="w-full">
+              <TabsList className="grid grid-cols-4">
+                <TabsTrigger value="notifications">
+                  <Bell className="mr-2 h-4 w-4" />
+                  <span>Notifications</span>
+                </TabsTrigger>
+                <TabsTrigger value="privacy">
+                  <Lock className="mr-2 h-4 w-4" />
+                  <span>Privacy</span>
+                </TabsTrigger>
+                <TabsTrigger value="preferences">
+                  <UserCog className="mr-2 h-4 w-4" />
+                  <span>Preferences</span>
+                </TabsTrigger>
+                <TabsTrigger value="accessibility">
+                  <Eye className="mr-2 h-4 w-4" />
+                  <span>Accessibility</span>
+                </TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="notifications" className="p-4">
+                <section className="space-y-6">
+                  <h2 className="text-xl font-semibold flex items-center mb-4">
+                    <BellDot className="mr-2 h-5 w-5 text-blue-500" />
+                    Notification Settings
+                  </h2>
+                  
+                  <div className="grid gap-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Email Notifications</CardTitle>
+                        <CardDescription>Manage your email notification preferences</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <Label htmlFor="email-notifications" className="flex-1">
+                            Receive email notifications
+                          </Label>
+                          <Switch 
+                            id="email-notifications" 
+                            checked={settings.emailNotifications} 
+                            onCheckedChange={() => handleSwitchChange('emailNotifications')}
+                          />
+                        </div>
+                        
+                        {settings.emailNotifications && (
+                          <Accordion type="single" collapsible className="w-full">
+                            <AccordionItem value="email-settings">
+                              <AccordionTrigger>Email settings</AccordionTrigger>
+                              <AccordionContent>
+                                <div className="space-y-2">
+                                  <div className="space-y-1">
+                                    <Label htmlFor="email-frequency">Frequency</Label>
+                                    <Select defaultValue="daily">
+                                      <SelectTrigger id="email-frequency">
+                                        <SelectValue placeholder="Select frequency" />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        <SelectItem value="immediate">Immediate</SelectItem>
+                                        <SelectItem value="daily">Daily digest</SelectItem>
+                                        <SelectItem value="weekly">Weekly summary</SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                  </div>
+                                </div>
+                              </AccordionContent>
+                            </AccordionItem>
+                          </Accordion>
+                        )}
+                      </CardContent>
+                    </Card>
+                    
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Push Notifications</CardTitle>
+                        <CardDescription>Control push notifications to your devices</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <Label htmlFor="push-notifications" className="flex-1">
+                            Enable push notifications
+                          </Label>
+                          <Switch 
+                            id="push-notifications" 
+                            checked={settings.pushNotifications} 
+                            onCheckedChange={() => handleSwitchChange('pushNotifications')}
+                          />
+                        </div>
+                        
+                        <div className="flex items-center justify-between">
+                          <Label htmlFor="activity-reminders" className="flex-1">
+                            Activity reminders
+                          </Label>
+                          <Switch 
+                            id="activity-reminders" 
+                            checked={settings.activityReminders} 
+                            onCheckedChange={() => handleSwitchChange('activityReminders')}
+                          />
+                        </div>
+                        
+                        <div className="flex items-center justify-between">
+                          <Label htmlFor="challenge-notifications" className="flex-1">
+                            Challenge updates
+                          </Label>
+                          <Switch 
+                            id="challenge-notifications" 
+                            checked={settings.challengeNotifications} 
+                            onCheckedChange={() => handleSwitchChange('challengeNotifications')}
+                          />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </section>
+              </TabsContent>
+              
+              <TabsContent value="privacy" className="p-4">
+                <section className="space-y-6">
+                  <h2 className="text-xl font-semibold flex items-center mb-4">
+                    <Lock className="mr-2 h-5 w-5 text-blue-500" />
+                    Privacy Settings
+                  </h2>
+                  
+                  <div className="grid gap-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Profile Visibility</CardTitle>
+                        <CardDescription>Control who can see your profile</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <RadioGroup 
+                          defaultValue={settings.profileVisibility}
+                          onValueChange={(value) => handleRadioChange('profileVisibility', value)}
+                        >
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="public" id="profile-public" />
+                            <Label htmlFor="profile-public">Public - Anyone can view your profile</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="friends" id="profile-friends" />
+                            <Label htmlFor="profile-friends">Friends Only - Only your connections can view</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="private" id="profile-private" />
+                            <Label htmlFor="profile-private">Private - Only you can view your profile</Label>
+                          </div>
+                        </RadioGroup>
+                      </CardContent>
+                    </Card>
+                    
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Activity Sharing</CardTitle>
+                        <CardDescription>Control how your activity data is shared</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <Label htmlFor="share-activity" className="flex-1">
+                            Share your activity data
+                          </Label>
+                          <Switch 
+                            id="share-activity" 
+                            checked={settings.shareActivity} 
+                            onCheckedChange={() => handleSwitchChange('shareActivity')}
+                          />
+                        </div>
+                        
+                        <div className="flex items-center justify-between">
+                          <Label htmlFor="show-leaderboards" className="flex-1">
+                            Show on leaderboards
+                          </Label>
+                          <Switch 
+                            id="show-leaderboards" 
+                            checked={settings.showInLeaderboards} 
+                            onCheckedChange={() => handleSwitchChange('showInLeaderboards')}
+                          />
+                        </div>
+                        
+                        <div className="space-y-1">
+                          <Label htmlFor="data-sharing">Data sharing level</Label>
+                          <Select 
+                            defaultValue={settings.dataSharing}
+                            onValueChange={(value) => handleSelectChange('dataSharing', value)}
+                          >
+                            <SelectTrigger id="data-sharing">
+                              <SelectValue placeholder="Select data sharing level" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="minimal">Minimal - Basic activity metrics only</SelectItem>
+                              <SelectItem value="standard">Standard - Most activity data</SelectItem>
+                              <SelectItem value="detailed">Detailed - All activity and fitness data</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </section>
+              </TabsContent>
+              
+              <TabsContent value="preferences" className="p-4">
+                <section className="space-y-6">
+                  <h2 className="text-xl font-semibold flex items-center mb-4">
+                    <UserCog className="mr-2 h-5 w-5 text-blue-500" />
+                    Preferences
+                  </h2>
+                  
+                  <div className="grid gap-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Display Settings</CardTitle>
+                        <CardDescription>Customize your app appearance</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-1">
+                          <Label htmlFor="theme-selector">Theme</Label>
+                          <div className="grid grid-cols-3 gap-2">
+                            <Button 
+                              variant={settings.theme === "light" ? "default" : "outline"} 
+                              className="w-full justify-start"
+                              onClick={() => handleRadioChange('theme', 'light')}
+                            >
+                              <SunMedium className="mr-2 h-4 w-4" /> Light
+                            </Button>
+                            <Button 
+                              variant={settings.theme === "dark" ? "default" : "outline"} 
+                              className="w-full justify-start"
+                              onClick={() => handleRadioChange('theme', 'dark')}
+                            >
+                              <Moon className="mr-2 h-4 w-4" /> Dark
+                            </Button>
+                            <Button 
+                              variant={settings.theme === "system" ? "default" : "outline"} 
+                              className="w-full justify-start"
+                              onClick={() => handleRadioChange('theme', 'system')}
+                            >
+                              <Monitor className="mr-2 h-4 w-4" /> System
+                            </Button>
+                          </div>
+                        </div>
+                        
+                        <div className="space-y-1">
+                          <Label htmlFor="language-selector">Language</Label>
+                          <Select 
+                            defaultValue={settings.language}
+                            onValueChange={(value) => handleSelectChange('language', value)}
+                          >
+                            <SelectTrigger id="language-selector">
+                              <SelectValue placeholder="Select language" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="en">English</SelectItem>
+                              <SelectItem value="es">Español</SelectItem>
+                              <SelectItem value="fr">Français</SelectItem>
+                              <SelectItem value="de">Deutsch</SelectItem>
+                              <SelectItem value="ja">日本語</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Measurement Units</CardTitle>
+                        <CardDescription>Customize how measurements are displayed</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-1">
+                          <Label htmlFor="units-selector">Unit System</Label>
+                          <Select 
+                            defaultValue={settings.units}
+                            onValueChange={(value) => handleSelectChange('units', value)}
+                          >
+                            <SelectTrigger id="units-selector">
+                              <SelectValue placeholder="Select unit system" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="metric">Metric (km, kg)</SelectItem>
+                              <SelectItem value="imperial">Imperial (mi, lb)</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        
+                        <div className="space-y-1">
+                          <Label htmlFor="date-format">Date Format</Label>
+                          <Select 
+                            defaultValue={settings.dateFormat}
+                            onValueChange={(value) => handleSelectChange('dateFormat', value)}
+                          >
+                            <SelectTrigger id="date-format">
+                              <SelectValue placeholder="Select date format" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="mm/dd/yyyy">MM/DD/YYYY</SelectItem>
+                              <SelectItem value="dd/mm/yyyy">DD/MM/YYYY</SelectItem>
+                              <SelectItem value="yyyy/mm/dd">YYYY/MM/DD</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </section>
+              </TabsContent>
+              
+              <TabsContent value="accessibility" className="p-4">
+                <section className="space-y-6">
+                  <h2 className="text-xl font-semibold flex items-center mb-4">
+                    <Eye className="mr-2 h-5 w-5 text-blue-500" />
+                    Accessibility
+                  </h2>
+                  
+                  <div className="grid gap-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Visual Settings</CardTitle>
+                        <CardDescription>Adjust the visual presentation</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="space-y-3">
+                          <div className="flex justify-between items-center">
+                            <Label htmlFor="font-scale">Font Size</Label>
+                            <span className="text-sm text-muted-foreground">{settings.fontScale[0]}x</span>
+                          </div>
+                          <Slider
+                            id="font-scale"
+                            min={0.75}
+                            max={1.5}
+                            step={0.05}
+                            defaultValue={settings.fontScale}
+                            onValueChange={(value) => handleSliderChange('fontScale', value)}
+                          />
+                          <div className="flex justify-between text-xs text-muted-foreground">
+                            <span>Smaller</span>
+                            <span>Normal</span>
+                            <span>Larger</span>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center justify-between pt-2">
+                          <Label htmlFor="high-contrast" className="flex-1">
+                            High contrast mode
+                          </Label>
+                          <Switch 
+                            id="high-contrast" 
+                            checked={settings.highContrast} 
+                            onCheckedChange={() => handleSwitchChange('highContrast')}
+                          />
+                        </div>
+                      </CardContent>
+                    </Card>
+                    
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Motion Settings</CardTitle>
+                        <CardDescription>Adjust animations and transitions</CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <Label htmlFor="reduce-motion" className="flex-1">
+                            Reduce motion
+                          </Label>
+                          <Switch 
+                            id="reduce-motion" 
+                            checked={settings.reduceMotion} 
+                            onCheckedChange={() => handleSwitchChange('reduceMotion')}
+                          />
+                        </div>
+                        
+                        <div className="flex items-center justify-between">
+                          <Label htmlFor="screen-reader" className="flex-1">
+                            Optimize for screen readers
+                          </Label>
+                          <Switch 
+                            id="screen-reader" 
+                            checked={settings.screenReader} 
+                            onCheckedChange={() => handleSwitchChange('screenReader')}
+                          />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </section>
+              </TabsContent>
+            </Tabs>
+            
+            <div className="flex justify-end p-4 border-t">
+              <Button 
+                className="ml-auto" 
+                disabled={isUpdating}
+                onClick={saveSettings}
+              >
+                {isUpdating ? "Saving..." : "Save Changes"}
+              </Button>
+            </div>
+          </Card>
+        </motion.div>
       </div>
-      
-      <Tabs defaultValue="general" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="general">General</TabsTrigger>
-          <TabsTrigger value="notifications">Notifications</TabsTrigger>
-          <TabsTrigger value="privacy">Privacy</TabsTrigger>
-          <TabsTrigger value="connected">Connected Apps</TabsTrigger>
-          <TabsTrigger value="challenges">Challenges</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="general" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Display Settings</CardTitle>
-              <CardDescription>Customize how your dashboard looks</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <div className="flex items-center">
-                    <Moon className="h-4 w-4 mr-2 text-muted-foreground" />
-                    <span className="font-medium">Dark Mode</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground">Switch between light and dark themes</p>
-                </div>
-                <Switch 
-                  id="dark-mode" 
-                  checked={theme === "dark"}
-                  onCheckedChange={(isChecked) => {
-                    setTheme(isChecked ? "dark" : "light");
-                  }}
-                />
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <div className="flex items-center">
-                    <Zap className="h-4 w-4 mr-2 text-muted-foreground" />
-                    <span className="font-medium">Live Updates</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground">Show real-time updates on dashboard</p>
-                </div>
-                <Switch 
-                  id="live-updates" 
-                  defaultChecked 
-                  onCheckedChange={(checked) => handleToggle("Live updates", checked)}
-                />
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <div className="flex items-center">
-                    <Droplet className="h-4 w-4 mr-2 text-muted-foreground" />
-                    <span className="font-medium">Water Tracking Widget</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground">Show water intake tracker on dashboard</p>
-                </div>
-                <Switch 
-                  id="water-widget" 
-                  defaultChecked 
-                  onCheckedChange={(checked) => handleToggle("Water tracking widget", checked)}
-                />
-              </div>
-              
-              <div className="pt-4">
-                <Button onClick={() => toast({ title: "Settings saved", description: "Your display settings have been updated" })}>
-                  Save Settings
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader>
-              <CardTitle>Units Preferences</CardTitle>
-              <CardDescription>Choose your preferred measurement units</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-2">
-                <div className="font-medium">Distance</div>
-                <div className="flex space-x-2">
-                  <Button 
-                    variant={units.distance === "km" ? "default" : "outline"} 
-                    className="w-full" 
-                    onClick={() => handleUnitChange("distance", "km")}
-                  >
-                    Kilometers
-                  </Button>
-                  <Button 
-                    variant={units.distance === "mi" ? "default" : "outline"} 
-                    className="w-full"
-                    onClick={() => handleUnitChange("distance", "mi")}
-                  >
-                    Miles
-                  </Button>
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <div className="font-medium">Weight</div>
-                <div className="flex space-x-2">
-                  <Button 
-                    variant={units.weight === "kg" ? "default" : "outline"} 
-                    className="w-full"
-                    onClick={() => handleUnitChange("weight", "kg")}
-                  >
-                    Kilograms
-                  </Button>
-                  <Button 
-                    variant={units.weight === "lb" ? "default" : "outline"} 
-                    className="w-full"
-                    onClick={() => handleUnitChange("weight", "lb")}
-                  >
-                    Pounds
-                  </Button>
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <div className="font-medium">Height</div>
-                <div className="flex space-x-2">
-                  <Button 
-                    variant={units.height === "cm" ? "default" : "outline"} 
-                    className="w-full"
-                    onClick={() => handleUnitChange("height", "cm")}
-                  >
-                    Centimeters
-                  </Button>
-                  <Button 
-                    variant={units.height === "ft" ? "default" : "outline"} 
-                    className="w-full"
-                    onClick={() => handleUnitChange("height", "ft")}
-                  >
-                    Feet/Inches
-                  </Button>
-                </div>
-              </div>
-              
-              <Button onClick={() => toast({ title: "Units saved", description: "Your measurement preferences have been updated" })}>
-                Save Units
-              </Button>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="notifications" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Notification Preferences</CardTitle>
-              <CardDescription>Manage how you receive notifications</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <div className="flex items-center">
-                      <Bell className="h-4 w-4 mr-2 text-muted-foreground" />
-                      <span className="font-medium">Daily Reminders</span>
-                    </div>
-                    <p className="text-sm text-muted-foreground">Get reminders about daily goals</p>
-                  </div>
-                  <Switch 
-                    id="daily-reminders" 
-                    defaultChecked 
-                    onCheckedChange={(checked) => handleToggle("Daily reminders", checked)}
-                  />
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <div className="flex items-center">
-                      <Bell className="h-4 w-4 mr-2 text-muted-foreground" />
-                      <span className="font-medium">Challenge Invites</span>
-                    </div>
-                    <p className="text-sm text-muted-foreground">Get notified about new challenge invitations</p>
-                  </div>
-                  <Switch 
-                    id="challenge-invites" 
-                    defaultChecked 
-                    onCheckedChange={(checked) => handleToggle("Challenge invites", checked)}
-                  />
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <div className="flex items-center">
-                      <Bell className="h-4 w-4 mr-2 text-muted-foreground" />
-                      <span className="font-medium">Friend Activity</span>
-                    </div>
-                    <p className="text-sm text-muted-foreground">Get updates when friends reach milestones</p>
-                  </div>
-                  <Switch 
-                    id="friend-activity" 
-                    onCheckedChange={(checked) => handleToggle("Friend activity notifications", checked)}
-                  />
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <div className="flex items-center">
-                      <Bell className="h-4 w-4 mr-2 text-muted-foreground" />
-                      <span className="font-medium">Weekly Reports</span>
-                    </div>
-                    <p className="text-sm text-muted-foreground">Receive weekly progress summaries</p>
-                  </div>
-                  <Switch 
-                    id="weekly-reports" 
-                    defaultChecked 
-                    onCheckedChange={(checked) => handleToggle("Weekly reports", checked)}
-                  />
-                </div>
-              </div>
-              
-              <Button onClick={() => toast({ title: "Notification settings saved", description: "Your notification preferences have been updated" })}>
-                Save Preferences
-              </Button>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="privacy" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Privacy Settings</CardTitle>
-              <CardDescription>Control who can see your data</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <div className="flex items-center">
-                      <Lock className="h-4 w-4 mr-2 text-muted-foreground" />
-                      <span className="font-medium">Public Profile</span>
-                    </div>
-                    <p className="text-sm text-muted-foreground">Allow others to view your profile</p>
-                  </div>
-                  <Switch 
-                    id="public-profile"
-                    onCheckedChange={(checked) => handleToggle("Public profile", checked)}
-                  />
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <div className="flex items-center">
-                      <Lock className="h-4 w-4 mr-2 text-muted-foreground" />
-                      <span className="font-medium">Show Activity on Feed</span>
-                    </div>
-                    <p className="text-sm text-muted-foreground">Share your activity on community feeds</p>
-                  </div>
-                  <Switch 
-                    id="activity-feed" 
-                    defaultChecked 
-                    onCheckedChange={(checked) => handleToggle("Activity feed sharing", checked)}
-                  />
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <div className="flex items-center">
-                      <Lock className="h-4 w-4 mr-2 text-muted-foreground" />
-                      <span className="font-medium">Anonymous Mode</span>
-                    </div>
-                    <p className="text-sm text-muted-foreground">Participate in challenges anonymously</p>
-                  </div>
-                  <Switch 
-                    id="anonymous-mode"
-                    onCheckedChange={(checked) => handleToggle("Anonymous mode", checked)}
-                  />
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <div className="flex items-center">
-                      <Globe className="h-4 w-4 mr-2 text-muted-foreground" />
-                      <span className="font-medium">Location Sharing</span>
-                    </div>
-                    <p className="text-sm text-muted-foreground">Share your workout locations</p>
-                  </div>
-                  <Switch 
-                    id="location-sharing"
-                    onCheckedChange={(checked) => handleToggle("Location sharing", checked)}
-                  />
-                </div>
-              </div>
-              
-              <Button onClick={() => toast({ title: "Privacy settings saved", description: "Your privacy preferences have been updated" })}>
-                Save Privacy Settings
-              </Button>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader>
-              <CardTitle>Data Management</CardTitle>
-              <CardDescription>Manage your personal data</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-sm">You can download all your fitness data or delete your account permanently.</p>
-              <div className="flex space-x-4">
-                <Button 
-                  variant="outline"
-                  onClick={() => toast({
-                    title: "Data download initiated",
-                    description: "Your data will be sent to your email once ready."
-                  })}
-                >
-                  Download My Data
-                </Button>
-                <Button 
-                  variant="destructive"
-                  onClick={() => toast({
-                    title: "Account deletion requested",
-                    description: "Please check your email to confirm account deletion.",
-                    variant: "destructive"
-                  })}
-                >
-                  Delete Account
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="connected" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Connected Apps</CardTitle>
-              <CardDescription>Manage connected applications and services</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-                      <Smartphone className="h-5 w-5 text-blue-600" />
-                    </div>
-                    <div>
-                      <p className="font-medium">Google Fit</p>
-                      <p className="text-sm text-muted-foreground">Connected since May 15, 2023</p>
-                    </div>
-                  </div>
-                  <div>
-                    <Badge variant="outline" className="bg-green-50 text-green-700 hover:bg-green-50">Connected</Badge>
-                  </div>
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center">
-                      <Volume2 className="h-5 w-5 text-gray-600" />
-                    </div>
-                    <div>
-                      <p className="font-medium">Spotify</p>
-                      <p className="text-sm text-muted-foreground">Not connected</p>
-                    </div>
-                  </div>
-                  <div>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => toast({ 
-                        title: "Connecting to Spotify",
-                        description: "You'll be redirected to authorize the connection."
-                      })}
-                    >
-                      Connect
-                    </Button>
-                  </div>
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    <div className="h-10 w-10 rounded-full bg-red-100 flex items-center justify-center">
-                      <Activity className="h-5 w-5 text-red-600" />
-                    </div>
-                    <div>
-                      <p className="font-medium">Apple Health</p>
-                      <p className="text-sm text-muted-foreground">Not connected</p>
-                    </div>
-                  </div>
-                  <div>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => toast({ 
-                        title: "Connecting to Apple Health",
-                        description: "You'll be redirected to authorize the connection."
-                      })}
-                    >
-                      Connect
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="challenges" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Challenge Settings</CardTitle>
-              <CardDescription>Control how challenges work for you</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <p className="font-medium">Automatic Challenge Suggestions</p>
-                  <p className="text-sm text-muted-foreground">Get suggestions for new challenges based on your activity</p>
-                </div>
-                <Switch 
-                  id="auto-challenges" 
-                  defaultChecked 
-                  onCheckedChange={(checked) => handleToggle("Challenge suggestions", checked)}
-                />
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <p className="font-medium">Challenge Difficulty</p>
-                  <p className="text-sm text-muted-foreground">How hard should challenges be?</p>
-                </div>
-                <Select defaultValue="medium" onValueChange={(value) => {
-                  toast({
-                    title: "Challenge difficulty updated",
-                    description: `Difficulty set to ${value}`
-                  });
-                }}>
-                  <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Select difficulty" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="easy">Easy</SelectItem>
-                    <SelectItem value="medium">Medium</SelectItem>
-                    <SelectItem value="hard">Hard</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <p className="font-medium">Friends Can Challenge Me</p>
-                  <p className="text-sm text-muted-foreground">Allow friends to send you challenge invites</p>
-                </div>
-                <Switch 
-                  id="friend-challenges" 
-                  defaultChecked 
-                  onCheckedChange={(checked) => handleToggle("Friend challenges", checked)}
-                />
-              </div>
-              
-              <Button onClick={() => toast({ title: "Challenge settings saved", description: "Your challenge preferences have been updated" })}>
-                Save Challenge Settings
-              </Button>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
     </div>
   );
 };

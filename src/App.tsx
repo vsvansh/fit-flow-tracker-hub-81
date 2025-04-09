@@ -23,6 +23,7 @@ import About from "./pages/About";
 import Careers from "./pages/Careers";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Terms from "./pages/Terms";
+import AchievementsPage from "./pages/AchievementsPage";
 
 const queryClient = new QueryClient();
 
@@ -52,6 +53,7 @@ const AnimatedRoutes = () => {
           <Route path="/challenges" element={<Challenges />} />
           <Route path="/social" element={<Social />} />
           <Route path="/nutrition" element={<Nutrition />} />
+          <Route path="/achievements" element={<AchievementsPage />} />
           <Route path="/about" element={<About />} />
           <Route path="/careers" element={<Careers />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />

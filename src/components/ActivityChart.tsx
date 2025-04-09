@@ -38,29 +38,37 @@ const ActivityChart = () => {
             <CardTitle className="text-xl font-bold">Activity History</CardTitle>
           </div>
           <div className="flex space-x-2">
-            <div className="flex rounded-md overflow-hidden border">
+            <div className="flex rounded-md overflow-hidden border dark:border-gray-700">
               <button 
-                className={`px-3 py-1 text-xs ${period === 'week' ? 'bg-blue-500 text-white' : 'bg-gray-100'}`}
+                className={`px-3 py-1 text-xs ${period === 'week' 
+                  ? 'bg-blue-500 text-white' 
+                  : 'bg-gray-100 dark:bg-gray-800 dark:text-gray-300'}`}
                 onClick={() => setPeriod('week')}
               >
                 Week
               </button>
               <button 
-                className={`px-3 py-1 text-xs ${period === 'month' ? 'bg-blue-500 text-white' : 'bg-gray-100'}`}
+                className={`px-3 py-1 text-xs ${period === 'month' 
+                  ? 'bg-blue-500 text-white' 
+                  : 'bg-gray-100 dark:bg-gray-800 dark:text-gray-300'}`}
                 onClick={() => setPeriod('month')}
               >
                 Month
               </button>
             </div>
-            <div className="flex rounded-md overflow-hidden border">
+            <div className="flex rounded-md overflow-hidden border dark:border-gray-700">
               <button 
-                className={`px-3 py-1 text-xs ${chartType === 'bar' ? 'bg-blue-500 text-white' : 'bg-gray-100'}`}
+                className={`px-3 py-1 text-xs ${chartType === 'bar' 
+                  ? 'bg-blue-500 text-white' 
+                  : 'bg-gray-100 dark:bg-gray-800 dark:text-gray-300'}`}
                 onClick={() => setChartType('bar')}
               >
                 Bar
               </button>
               <button 
-                className={`px-3 py-1 text-xs ${chartType === 'line' ? 'bg-blue-500 text-white' : 'bg-gray-100'}`}
+                className={`px-3 py-1 text-xs ${chartType === 'line' 
+                  ? 'bg-blue-500 text-white' 
+                  : 'bg-gray-100 dark:bg-gray-800 dark:text-gray-300'}`}
                 onClick={() => setChartType('line')}
               >
                 Line
@@ -74,29 +82,71 @@ const ActivityChart = () => {
           <ResponsiveContainer width="100%" height="100%">
             {chartType === 'bar' ? (
               <BarChart data={chartData} margin={{ top: 5, right: 20, left: 0, bottom: 15 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="date" />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(142, 142, 142, 0.2)" />
+                <XAxis dataKey="date" stroke="currentColor" />
                 <YAxis yAxisId="left" orientation="left" stroke="#3B82F6" />
                 <YAxis yAxisId="right" orientation="right" stroke="#F97316" />
                 <Tooltip 
-                  contentStyle={{ borderRadius: "0.5rem", border: "none", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)" }}
+                  contentStyle={{ 
+                    borderRadius: "0.5rem", 
+                    border: "none", 
+                    boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)",
+                    backgroundColor: "var(--background)",
+                    color: "var(--foreground)"
+                  }}
                   wrapperStyle={{ outline: "none" }}
+                  itemStyle={{ color: "currentColor" }}
+                  labelStyle={{ color: "currentColor", fontWeight: "bold" }}
                 />
-                <Bar yAxisId="left" dataKey="steps" name="Steps" fill="#3B82F6" radius={[4, 4, 0, 0]} />
-                <Bar yAxisId="right" dataKey="caloriesBurned" name="Calories Burned" fill="#F97316" radius={[4, 4, 0, 0]} />
+                <Bar 
+                  yAxisId="left" 
+                  dataKey="steps" 
+                  name="Steps" 
+                  fill="#3B82F6" 
+                  radius={[4, 4, 0, 0]} 
+                  className="transition-all duration-300"
+                  onMouseOver={(data, index) => {
+                    document.querySelectorAll('.recharts-bar-rectangle')[index].classList.add('scale-y-105', 'filter', 'drop-shadow-lg');
+                  }}
+                  onMouseOut={(data, index) => {
+                    document.querySelectorAll('.recharts-bar-rectangle')[index].classList.remove('scale-y-105', 'filter', 'drop-shadow-lg');
+                  }}
+                />
+                <Bar 
+                  yAxisId="right" 
+                  dataKey="caloriesBurned" 
+                  name="Calories Burned" 
+                  fill="#F97316" 
+                  radius={[4, 4, 0, 0]} 
+                  className="transition-all duration-300"
+                  onMouseOver={(data, index) => {
+                    document.querySelectorAll('.recharts-bar-rectangle')[index + chartData.length].classList.add('scale-y-105', 'filter', 'drop-shadow-lg');
+                  }}
+                  onMouseOut={(data, index) => {
+                    document.querySelectorAll('.recharts-bar-rectangle')[index + chartData.length].classList.remove('scale-y-105', 'filter', 'drop-shadow-lg');
+                  }}
+                />
               </BarChart>
             ) : (
               <LineChart data={chartData} margin={{ top: 5, right: 20, left: 0, bottom: 15 }}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" />
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(142, 142, 142, 0.2)" />
+                <XAxis dataKey="date" stroke="currentColor" />
                 <YAxis yAxisId="left" orientation="left" stroke="#3B82F6" />
                 <YAxis yAxisId="right" orientation="right" stroke="#F97316" />
                 <Tooltip 
-                  contentStyle={{ borderRadius: "0.5rem", border: "none", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)" }}
+                  contentStyle={{ 
+                    borderRadius: "0.5rem", 
+                    border: "none", 
+                    boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)",
+                    backgroundColor: "var(--background)",
+                    color: "var(--foreground)"
+                  }}
                   wrapperStyle={{ outline: "none" }}
+                  itemStyle={{ color: "currentColor" }}
+                  labelStyle={{ color: "currentColor", fontWeight: "bold" }}
                 />
-                <Line yAxisId="left" type="monotone" dataKey="steps" name="Steps" stroke="#3B82F6" strokeWidth={2} dot={{ r: 4 }} />
-                <Line yAxisId="right" type="monotone" dataKey="caloriesBurned" name="Calories Burned" stroke="#F97316" strokeWidth={2} dot={{ r: 4 }} />
+                <Line yAxisId="left" type="monotone" dataKey="steps" name="Steps" stroke="#3B82F6" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 6, fill: "#3B82F6", stroke: "#fff", strokeWidth: 2 }} />
+                <Line yAxisId="right" type="monotone" dataKey="caloriesBurned" name="Calories Burned" stroke="#F97316" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 6, fill: "#F97316", stroke: "#fff", strokeWidth: 2 }} />
               </LineChart>
             )}
           </ResponsiveContainer>

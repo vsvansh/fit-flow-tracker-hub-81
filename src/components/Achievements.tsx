@@ -1,9 +1,11 @@
 
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Trophy, Medal, Star, Award, Crown } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 
 const achievementData = [
@@ -60,6 +62,12 @@ const achievementData = [
 ];
 
 const Achievements = () => {
+  const navigate = useNavigate();
+  
+  const handleViewAll = () => {
+    navigate('/achievements');
+  };
+  
   return (
     <Card className="shadow">
       <CardHeader>
@@ -105,6 +113,7 @@ const Achievements = () => {
             className="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-medium rounded-lg transition-all duration-200"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
+            onClick={handleViewAll}
           >
             View All Achievements
           </motion.button>
