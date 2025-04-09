@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -15,8 +14,8 @@ import {
   Plus, Filter, FileDown, Printer, Star,
   RefreshCcw, SaveAll, Send, Search, Settings
 } from "lucide-react";
+import confetti from "canvas-confetti";
 
-// Sample meal plan data
 const mealPlanData = {
   days: [
     {
@@ -124,7 +123,6 @@ const mealPlanData = {
   }
 };
 
-// Sample grocery lists
 const groceryList = {
   produce: [
     { name: "Spinach", amount: "1 bag", checked: false },
@@ -165,7 +163,6 @@ const groceryList = {
   ]
 };
 
-// Sample meal plans
 const mealPlans = [
   { id: 1, name: "High Protein Plan", description: "2000 calories, 150g protein", active: true },
   { id: 2, name: "Low Carb", description: "1800 calories, 30% carbs", active: false },
@@ -178,12 +175,11 @@ const MealPlanner = () => {
   const [activePlan, setActivePlan] = useState(mealPlans[0]);
   const [activeDay, setActiveDay] = useState("Monday");
   const [groceries, setGroceries] = useState(groceryList);
+  const [showCreatePlanDialog, setShowCreatePlanDialog] = useState(false);
   
-  // Toggle grocery item check
   const toggleGroceryItem = (category: string, index: number) => {
     setGroceries(prev => {
       const newGroceries = { ...prev };
-      // TypeScript doesn't know which keys exist on newGroceries, so we need to use a type assertion
       const categoryItems = (newGroceries as any)[category];
       if (categoryItems && Array.isArray(categoryItems)) {
         categoryItems[index] = { 
@@ -195,7 +191,6 @@ const MealPlanner = () => {
     });
   };
   
-  // Generate shopping list
   const generateGroceryList = () => {
     toast({
       title: "Shopping list generated",
@@ -203,7 +198,6 @@ const MealPlanner = () => {
     });
   };
   
-  // Change meal plan
   const changeMealPlan = (id: number) => {
     const newPlan = mealPlans.find(plan => plan.id === id);
     if (newPlan) {
@@ -220,8 +214,48 @@ const MealPlanner = () => {
       });
     }
   };
+
+  const handleCreateNewPlan = () => {
+    toast({
+      title: "New meal plan created",
+      description: "Your custom meal plan has been created successfully!",
+    });
+    
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.6 }
+    });
+  };
   
-  // Current day data
+  const handleViewRecipe = () => {
+    toast({
+      title: "Recipe details",
+      description: "Detailed recipe and cooking instructions opened in a new tab.",
+    });
+  };
+  
+  const handleAddMeal = () => {
+    toast({
+      title: "Add meal",
+      description: "New meal has been added to your plan.",
+    });
+  };
+  
+  const handleShareList = () => {
+    toast({
+      title: "List shared",
+      description: "Your grocery list has been shared successfully.",
+    });
+  };
+  
+  const handleCustomize = () => {
+    toast({
+      title: "Customize options",
+      description: "Customize your shopping list preferences.",
+    });
+  };
+  
   const currentDayData = mealPlanData.days.find(day => day.day === activeDay) || mealPlanData.days[0];
 
   return (
@@ -241,11 +275,17 @@ const MealPlanner = () => {
                   </CardDescription>
                 </div>
                 <div className="flex gap-2">
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" onClick={() => toast({
+                    title: "Plan exported",
+                    description: "Your meal plan has been exported successfully."
+                  })}>
                     <FileDown className="h-4 w-4 mr-1" />
                     Export
                   </Button>
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" onClick={() => toast({
+                    title: "Print ready",
+                    description: "Your meal plan is ready to print."
+                  })}>
                     <Printer className="h-4 w-4 mr-1" />
                     Print
                   </Button>
@@ -287,7 +327,16 @@ const MealPlanner = () => {
                     </Badge>
                   </div>
                   
-                  <Button variant="outline" size="sm">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => {
+                      toast({
+                        title: "Plan regenerated", 
+                        description: "Your meal plan has been updated with new recommendations."
+                      });
+                    }}
+                  >
                     <RefreshCcw className="h-4 w-4 mr-1" />
                     Regenerate
                   </Button>
@@ -341,7 +390,11 @@ const MealPlanner = () => {
                               </div>
                             </div>
                             
-                            <Button variant="outline" size="sm">
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={handleViewRecipe}
+                            >
                               View Recipe
                               <ChevronRight className="h-4 w-4 ml-1" />
                             </Button>
@@ -352,7 +405,7 @@ const MealPlanner = () => {
                   ))}
                 </div>
                 
-                <Button className="w-full">
+                <Button className="w-full" onClick={handleAddMeal}>
                   <Plus className="h-4 w-4 mr-2" />
                   Add Meal
                 </Button>
@@ -394,7 +447,11 @@ const MealPlanner = () => {
                   </div>
                 ))}
                 
-                <Button variant="outline" className="w-full">
+                <Button 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={handleCreateNewPlan}
+                >
                   <Plus className="h-4 w-4 mr-2" />
                   Create New Plan
                 </Button>
@@ -574,7 +631,13 @@ const MealPlanner = () => {
                 <RefreshCcw className="h-4 w-4 mr-1" />
                 Update List
               </Button>
-              <Button size="sm">
+              <Button 
+                size="sm"
+                onClick={() => toast({
+                  title: "List exported",
+                  description: "Your shopping list has been exported successfully."
+                })}
+              >
                 <FileDown className="h-4 w-4 mr-1" />
                 Export
               </Button>
@@ -623,16 +686,24 @@ const MealPlanner = () => {
               
               <div className="flex justify-between mt-6">
                 <div className="space-x-2">
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={handleShareList}>
                     <Send className="h-4 w-4 mr-1" />
                     Share List
                   </Button>
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={handleCustomize}>
                     <Settings className="h-4 w-4 mr-1" />
                     Customize
                   </Button>
                 </div>
-                <Button variant="destructive">Clear Checked Items</Button>
+                <Button 
+                  variant="destructive"
+                  onClick={() => toast({
+                    title: "Items cleared",
+                    description: "Checked items have been removed from your list."
+                  })}
+                >
+                  Clear Checked Items
+                </Button>
               </div>
             </TabsContent>
             
@@ -640,7 +711,9 @@ const MealPlanner = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {mealPlanData.days.flatMap(day => day.meals).slice(0, 6).map((recipe, idx) => (
                   <Card key={idx}>
-                    <div className="h-40 bg-gray-100 dark:bg-gray-800 rounded-t-lg"></div>
+                    <div className={`h-40 bg-cover bg-center rounded-t-lg`} 
+                         style={{ backgroundImage: `url(https://source.unsplash.com/random/300x200?food=${idx+1})` }}>
+                    </div>
                     <CardContent className="p-4">
                       <h3 className="font-medium">{recipe.name}</h3>
                       <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 mt-1">
@@ -651,7 +724,12 @@ const MealPlanner = () => {
                         <span>{recipe.calories} cal</span>
                         <span>{recipe.protein}g protein</span>
                       </div>
-                      <Button variant="outline" size="sm" className="w-full mt-3">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="w-full mt-3"
+                        onClick={handleViewRecipe}
+                      >
                         View Recipe
                       </Button>
                     </CardContent>
@@ -660,7 +738,12 @@ const MealPlanner = () => {
               </div>
               
               <div className="text-center mt-6">
-                <Button>View All Recipes</Button>
+                <Button onClick={() => toast({
+                  title: "All recipes",
+                  description: "Viewing all recipes for the week."
+                })}>
+                  View All Recipes
+                </Button>
               </div>
             </TabsContent>
             
@@ -725,7 +808,10 @@ const MealPlanner = () => {
                 </div>
                 
                 <div className="flex justify-center">
-                  <Button>
+                  <Button onClick={() => toast({
+                    title: "Print requested",
+                    description: "Your meal prep guide is ready to print."
+                  })}>
                     <Printer className="h-4 w-4 mr-2" />
                     Print Meal Prep Guide
                   </Button>

@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,7 +11,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 
 const defaultGoals = {
-  calories: { current: 1850, target: 2200 },
+  calories: { current: 1850, target: 2200, unit: 'kcal' },
   protein: { current: 85, target: 110, unit: 'g' },
   carbs: { current: 210, target: 250, unit: 'g' },
   fat: { current: 65, target: 73, unit: 'g' },
@@ -111,7 +112,7 @@ const NutritionGoals = () => {
                     className="h-2 flex-grow mx-4"
                   />
                   <div className="text-sm text-gray-600 dark:text-gray-400">
-                    {goal.current} / {goal.target} {goal.unit ?? ''}
+                    {goal.current} / {goal.target} {goal.unit}
                   </div>
                 </div>
                 <Button

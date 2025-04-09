@@ -1,20 +1,35 @@
-
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
-import { format } from "date-fns";
+import { motion, AnimatePresence } from "framer-motion";
 import {
-  CalendarDays, FileText, Utensils, Plus, Search, Filter, 
-  Clock, Calendar as CalendarIcon, Star, BarChart2, Heart
+  Calendar as CalendarIcon, 
+  Plus, 
+  Search, 
+  ChevronRight, 
+  Utensils, 
+  Clock, 
+  Flame, 
+  BarChart, 
+  Pizza, 
+  Coffee, 
+  Apple, 
+  Sandwich, 
+  Heart, 
+  Edit, 
+  Trash2, 
+  Copy, 
+  MoreHorizontal, 
+  Filter
 } from "lucide-react";
+import { format } from "date-fns";
 
 // Sample journal entries
 const sampleEntries = [
@@ -588,7 +603,7 @@ const FoodJournal = () => {
                         <CardContent className="p-4">
                           <div className="flex items-center space-x-4">
                             <div className="rounded-full bg-purple-100 dark:bg-purple-900/40 p-3">
-                              <BarChart2 className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+                              <BarChart className="h-6 w-6 text-purple-600 dark:text-purple-400" />
                             </div>
                             <div>
                               <h3 className="font-medium">Journal Streak</h3>

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,7 @@ import {
   TrendingUp, TrendingDown, Heart, FileText, Star,
   Activity
 } from "lucide-react";
+import confetti from "canvas-confetti";
 
 // Update the nutrition data to ensure unit is always defined
 const nutritionData = {
@@ -70,6 +72,15 @@ const NutritionTracker = () => {
         title: "Water intake updated",
         description: `You've logged ${waterIntake + 1} cups of water today.`,
       });
+      
+      // Trigger a small confetti effect when reaching 8 cups
+      if (waterIntake === 7) {
+        confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 }
+        });
+      }
     }
   };
 
@@ -136,14 +147,14 @@ const NutritionTracker = () => {
                   <h3 className="text-lg font-medium capitalize mb-1">{key}</h3>
                   <div className="text-3xl font-bold mb-2">
                     {key === 'protein' ? protein : key === 'carbs' ? carbs : key === 'fat' ? fat : fiber}
-                    <span className="text-sm text-gray-500 dark:text-gray-400 ml-1">{data.unit ?? ''}</span>
+                    <span className="text-sm text-gray-500 dark:text-gray-400 ml-1">{data.unit}</span>
                   </div>
                   <Progress
                     value={((key === 'protein' ? protein : key === 'carbs' ? carbs : key === 'fat' ? fat : fiber) / data.goal) * 100}
                     className="h-2 w-full mb-1"
                   />
                   <div className="text-xs text-gray-500 dark:text-gray-400">
-                    {key === 'protein' ? protein : key === 'carbs' ? carbs : key === 'fat' ? fat : fiber} / {data.goal} {data.unit ?? ''}
+                    {key === 'protein' ? protein : key === 'carbs' ? carbs : key === 'fat' ? fat : fiber} / {data.goal} {data.unit}
                   </div>
                 </motion.div>
               ))}
@@ -197,6 +208,7 @@ const NutritionTracker = () => {
                   type="number"
                   placeholder="Enter calories consumed"
                   className="mb-3"
+                  value={calories}
                   onChange={(e) => handleInputChange("calories", parseInt(e.target.value) || 0)}
                 />
                 <Progress value={(calories / nutritionData.calories.goal) * 100} className="h-2" />
@@ -212,8 +224,12 @@ const NutritionTracker = () => {
                   <span className="text-sm text-gray-600 dark:text-gray-400">Consumed</span>
                   <span className="text-sm font-medium">{waterIntake} cups</span>
                 </div>
-                <Button onClick={handleAddWater} className="w-full bg-blue-600 hover:bg-blue-700 text-white">
-                  Add Water
+                <Button 
+                  onClick={handleAddWater} 
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white relative overflow-hidden group"
+                >
+                  <span className="relative z-10">Add Water</span>
+                  <span className="absolute inset-0 bg-blue-400 opacity-0 group-hover:opacity-20 group-active:opacity-30 transition-opacity duration-300 rounded"></span>
                 </Button>
                 <Progress value={(waterIntake / 8) * 100} className="h-2 mt-3" />
                 <div className="flex justify-between mt-1 text-xs text-gray-500 dark:text-gray-400">

@@ -1,387 +1,367 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { motion } from "framer-motion";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
 import { useToast } from "@/components/ui/use-toast";
-import {
-  BarChart2, Heart, ArrowRight, Info, Calendar, 
-  TrendingUp, TrendingDown, BarChart, PieChart, Activity
+import { 
+  BarChart4, PieChart as PieChartIcon, Activity, Info, ChevronRight, 
+  Apple, Carrot, Beef, Fish, Egg, Coffee, Cherry, Leaf, Droplet
 } from "lucide-react";
-import { launchConfetti } from "@/utils/confettiUtil";
 
+// Sample data for vitamins and minerals
 const nutrientData = [
-  { name: "Vitamin A", value: 80, goal: 100, unit: "μg", category: "Fat-soluble Vitamins" },
-  { name: "Vitamin C", value: 65, goal: 90, unit: "mg", category: "Water-soluble Vitamins" },
-  { name: "Vitamin D", value: 10, goal: 20, unit: "μg", category: "Fat-soluble Vitamins" },
-  { name: "Vitamin E", value: 12, goal: 15, unit: "mg", category: "Fat-soluble Vitamins" },
-  { name: "Vitamin K", value: 70, goal: 120, unit: "μg", category: "Fat-soluble Vitamins" },
-  { name: "Vitamin B1", value: 1.1, goal: 1.2, unit: "mg", category: "Water-soluble Vitamins" },
-  { name: "Vitamin B2", value: 1.2, goal: 1.3, unit: "mg", category: "Water-soluble Vitamins" },
-  { name: "Vitamin B3", value: 14, goal: 16, unit: "mg", category: "Water-soluble Vitamins" },
-  { name: "Vitamin B6", value: 1.6, goal: 1.7, unit: "mg", category: "Water-soluble Vitamins" },
-  { name: "Vitamin B12", value: 2.2, goal: 2.4, unit: "μg", category: "Water-soluble Vitamins" },
-  { name: "Folate", value: 320, goal: 400, unit: "μg", category: "Water-soluble Vitamins" },
-  { name: "Calcium", value: 850, goal: 1000, unit: "mg", category: "Minerals" },
-  { name: "Iron", value: 14, goal: 18, unit: "mg", category: "Minerals" },
-  { name: "Magnesium", value: 310, goal: 400, unit: "mg", category: "Minerals" },
-  { name: "Zinc", value: 9, goal: 11, unit: "mg", category: "Minerals" },
-  { name: "Potassium", value: 3200, goal: 4700, unit: "mg", category: "Minerals" },
-  { name: "Sodium", value: 1800, goal: 2300, unit: "mg", category: "Minerals" },
-  { name: "Selenium", value: 50, goal: 55, unit: "μg", category: "Minerals" },
-  { name: "Fiber", value: 22, goal: 30, unit: "g", category: "Other" },
-  { name: "Omega-3", value: 1.2, goal: 1.6, unit: "g", category: "Other" }
+  // Fat-soluble vitamins
+  { name: "Vitamin A", category: "fat-soluble", percent: 85, info: "Important for vision, immune function, and cell growth", sources: ["Sweet potatoes", "Carrots", "Spinach"] },
+  { name: "Vitamin D", category: "fat-soluble", percent: 60, info: "Regulates calcium absorption and bone growth", sources: ["Sunlight", "Fatty fish", "Fortified foods"] },
+  { name: "Vitamin E", category: "fat-soluble", percent: 70, info: "Acts as an antioxidant to protect cells", sources: ["Nuts", "Seeds", "Vegetable oils"] },
+  { name: "Vitamin K", category: "fat-soluble", percent: 95, info: "Essential for blood clotting and bone health", sources: ["Leafy greens", "Broccoli", "Brussels sprouts"] },
+  
+  // Water-soluble vitamins
+  { name: "Vitamin C", category: "water-soluble", percent: 120, info: "Important for immune function and iron absorption", sources: ["Citrus fruits", "Bell peppers", "Strawberries"] },
+  { name: "Vitamin B1", category: "water-soluble", percent: 90, info: "Helps convert food into energy", sources: ["Whole grains", "Pork", "Beans"] },
+  { name: "Vitamin B2", category: "water-soluble", percent: 85, info: "Supports energy production and cell function", sources: ["Milk", "Yogurt", "Eggs"] },
+  { name: "Vitamin B3", category: "water-soluble", percent: 110, info: "Essential for metabolism and DNA repair", sources: ["Chicken", "Tuna", "Peanuts"] },
+  { name: "Vitamin B5", category: "water-soluble", percent: 75, info: "Helps create coenzyme A for metabolism", sources: ["Avocados", "Mushrooms", "Yogurt"] },
+  { name: "Vitamin B6", category: "water-soluble", percent: 90, info: "Important for brain development and function", sources: ["Poultry", "Fish", "Potatoes"] },
+  { name: "Vitamin B7", category: "water-soluble", percent: 65, info: "Helps metabolize fats and carbohydrates", sources: ["Eggs", "Nuts", "Whole grains"] },
+  { name: "Vitamin B9", category: "water-soluble", percent: 80, info: "Essential for cell division and DNA synthesis", sources: ["Leafy greens", "Beans", "Citrus fruits"] },
+  { name: "Vitamin B12", category: "water-soluble", percent: 95, info: "Critical for nerve function and blood cell formation", sources: ["Meat", "Fish", "Dairy"] },
+  
+  // Minerals
+  { name: "Calcium", category: "mineral", percent: 75, info: "Essential for bone health and muscle function", sources: ["Dairy products", "Leafy greens", "Fortified foods"] },
+  { name: "Iron", category: "mineral", percent: 60, info: "Needed for oxygen transport in the blood", sources: ["Red meat", "Beans", "Spinach"] },
+  { name: "Magnesium", category: "mineral", percent: 65, info: "Important for muscle and nerve function", sources: ["Nuts", "Seeds", "Whole grains"] },
+  { name: "Zinc", category: "mineral", percent: 80, info: "Supports immune function and wound healing", sources: ["Meat", "Shellfish", "Legumes"] },
+  { name: "Potassium", category: "mineral", percent: 70, info: "Regulates fluid balance and nerve signals", sources: ["Bananas", "Potatoes", "Beans"] },
+  { name: "Selenium", category: "mineral", percent: 90, info: "Acts as an antioxidant and supports thyroid function", sources: ["Brazil nuts", "Fish", "Eggs"] },
+  { name: "Phosphorus", category: "mineral", percent: 95, info: "Component of bones and cell membranes", sources: ["Dairy", "Meat", "Fish"] }
 ];
 
-const weeklyTrends = [
-  { nutrient: "Calcium", trend: "+12%", direction: "up" },
-  { nutrient: "Vitamin D", trend: "+20%", direction: "up" },
-  { nutrient: "Iron", trend: "-5%", direction: "down" },
-  { nutrient: "Fiber", trend: "+8%", direction: "up" },
-  { nutrient: "Sodium", trend: "-10%", direction: "down" },
+// Pie chart data for nutrient breakdown
+const nutritionBreakdownData = [
+  { name: "Protein", value: 25, color: "#4ade80" },
+  { name: "Carbohydrates", value: 45, color: "#60a5fa" },
+  { name: "Fat", value: 30, color: "#f59e0b" }
 ];
 
-const recommendations = [
-  {
-    nutrient: "Vitamin D",
-    message: "Your Vitamin D levels are improving but still below optimal. Consider more sunlight exposure or supplementation.",
-    actions: ["Add fatty fish to diet", "15 min daily sunlight", "Consider supplements"]
-  },
-  {
-    nutrient: "Iron",
-    message: "Your iron intake has decreased this week. Add more iron-rich foods to prevent deficiency.",
-    actions: ["Add leafy greens", "Include lean meat", "Pair with Vitamin C for absorption"]
-  },
-  {
-    nutrient: "Fiber",
-    message: "Great progress on fiber intake! Keep including whole grains and vegetables in your meals.",
-    actions: ["Continue with whole grains", "Add more vegetables", "Stay hydrated"]
-  }
+// Pie chart data for vitamin sources
+const vitaminSourcesData = [
+  { name: "Fruits & Vegetables", value: 45, color: "#4ade80" },
+  { name: "Animal Products", value: 30, color: "#f87171" },
+  { name: "Grains & Legumes", value: 15, color: "#fbbf24" },
+  { name: "Nuts & Seeds", value: 10, color: "#8b5cf6" }
 ];
 
 const NutrientInsights = () => {
   const { toast } = useToast();
-  const [selectedCategory, setSelectedCategory] = useState("All");
-  const [viewMode, setViewMode] = useState("list");
-  
-  const filteredNutrients = selectedCategory === "All" 
-    ? nutrientData 
-    : nutrientData.filter(nutrient => nutrient.category === selectedCategory);
-  
-  const categories = ["All", ...new Set(nutrientData.map(item => item.category))];
-  
-  const handleNutrientClick = (nutrient: typeof nutrientData[0]) => {
-    const percentage = Math.round((nutrient.value / nutrient.goal) * 100);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>("all");
+  const [hoveredNutrient, setHoveredNutrient] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredNutrients = nutrientData.filter(nutrient => {
+    // First filter by category
+    const categoryMatch = selectedCategory === "all" || nutrient.category === selectedCategory;
     
-    toast({
-      title: `${nutrient.name} Details`,
-      description: `Current: ${nutrient.value}${nutrient.unit} (${percentage}% of daily goal)`,
-    });
+    // Then filter by search query if present
+    const queryMatch = searchQuery === "" || 
+      nutrient.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      nutrient.sources.some(source => source.toLowerCase().includes(searchQuery.toLowerCase()));
     
-    if (percentage >= 100) {
-      launchConfetti({
-        particleCount: 30,
-        spread: 70,
-        origin: { y: 0.6 }
-      });
-    }
-  };
+    return categoryMatch && queryMatch;
+  });
+
+  const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, index, name }: any) => {
+    const RADIAN = Math.PI / 180;
+    const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+    const x = cx + radius * Math.cos(-midAngle * RADIAN);
+    const y = cy + radius * Math.sin(-midAngle * RADIAN);
   
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.05
-      }
-    }
+    return (
+      <text 
+        x={x} 
+        y={y} 
+        fill="white" 
+        textAnchor={x > cx ? 'start' : 'end'} 
+        dominantBaseline="central"
+        fontSize="12"
+      >
+        {`${name} ${(percent * 100).toFixed(0)}%`}
+      </text>
+    );
   };
-  
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0 }
-  };
-  
+
   return (
     <div className="space-y-6">
-      <motion.div 
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        <Card className="shadow-md overflow-hidden border-0 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20">
-          <CardHeader className="pb-2 relative">
-            <div className="absolute top-0 right-0 h-32 w-32 bg-blue-400 dark:bg-blue-600 rounded-full blur-3xl opacity-20 -mr-10 -mt-10"></div>
-            <CardTitle className="text-xl font-bold flex items-center">
-              <BarChart2 className="h-5 w-5 mr-2 text-purple-600 dark:text-purple-400" />
-              Nutrient Insights
-            </CardTitle>
-            <CardDescription>
-              Track your micronutrient intake and discover patterns
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex justify-between items-center mb-4">
-              <Tabs defaultValue={selectedCategory} onValueChange={setSelectedCategory} className="w-full">
-                <TabsList className="w-full">
-                  {categories.map(category => (
-                    <TabsTrigger key={category} value={category} className="flex-1">
-                      {category}
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
-              </Tabs>
-              
-              <div className="flex space-x-2 ml-4">
-                <Button 
-                  variant={viewMode === "list" ? "default" : "outline"} 
-                  size="sm"
-                  onClick={() => setViewMode("list")}
-                  className="h-8 px-2"
-                >
-                  <BarChart className="h-4 w-4" />
-                </Button>
-                <Button 
-                  variant={viewMode === "chart" ? "default" : "outline"} 
-                  size="sm"
-                  onClick={() => setViewMode("chart")}
-                  className="h-8 px-2"
-                >
-                  <PieChart className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-            
-            {viewMode === "list" ? (
-              <motion.div 
-                className="space-y-4"
-                variants={containerVariants}
-                initial="hidden"
-                animate="show"
-              >
-                {filteredNutrients.map((nutrient, idx) => (
-                  <motion.div 
-                    key={nutrient.name} 
-                    className="border rounded-lg p-3 hover:shadow-md transition-all cursor-pointer hover:border-purple-200 dark:hover:border-purple-700"
-                    onClick={() => handleNutrientClick(nutrient)}
-                    variants={itemVariants}
-                  >
-                    <div className="flex justify-between items-center mb-1">
-                      <div className="font-medium">{nutrient.name}</div>
-                      <Badge className={
-                        (nutrient.value / nutrient.goal) >= 1 ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400" :
-                        (nutrient.value / nutrient.goal) >= 0.8 ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400" :
-                        (nutrient.value / nutrient.goal) >= 0.5 ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400" :
-                        "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
-                      }>
-                        {Math.round((nutrient.value / nutrient.goal) * 100)}%
-                      </Badge>
-                    </div>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span className="text-gray-500 dark:text-gray-400">{nutrient.value} / {nutrient.goal} {nutrient.unit}</span>
-                    </div>
-                    <Progress 
-                      value={(nutrient.value / nutrient.goal) * 100} 
-                      className={`h-2 ${
-                        (nutrient.value / nutrient.goal) >= 1 ? '[&>div]:bg-green-500' :
-                        (nutrient.value / nutrient.goal) >= 0.8 ? '[&>div]:bg-blue-500' :
-                        (nutrient.value / nutrient.goal) >= 0.5 ? '[&>div]:bg-yellow-500' :
-                        '[&>div]:bg-red-500'
-                      }`}
-                    />
-                  </motion.div>
-                ))}
-              </motion.div>
-            ) : (
-              <div className="flex justify-center items-center h-80 mt-4">
-                <div className="text-center text-gray-500 dark:text-gray-400">
-                  <Activity className="h-12 w-12 mx-auto mb-2" />
-                  <p>Interactive nutrient chart view coming soon!</p>
-                  <Button className="mt-4" onClick={() => setViewMode("list")}>
-                    Switch to List View
-                  </Button>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <Card className="shadow-md border-0 overflow-hidden bg-gradient-to-br from-green-50 to-teal-50 dark:from-green-900/20 dark:to-teal-900/20">
+            <CardHeader>
+              <CardTitle className="flex items-center text-xl font-bold">
+                <BarChart4 className="h-5 w-5 mr-2 text-green-600 dark:text-green-400" />
+                Nutrient Analysis
+              </CardTitle>
+              <CardDescription>
+                Track your vitamin and mineral intake
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-col space-y-4">
+                <div className="flex flex-wrap justify-start gap-3 mb-4">
+                  <ToggleGroup type="single" value={selectedCategory || ""} onValueChange={(value) => setSelectedCategory(value || "all")}>
+                    <ToggleGroupItem value="all" aria-label="All nutrients" className="px-4 py-2 rounded-full">
+                      All
+                    </ToggleGroupItem>
+                    <ToggleGroupItem value="fat-soluble" aria-label="Fat-soluble vitamins" className="px-4 py-2 rounded-full">
+                      Fat Soluble
+                    </ToggleGroupItem>
+                    <ToggleGroupItem value="water-soluble" aria-label="Water-soluble vitamins" className="px-4 py-2 rounded-full">
+                      Water Soluble
+                    </ToggleGroupItem>
+                    <ToggleGroupItem value="mineral" aria-label="Minerals" className="px-4 py-2 rounded-full">
+                      Minerals
+                    </ToggleGroupItem>
+                  </ToggleGroup>
+                </div>
+                
+                <div className="space-y-4">
+                  <ScrollArea className="h-[400px] pr-4">
+                    {filteredNutrients.map((nutrient, index) => (
+                      <div 
+                        key={index}
+                        className={`p-4 mb-3 rounded-lg border ${
+                          hoveredNutrient === nutrient.name 
+                            ? 'border-green-300 bg-green-50 dark:border-green-700 dark:bg-green-900/30'
+                            : 'border-gray-200 dark:border-gray-700'
+                        } transition-all duration-200`}
+                        onMouseEnter={() => setHoveredNutrient(nutrient.name)}
+                        onMouseLeave={() => setHoveredNutrient(null)}
+                      >
+                        <div className="flex justify-between items-center mb-2">
+                          <div className="flex items-center">
+                            <div className={`p-2 rounded-full mr-2 ${
+                              nutrient.category === 'fat-soluble' 
+                                ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400' 
+                                : nutrient.category === 'water-soluble' 
+                                ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'
+                                : 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400'
+                            }`}>
+                              {nutrient.category === 'fat-soluble' && <Cherry className="h-4 w-4" />}
+                              {nutrient.category === 'water-soluble' && <Droplet className="h-4 w-4" />}
+                              {nutrient.category === 'mineral' && <Leaf className="h-4 w-4" />}
+                            </div>
+                            <h3 className="font-medium">{nutrient.name}</h3>
+                          </div>
+                          <Badge 
+                            className={`${
+                              nutrient.percent >= 100 
+                                ? 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300' 
+                                : nutrient.percent >= 75 
+                                ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300'
+                                : 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300'
+                            }`}
+                          >
+                            {nutrient.percent}%
+                          </Badge>
+                        </div>
+                        
+                        <Progress 
+                          value={Math.min(nutrient.percent, 100)} 
+                          className={`h-2 mb-2 ${
+                            nutrient.percent >= 100 
+                              ? '[&>div]:bg-green-500' 
+                              : nutrient.percent >= 75 
+                              ? '[&>div]:bg-yellow-500'
+                              : '[&>div]:bg-red-500'
+                          }`}
+                        />
+                        
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+                          {nutrient.info}
+                        </p>
+                        
+                        <div className="flex flex-wrap gap-1">
+                          {nutrient.sources.map((source, i) => (
+                            <Badge key={i} variant="outline" className="text-xs">
+                              {source}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </ScrollArea>
                 </div>
               </div>
-            )}
-          </CardContent>
-        </Card>
-      </motion.div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-        >
-          <Card className="shadow-md bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-0">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg font-bold flex items-center">
-                <TrendingUp className="h-5 w-5 mr-2 text-blue-600 dark:text-blue-400" />
-                Weekly Trends
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {weeklyTrends.map((item, idx) => (
-                  <motion.div 
-                    key={idx} 
-                    className="flex justify-between items-center"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1 * idx }}
-                  >
-                    <div className="flex items-center">
-                      {item.direction === "up" ? (
-                        <div className="p-1 rounded-full bg-green-100 dark:bg-green-900/30 mr-2">
-                          <TrendingUp className="h-4 w-4 text-green-600 dark:text-green-400" />
-                        </div>
-                      ) : (
-                        <div className="p-1 rounded-full bg-red-100 dark:bg-red-900/30 mr-2">
-                          <TrendingDown className="h-4 w-4 text-red-600 dark:text-red-400" />
-                        </div>
-                      )}
-                      <span>{item.nutrient}</span>
-                    </div>
-                    <Badge className={
-                      item.direction === "up" 
-                        ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400" 
-                        : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
-                    }>
-                      {item.trend}
-                    </Badge>
-                  </motion.div>
-                ))}
-              </div>
-              
-              <Button variant="ghost" className="w-full mt-4 text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/20">
-                View Detailed Report
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
             </CardContent>
           </Card>
-        </motion.div>
+        </div>
         
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
-        >
-          <Card className="shadow-md bg-gradient-to-br from-green-50 to-teal-50 dark:from-green-900/20 dark:to-teal-900/20 border-0">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg font-bold flex items-center">
-                <Heart className="h-5 w-5 mr-2 text-green-600 dark:text-green-400" />
-                Personalized Recommendations
+        <div className="space-y-6">
+          <Card className="shadow-md border-0 bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20">
+            <CardHeader>
+              <CardTitle className="flex items-center text-xl font-bold">
+                <PieChartIcon className="h-5 w-5 mr-2 text-purple-600 dark:text-purple-400" />
+                Nutrient Distribution
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Tabs defaultValue="macros">
+                <TabsList className="mb-4 grid grid-cols-2 h-auto w-full">
+                  <TabsTrigger value="macros" className="text-xs sm:text-sm py-2">Macronutrients</TabsTrigger>
+                  <TabsTrigger value="sources" className="text-xs sm:text-sm py-2">Vitamin Sources</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="macros">
+                  <div className="h-[300px] w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={nutritionBreakdownData}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          label={renderCustomizedLabel}
+                          outerRadius={100}
+                          fill="#8884d8"
+                          dataKey="value"
+                        >
+                          {nutritionBreakdownData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} />
+                          ))}
+                        </Pie>
+                        <Tooltip />
+                        <Legend />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                  
+                  <div className="mt-4 space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                    <p>
+                      Protein: Essential for muscle building and repair
+                    </p>
+                    <p>
+                      Carbohydrates: Primary energy source for the body
+                    </p>
+                    <p>
+                      Fat: Important for hormone production and nutrient absorption
+                    </p>
+                  </div>
+                </TabsContent>
+                
+                <TabsContent value="sources">
+                  <div className="h-[300px] w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={vitaminSourcesData}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          label={renderCustomizedLabel}
+                          outerRadius={100}
+                          fill="#8884d8"
+                          dataKey="value"
+                        >
+                          {vitaminSourcesData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} />
+                          ))}
+                        </Pie>
+                        <Tooltip />
+                        <Legend />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                  
+                  <div className="mt-4 text-sm text-gray-600 dark:text-gray-400">
+                    <p className="mb-2">
+                      Most of your vitamins and minerals come from a variety of food sources.
+                    </p>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      className="w-full mt-2"
+                      onClick={() => {
+                        toast({
+                          title: "Food recommendations",
+                          description: "Based on your nutritional gaps, we recommend increasing your intake of leafy greens and nuts."
+                        });
+                      }}
+                    >
+                      <Info className="h-4 w-4 mr-1" />
+                      Get Food Recommendations
+                    </Button>
+                  </div>
+                </TabsContent>
+              </Tabs>
+            </CardContent>
+          </Card>
+          
+          <Card className="shadow-md border-0 bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20">
+            <CardHeader>
+              <CardTitle className="flex items-center text-xl font-bold">
+                <Activity className="h-5 w-5 mr-2 text-blue-600 dark:text-blue-400" />
+                Nutrition Tips
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {recommendations.map((rec, idx) => (
-                  <motion.div 
-                    key={idx} 
-                    className="border border-green-100 dark:border-green-900/30 rounded-lg p-3 hover:shadow-md transition-all"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1 * idx }}
-                    whileHover={{ scale: 1.02 }}
-                  >
-                    <div className="flex justify-between items-start">
-                      <div className="font-medium flex items-center">
-                        <Badge className="mr-2 bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-400">
-                          {rec.nutrient}
-                        </Badge>
-                      </div>
-                      <Info className="h-4 w-4 text-gray-400" />
+                <div className="p-3 rounded-lg border border-blue-100 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20">
+                  <div className="flex items-center mb-2">
+                    <div className="p-2 rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 mr-2">
+                      <Apple className="h-4 w-4" />
                     </div>
-                    <p className="text-sm mt-2 text-gray-600 dark:text-gray-300">
-                      {rec.message}
-                    </p>
-                    <div className="flex flex-wrap gap-2 mt-3">
-                      {rec.actions.map((action, idx) => (
-                        <Badge key={idx} variant="outline" className="text-xs font-normal">
-                          {action}
-                        </Badge>
-                      ))}
+                    <h3 className="font-medium">Increase Fruit Intake</h3>
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Try to have at least 2 servings of fruit daily to boost your vitamin C and antioxidant levels.
+                  </p>
+                </div>
+                
+                <div className="p-3 rounded-lg border border-green-100 dark:border-green-800 bg-green-50 dark:bg-green-900/20">
+                  <div className="flex items-center mb-2">
+                    <div className="p-2 rounded-full bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 mr-2">
+                      <Carrot className="h-4 w-4" />
                     </div>
-                  </motion.div>
-                ))}
+                    <h3 className="font-medium">Eat More Vegetables</h3>
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Include a variety of colorful vegetables in each meal for optimal micronutrient intake.
+                  </p>
+                </div>
+                
+                <div className="p-3 rounded-lg border border-amber-100 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/20">
+                  <div className="flex items-center mb-2">
+                    <div className="p-2 rounded-full bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 mr-2">
+                      <Beef className="h-4 w-4" />
+                    </div>
+                    <h3 className="font-medium">Iron-Rich Foods</h3>
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Your iron levels are slightly low. Consider adding more lean meats, beans and spinach to your diet.
+                  </p>
+                </div>
+                
+                <Button 
+                  className="w-full bg-blue-600 hover:bg-blue-700"
+                  onClick={() => {
+                    toast({
+                      title: "Personalized nutrition plan",
+                      description: "Your personalized nutrition plan has been updated based on your current nutrient levels.",
+                    });
+                  }}
+                >
+                  Get Personalized Recommendations
+                </Button>
               </div>
-              
-              <Button variant="ghost" className="w-full mt-4 text-green-600 hover:text-green-700 hover:bg-green-50 dark:text-green-400 dark:hover:bg-green-900/20">
-                Get More Recommendations
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
             </CardContent>
           </Card>
-        </motion.div>
+        </div>
       </div>
-      
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.4 }}
-      >
-        <Card className="shadow-md">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg font-bold flex items-center">
-              <Calendar className="h-5 w-5 mr-2 text-purple-600 dark:text-purple-400" />
-              Upcoming Nutrient Reports
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {[
-                { 
-                  title: "Weekly Summary", 
-                  description: "Review of this week's nutrient intake",
-                  date: "Sunday",
-                  status: "upcoming"
-                },
-                { 
-                  title: "Monthly Analysis", 
-                  description: "Detailed nutritional patterns and trends",
-                  date: "May 1",
-                  status: "scheduled"
-                },
-                { 
-                  title: "Quarterly Review", 
-                  description: "Long-term progress and recommendations",
-                  date: "June 30",
-                  status: "planned"
-                }
-              ].map((report, idx) => (
-                <motion.div 
-                  key={idx}
-                  whileHover={{ scale: 1.03 }}
-                  className="border rounded-lg p-3 hover:shadow-md transition-all cursor-pointer"
-                >
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="font-medium">{report.title}</h3>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
-                        {report.description}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex justify-between items-center mt-3">
-                    <Badge variant="outline">
-                      {report.date}
-                    </Badge>
-                    <Badge className={
-                      report.status === "upcoming" ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400" :
-                      report.status === "scheduled" ? "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400" :
-                      "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400"
-                    }>
-                      {report.status}
-                    </Badge>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </motion.div>
     </div>
   );
 };

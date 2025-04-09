@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -7,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/components/ui/use-toast";
+import { Switch } from "@/components/Switch";
 import {
   Apple, Coffee, Droplet, PlusCircle, Utensils, FileText,
   BarChart, ChevronRight, Clock, CalendarDays, ArrowRight,
@@ -92,13 +94,22 @@ const Nutrition = () => {
           </p>
         </div>
         
-        <Button 
-          onClick={toggleViewMode} 
-          className="mt-4 md:mt-0 flex items-center gap-2 bg-green-600 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-800"
-        >
-          <Layers className="h-4 w-4" />
-          <span>{viewMode === 'classic' ? 'Try New Interface' : 'Classic View'}</span>
-        </Button>
+        <div className="mt-4 md:mt-0 flex items-center gap-3 bg-gradient-to-r from-green-100 to-emerald-100 dark:from-green-900/30 dark:to-emerald-900/30 p-3 rounded-full shadow-md">
+          <span className={`text-sm font-medium transition-colors ${viewMode === 'classic' ? 'text-green-800 dark:text-green-300' : 'text-gray-500 dark:text-gray-400'}`}>
+            Classic View
+          </span>
+          <Switch
+            checked={viewMode === 'new'}
+            onCheckedChange={toggleViewMode}
+            size="lg"
+            className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-green-600 data-[state=checked]:to-emerald-500 data-[state=unchecked]:bg-gradient-to-r data-[state=unchecked]:from-gray-400 data-[state=unchecked]:to-gray-300 relative overflow-hidden group"
+          />
+          <span className={`text-sm font-medium transition-colors ${viewMode === 'new' ? 'text-green-800 dark:text-green-300' : 'text-gray-500 dark:text-gray-400'}`}>
+            New Interface
+          </span>
+          
+          <div className="absolute inset-0 -z-10 bg-green-300 dark:bg-green-700 opacity-0 group-hover:opacity-20 blur-xl rounded-full transition-opacity duration-700"></div>
+        </div>
       </div>
       
       {viewMode === 'classic' ? (
@@ -123,6 +134,20 @@ const ClassicNutritionView = ({ activeTab, setActiveTab }: { activeTab: string, 
       });
     }
   };
+
+  const handleViewFullWeekPlan = () => {
+    toast({
+      title: "Full Week Plan",
+      description: "Viewing your complete meal plan for the week.",
+    });
+  };
+
+  const handleCustomizeMealPlan = () => {
+    toast({
+      title: "Customize Meal Plan",
+      description: "Opening meal plan customization options.",
+    });
+  };
   
   return (
     <div className="space-y-6">
@@ -141,7 +166,7 @@ const ClassicNutritionView = ({ activeTab, setActiveTab }: { activeTab: string, 
                 <div className="text-3xl font-bold mb-2">
                   {data.current}
                   <span className="text-sm text-gray-500 dark:text-gray-400 ml-1">
-                    {data.unit ?? ''}
+                    {data.unit}
                   </span>
                 </div>
                 <Progress 
@@ -149,7 +174,7 @@ const ClassicNutritionView = ({ activeTab, setActiveTab }: { activeTab: string, 
                   className="h-2 w-full mb-1"
                 />
                 <div className="text-xs text-gray-500 dark:text-gray-400">
-                  {data.current} / {data.goal} {data.unit ?? ''}
+                  {data.current} / {data.goal} {data.unit}
                 </div>
               </div>
             </CardContent>
@@ -200,7 +225,15 @@ const ClassicNutritionView = ({ activeTab, setActiveTab }: { activeTab: string, 
                   </div>
                 ))}
                 
-                <Button className="w-full bg-green-600 hover:bg-green-700">
+                <Button 
+                  className="w-full bg-green-600 hover:bg-green-700"
+                  onClick={() => {
+                    toast({
+                      title: "Log New Meal",
+                      description: "Opening form to log a new meal."
+                    });
+                  }}
+                >
                   <PlusCircle className="mr-2 h-4 w-4" />
                   Log New Meal
                 </Button>
@@ -289,7 +322,16 @@ const ClassicNutritionView = ({ activeTab, setActiveTab }: { activeTab: string, 
                 ))}
               </div>
               
-              <Button variant="outline" className="w-full mt-4">
+              <Button 
+                variant="outline" 
+                className="w-full mt-4"
+                onClick={() => {
+                  toast({
+                    title: "Nutrient Analysis",
+                    description: "Opening detailed nutrient analysis."
+                  });
+                }}
+              >
                 <Info className="mr-2 h-4 w-4" />
                 Detailed Nutrient Analysis
               </Button>
@@ -318,12 +360,15 @@ const ClassicNutritionView = ({ activeTab, setActiveTab }: { activeTab: string, 
                 <div>
                   <h3 className="font-medium mb-2">Daily Intake Breakdown</h3>
                   <div className="h-40 w-40 mx-auto relative">
-                    <div className="h-full w-full rounded-full border-8 border-blue-500 overflow-hidden"></div>
-                    <div className="absolute top-0 left-0 h-full bg-green-200 dark:bg-green-900/40 rounded-full" style={{ width: '80%' }}></div>
-                    <div className="absolute top-0 left-0 h-full bg-green-500 dark:bg-green-600 rounded-full" style={{ width: '70%' }}></div>
-                    <div className="absolute inset-0 flex items-center justify-end pr-2">
-                      <span className="text-xs text-gray-700 dark:text-gray-300">1850 / 2200 avg</span>
-                    </div>
+                    <svg viewBox="0 0 100 100" className="w-full h-full">
+                      <circle cx="50" cy="50" r="40" fill="none" stroke="#ddd" strokeWidth="20" />
+                      <circle cx="50" cy="50" r="40" fill="none" stroke="#3b82f6" strokeWidth="20" strokeDasharray="251.2" strokeDashoffset="50.24" transform="rotate(-90 50 50)" />
+                      <circle cx="50" cy="50" r="40" fill="none" stroke="#22c55e" strokeWidth="20" strokeDasharray="251.2" strokeDashoffset="125.6" transform="rotate(-90 50 50)" />
+                      <circle cx="50" cy="50" r="40" fill="none" stroke="#ef4444" strokeWidth="20" strokeDasharray="251.2" strokeDashoffset="188.4" transform="rotate(-90 50 50)" />
+                      <text x="50" y="50" textAnchor="middle" dominantBaseline="middle" fill="currentColor" className="text-sm font-medium">
+                        1850/2200
+                      </text>
+                    </svg>
                   </div>
                   <div className="flex justify-center mt-4 space-x-4">
                     <div className="flex items-center">
@@ -417,7 +462,17 @@ const ClassicNutritionView = ({ activeTab, setActiveTab }: { activeTab: string, 
                         <p className="text-sm">{meal.content}</p>
                         <div className="flex justify-between items-center">
                           <span className="text-sm text-gray-500 dark:text-gray-400">{meal.calories} kcal</span>
-                          <Button variant="ghost" size="sm" className="h-8 px-2">
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="h-8 px-2"
+                            onClick={() => {
+                              toast({
+                                title: "Recipe Details",
+                                description: `Viewing detailed recipe for ${meal.content}.`
+                              });
+                            }}
+                          >
                             Details <ArrowRight className="ml-1 h-3 w-3" />
                           </Button>
                         </div>
@@ -428,11 +483,16 @@ const ClassicNutritionView = ({ activeTab, setActiveTab }: { activeTab: string, 
               </div>
               
               <div className="mt-4 flex justify-between">
-                <Button variant="outline">
+                <Button 
+                  variant="outline"
+                  onClick={handleCustomizeMealPlan}
+                >
                   <Filter className="mr-2 h-4 w-4" />
                   Customize Meal Plan
                 </Button>
-                <Button>
+                <Button
+                  onClick={handleViewFullWeekPlan}
+                >
                   <Bookmark className="mr-2 h-4 w-4" />
                   View Full Week Plan
                 </Button>
@@ -453,7 +513,16 @@ const ClassicNutritionView = ({ activeTab, setActiveTab }: { activeTab: string, 
                     <div className="font-medium text-center mb-2">{day}</div>
                     <div className="space-y-2">
                       {["Breakfast", "Lunch", "Dinner"].map(mealType => (
-                        <div key={mealType} className="border border-dashed rounded p-2 text-center text-sm hover:bg-green-50 dark:hover:bg-green-900/20 cursor-pointer transition-colors">
+                        <div 
+                          key={mealType} 
+                          className="border border-dashed rounded p-2 text-center text-sm hover:bg-green-50 dark:hover:bg-green-900/20 cursor-pointer transition-colors"
+                          onClick={() => {
+                            toast({
+                              title: `${mealType} on ${day}`,
+                              description: "Opening meal editor."
+                            });
+                          }}
+                        >
                           {mealType}
                         </div>
                       ))}
@@ -466,7 +535,17 @@ const ClassicNutritionView = ({ activeTab, setActiveTab }: { activeTab: string, 
                 <h3 className="font-medium">Meal Plan Templates</h3>
                 <div className="flex flex-wrap gap-2">
                   {["Weight Loss", "Muscle Gain", "Vegetarian", "Keto", "Balanced"].map(plan => (
-                    <Badge key={plan} variant="outline" className="cursor-pointer hover:bg-green-50 dark:hover:bg-green-900/20">
+                    <Badge 
+                      key={plan} 
+                      variant="outline" 
+                      className="cursor-pointer hover:bg-green-50 dark:hover:bg-green-900/20"
+                      onClick={() => {
+                        toast({
+                          title: `${plan} Plan Selected`,
+                          description: `Applying the ${plan} meal plan template.`
+                        });
+                      }}
+                    >
                       {plan}
                     </Badge>
                   ))}
@@ -476,11 +555,26 @@ const ClassicNutritionView = ({ activeTab, setActiveTab }: { activeTab: string, 
               <Separator className="my-6" />
               
               <div className="flex justify-between">
-                <Button variant="outline">
+                <Button 
+                  variant="outline"
+                  onClick={() => {
+                    toast({
+                      title: "Plan Saved",
+                      description: "Your current meal plan has been saved."
+                    });
+                  }}
+                >
                   <Bookmark className="mr-2 h-4 w-4" />
                   Save Current Plan
                 </Button>
-                <Button>
+                <Button
+                  onClick={() => {
+                    toast({
+                      title: "New Plan Generated",
+                      description: "A new meal plan has been generated based on your preferences."
+                    });
+                  }}
+                >
                   <RefreshCcw className="mr-2 h-4 w-4" />
                   Generate New Plan
                 </Button>
@@ -509,7 +603,7 @@ const ClassicNutritionView = ({ activeTab, setActiveTab }: { activeTab: string, 
             {[
               {
                 title: "Quinoa Veggie Bowl",
-                image: "/placeholder.svg",
+                image: "https://source.unsplash.com/random/300x200?quinoa",
                 prepTime: "25 min",
                 difficulty: "Easy",
                 calories: 420,
@@ -517,7 +611,7 @@ const ClassicNutritionView = ({ activeTab, setActiveTab }: { activeTab: string, 
               },
               {
                 title: "Grilled Salmon with Asparagus",
-                image: "/placeholder.svg",
+                image: "https://source.unsplash.com/random/300x200?salmon",
                 prepTime: "30 min",
                 difficulty: "Medium",
                 calories: 380,
@@ -525,7 +619,7 @@ const ClassicNutritionView = ({ activeTab, setActiveTab }: { activeTab: string, 
               },
               {
                 title: "Berry Protein Smoothie",
-                image: "/placeholder.svg",
+                image: "https://source.unsplash.com/random/300x200?smoothie",
                 prepTime: "10 min",
                 difficulty: "Easy",
                 calories: 310,
@@ -533,7 +627,10 @@ const ClassicNutritionView = ({ activeTab, setActiveTab }: { activeTab: string, 
               }
             ].map((recipe, idx) => (
               <Card key={idx} className="overflow-hidden hover:shadow-lg transition-shadow">
-                <div className="h-48 bg-gray-200 dark:bg-gray-700 relative">
+                <div 
+                  className="h-48 bg-cover bg-center relative" 
+                  style={{ backgroundImage: `url(${recipe.image})` }}
+                >
                   <div className="absolute top-2 right-2">
                     <Badge className="bg-green-600">{recipe.calories} kcal</Badge>
                   </div>
@@ -553,7 +650,15 @@ const ClassicNutritionView = ({ activeTab, setActiveTab }: { activeTab: string, 
                       </Badge>
                     ))}
                   </div>
-                  <Button className="w-full mt-3 bg-green-600 hover:bg-green-700">
+                  <Button 
+                    className="w-full mt-3 bg-green-600 hover:bg-green-700"
+                    onClick={() => {
+                      toast({
+                        title: recipe.title,
+                        description: "Viewing detailed recipe instructions."
+                      });
+                    }}
+                  >
                     View Recipe
                   </Button>
                 </CardContent>
@@ -562,7 +667,15 @@ const ClassicNutritionView = ({ activeTab, setActiveTab }: { activeTab: string, 
           </div>
           
           <div className="text-center mt-6">
-            <Button variant="outline">
+            <Button 
+              variant="outline"
+              onClick={() => {
+                toast({
+                  title: "More Recipes",
+                  description: "Loading additional recipe suggestions."
+                });
+              }}
+            >
               Load More Recipes <ArrowDown className="ml-2 h-4 w-4" />
             </Button>
           </div>
