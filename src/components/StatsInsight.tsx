@@ -1,9 +1,7 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getWeeklyStats, getStreakCount } from "@/utils/fitnessData";
 import { BarChart, Bar, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts";
 import { Award, TrendingUp, Zap, BarChart as BarChartIcon } from "lucide-react";
-
 const StatsInsight = () => {
   const weeklyStats = getWeeklyStats();
   const streakCount = getStreakCount();
@@ -17,19 +15,27 @@ const StatsInsight = () => {
       d.setDate(today.getDate() - (6 - idx));
       return days[d.getDay()];
     });
-    
     return dayLabels[6]; // For demo, we'll just return the last day
   };
 
   // Performance data for the chart
-  const performanceData = [
-    { name: 'Steps', target: 10000, current: weeklyStats.averageSteps, fill: "#3B82F6" },
-    { name: 'Calories', target: 500, current: weeklyStats.averageCalories, fill: "#F97316" },
-    { name: 'Distance', target: 8, current: weeklyStats.averageDistance * 10, fill: "#10B981" }
-  ];
-
-  return (
-    <Card className="shadow">
+  const performanceData = [{
+    name: 'Steps',
+    target: 10000,
+    current: weeklyStats.averageSteps,
+    fill: "#3B82F6"
+  }, {
+    name: 'Calories',
+    target: 500,
+    current: weeklyStats.averageCalories,
+    fill: "#F97316"
+  }, {
+    name: 'Distance',
+    target: 8,
+    current: weeklyStats.averageDistance * 10,
+    fill: "#10B981"
+  }];
+  return <Card className="shadow">
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <CardTitle className="text-xl font-bold">Insights & Analytics</CardTitle>
@@ -41,38 +47,40 @@ const StatsInsight = () => {
           <div className="bg-blue-50 p-3 rounded-lg">
             <div className="flex items-center">
               <Award className="h-5 w-5 text-blue-500 mr-2" />
-              <span className="text-sm font-medium">Streak</span>
+              <span className="text-sm font-medium text-blue-600">Streak</span>
             </div>
-            <p className="text-2xl font-bold mt-1">{streakCount} days</p>
+            <p className="text-2xl font-bold mt-1 text-slate-950">{streakCount} days</p>
             <p className="text-xs text-gray-500">Goal achievement</p>
           </div>
           <div className="bg-green-50 p-3 rounded-lg">
             <div className="flex items-center">
               <TrendingUp className="h-5 w-5 text-green-500 mr-2" />
-              <span className="text-sm font-medium">Best Day</span>
+              <span className="text-sm font-medium text-green-500">Best Day</span>
             </div>
-            <p className="text-2xl font-bold mt-1">{getBestDay()}</p>
+            <p className="text-2xl font-bold mt-1 text-slate-950">{getBestDay()}</p>
             <p className="text-xs text-gray-500">Highest steps</p>
           </div>
           <div className="bg-orange-50 p-3 rounded-lg">
             <div className="flex items-center">
               <Zap className="h-5 w-5 text-orange-500 mr-2" />
-              <span className="text-sm font-medium">Weekly Avg</span>
+              <span className="text-sm font-medium text-orange-500">Weekly Avg</span>
             </div>
-            <p className="text-2xl font-bold mt-1">{weeklyStats.averageSteps}</p>
+            <p className="text-2xl font-bold mt-1 text-slate-950">{weeklyStats.averageSteps}</p>
             <p className="text-xs text-gray-500">Daily steps</p>
           </div>
         </div>
         
         <div className="h-40 mb-2">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={performanceData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+            <BarChart data={performanceData} margin={{
+            top: 5,
+            right: 20,
+            left: 0,
+            bottom: 5
+          }}>
               <XAxis dataKey="name" />
               <YAxis hide />
-              <Tooltip 
-                formatter={(value, name) => [value, `${name} ${name === 'Distance' ? '(km)' : ''}`]} 
-                labelFormatter={() => 'Average'} 
-              />
+              <Tooltip formatter={(value, name) => [value, `${name} ${name === 'Distance' ? '(km)' : ''}`]} labelFormatter={() => 'Average'} />
               <Bar dataKey="current" fill="#3B82F6" radius={[4, 4, 0, 0]} />
               <Bar dataKey="target" fill="#E5E7EB" radius={[4, 4, 0, 0]} />
             </BarChart>
@@ -89,8 +97,6 @@ const StatsInsight = () => {
           </div>
         </div>
       </CardContent>
-    </Card>
-  );
+    </Card>;
 };
-
 export default StatsInsight;
