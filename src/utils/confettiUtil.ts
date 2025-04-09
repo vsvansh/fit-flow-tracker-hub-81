@@ -2,8 +2,19 @@
 // A utility file for canvas-confetti configurations and helpers
 import confetti from 'canvas-confetti';
 
-export const launchConfetti = (options?: any) => {
-  const defaultOptions = {
+interface ConfettiOptions {
+  particleCount?: number;
+  spread?: number;
+  origin?: {
+    x?: number;
+    y?: number;
+  };
+  colors?: string[];
+  [key: string]: any;
+}
+
+export const launchConfetti = (options?: ConfettiOptions) => {
+  const defaultOptions: ConfettiOptions = {
     particleCount: 100,
     spread: 70,
     origin: { y: 0.6 }
