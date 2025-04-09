@@ -1,8 +1,9 @@
+
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { 
   Footprints, Menu, X, Bell, Settings, LogOut, 
-  User, Home, Activity, Utensils, Medal, Users
+  User, Home, Activity, Utensils, Medal, Users, Moon, Sun
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { 
@@ -26,10 +27,13 @@ import {
   SheetClose,
 } from "@/components/ui/sheet";
 import { mockUser } from "@/utils/fitnessData-extension";
+import { useTheme } from "@/providers/ThemeProvider";
+import NotificationCenter from "./NotificationCenter";
 
 const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { theme, toggleTheme } = useTheme();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [avatar, setAvatar] = useState(getCurrentAvatar());
@@ -127,20 +131,19 @@ const Navbar = () => {
           <div className="flex items-center space-x-4">
             <Button
               variant="ghost"
-              size="sm"
-              className="relative rounded-full"
-              onClick={handleNotificationsClick}
+              size="icon"
+              onClick={toggleTheme}
+              className="rounded-full"
+              aria-label="Toggle theme"
             >
-              <Bell className="h-5 w-5" />
-              {notificationCount > 0 && (
-                <Badge
-                  className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-red-500"
-                  variant="destructive"
-                >
-                  {notificationCount}
-                </Badge>
+              {theme === 'dark' ? (
+                <Sun className="h-5 w-5" />
+              ) : (
+                <Moon className="h-5 w-5" />
               )}
             </Button>
+            
+            <NotificationCenter />
             
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

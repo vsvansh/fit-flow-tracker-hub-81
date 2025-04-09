@@ -22,38 +22,20 @@ const Footer = () => {
     form.reset();
   };
   
-  const handleAboutClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    toast({
-      title: "About Us",
-      description: "FitFlow is a comprehensive fitness tracking platform designed to help you achieve your health goals."
-    });
+  const handleAboutClick = () => {
+    navigate("/about");
   };
   
-  const handleCareersClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    toast({
-      title: "Careers",
-      description: "Join our team at FitFlow and help build the future of fitness technology."
-    });
+  const handleCareersClick = () => {
+    navigate("/careers");
   };
   
-  const handlePrivacyClick = (e: React.MouseEvent) => {
-    e.preventDefault();
+  const handlePrivacyClick = () => {
     navigate("/privacy-policy");
-    toast({
-      title: "Privacy Policy",
-      description: "We're committed to protecting your privacy and personal data."
-    });
   };
   
-  const handleTermsClick = (e: React.MouseEvent) => {
-    e.preventDefault();
+  const handleTermsClick = () => {
     navigate("/terms");
-    toast({
-      title: "Terms of Service",
-      description: "By using FitFlow, you agree to our Terms of Service."
-    });
   };
   
   const handleSocialMediaClick = (platform: string) => (e: React.MouseEvent) => {
@@ -138,40 +120,40 @@ const Footer = () => {
             <h3 className="font-medium text-base">Company</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <a 
-                  href="#" 
-                  className="text-gray-600 dark:text-gray-400 hover:text-brand-600 dark:hover:text-brand-400 transition-colors duration-200"
+                <Button 
+                  variant="link" 
+                  className="text-gray-600 dark:text-gray-400 hover:text-brand-600 dark:hover:text-brand-400 transition-colors duration-200 p-0 h-auto font-normal"
                   onClick={handleAboutClick}
                 >
                   About Us
-                </a>
+                </Button>
               </li>
               <li>
-                <a 
-                  href="#" 
-                  className="text-gray-600 dark:text-gray-400 hover:text-brand-600 dark:hover:text-brand-400 transition-colors duration-200"
+                <Button 
+                  variant="link" 
+                  className="text-gray-600 dark:text-gray-400 hover:text-brand-600 dark:hover:text-brand-400 transition-colors duration-200 p-0 h-auto font-normal"
                   onClick={handleCareersClick}
                 >
                   Careers
-                </a>
+                </Button>
               </li>
               <li>
-                <a 
-                  href="#" 
-                  className="text-gray-600 dark:text-gray-400 hover:text-brand-600 dark:hover:text-brand-400 transition-colors duration-200"
+                <Button 
+                  variant="link" 
+                  className="text-gray-600 dark:text-gray-400 hover:text-brand-600 dark:hover:text-brand-400 transition-colors duration-200 p-0 h-auto font-normal"
                   onClick={handlePrivacyClick}
                 >
                   Privacy Policy
-                </a>
+                </Button>
               </li>
               <li>
-                <a 
-                  href="#" 
-                  className="text-gray-600 dark:text-gray-400 hover:text-brand-600 dark:hover:text-brand-400 transition-colors duration-200"
+                <Button 
+                  variant="link" 
+                  className="text-gray-600 dark:text-gray-400 hover:text-brand-600 dark:hover:text-brand-400 transition-colors duration-200 p-0 h-auto font-normal"
                   onClick={handleTermsClick}
                 >
                   Terms of Service
-                </a>
+                </Button>
               </li>
             </ul>
           </div>

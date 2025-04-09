@@ -1,10 +1,15 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getWeeklyStats, getStreakCount } from "@/utils/fitnessData";
 import { BarChart, Bar, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts";
 import { Award, TrendingUp, Zap, BarChart as BarChartIcon } from "lucide-react";
+import { useState } from "react";
+import { launchConfetti } from "@/utils/confettiUtil";
+
 const StatsInsight = () => {
   const weeklyStats = getWeeklyStats();
   const streakCount = getStreakCount();
+  const [activeBar, setActiveBar] = useState<string | null>(null);
 
   // Find best performing day based on steps
   const getBestDay = () => {
@@ -35,7 +40,22 @@ const StatsInsight = () => {
     current: weeklyStats.averageDistance * 10,
     fill: "#10B981"
   }];
-  return <Card className="shadow">
+
+  const handleBarHover = (name: string) => {
+    setActiveBar(name);
+  };
+
+  const handleBarClick = (name: string) => {
+    setActiveBar(name);
+    launchConfetti({
+      particleCount: 20,
+      spread: 50,
+      origin: { y: 0.5 }
+    });
+  };
+
+  return (
+    <Card className="shadow transform transition-all duration-300 hover:shadow-lg">
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <CardTitle className="text-xl font-bold">Insights & Analytics</CardTitle>
@@ -44,45 +64,69 @@ const StatsInsight = () => {
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-3 gap-4 mb-6">
-          <div className="bg-blue-50 p-3 rounded-lg">
+          <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg transform transition-all duration-300 hover:scale-105 hover:shadow-md">
             <div className="flex items-center">
               <Award className="h-5 w-5 text-blue-500 mr-2" />
               <span className="text-sm font-medium text-blue-600">Streak</span>
             </div>
-            <p className="text-2xl font-bold mt-1 text-slate-950">{streakCount} days</p>
-            <p className="text-xs text-gray-500">Goal achievement</p>
+            <p className="text-2xl font-bold mt-1 text-slate-950 dark:text-slate-100">{streakCount} days</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Goal achievement</p>
           </div>
-          <div className="bg-green-50 p-3 rounded-lg">
+          <div className="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg transform transition-all duration-300 hover:scale-105 hover:shadow-md">
             <div className="flex items-center">
               <TrendingUp className="h-5 w-5 text-green-500 mr-2" />
               <span className="text-sm font-medium text-green-500">Best Day</span>
             </div>
-            <p className="text-2xl font-bold mt-1 text-slate-950">{getBestDay()}</p>
-            <p className="text-xs text-gray-500">Highest steps</p>
+            <p className="text-2xl font-bold mt-1 text-slate-950 dark:text-slate-100">{getBestDay()}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Highest steps</p>
           </div>
-          <div className="bg-orange-50 p-3 rounded-lg">
+          <div className="bg-orange-50 dark:bg-orange-900/20 p-3 rounded-lg transform transition-all duration-300 hover:scale-105 hover:shadow-md">
             <div className="flex items-center">
               <Zap className="h-5 w-5 text-orange-500 mr-2" />
               <span className="text-sm font-medium text-orange-500">Weekly Avg</span>
             </div>
-            <p className="text-2xl font-bold mt-1 text-slate-950">{weeklyStats.averageSteps}</p>
-            <p className="text-xs text-gray-500">Daily steps</p>
+            <p className="text-2xl font-bold mt-1 text-slate-950 dark:text-slate-100">{weeklyStats.averageSteps}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Daily steps</p>
           </div>
         </div>
         
         <div className="h-40 mb-2">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={performanceData} margin={{
-            top: 5,
-            right: 20,
-            left: 0,
-            bottom: 5
-          }}>
+            <BarChart 
+              data={performanceData} 
+              margin={{
+                top: 5,
+                right: 20,
+                left: 0,
+                bottom: 5
+              }}
+              onMouseLeave={() => setActiveBar(null)}
+            >
               <XAxis dataKey="name" />
               <YAxis hide />
-              <Tooltip formatter={(value, name) => [value, `${name} ${name === 'Distance' ? '(km)' : ''}`]} labelFormatter={() => 'Average'} />
-              <Bar dataKey="current" fill="#3B82F6" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="target" fill="#E5E7EB" radius={[4, 4, 0, 0]} />
+              <Tooltip 
+                formatter={(value, name) => [value, `${name} ${name === 'Distance' ? '(km)' : ''}`]} 
+                labelFormatter={() => 'Average'} 
+                cursor={{fill: 'transparent'}}
+              />
+              <Bar 
+                dataKey="current" 
+                fill="#3B82F6"
+                radius={[4, 4, 0, 0]} 
+                className={`transition-transform duration-300`}
+                onMouseEnter={(data) => handleBarHover(data.name)}
+                onClick={(data) => handleBarClick(data.name)}
+                style={{
+                  filter: activeBar ? 'drop-shadow(0 0 6px rgba(59, 130, 246, 0.4))' : 'none',
+                  transform: `translateY(${activeBar ? -5 : 0}px)`
+                }}
+              />
+              <Bar 
+                dataKey="target" 
+                fill="#E5E7EB" 
+                radius={[4, 4, 0, 0]}
+                className="dark:fill-gray-700"
+              />
             </BarChart>
           </ResponsiveContainer>
           <div className="flex justify-center space-x-6 text-sm">
@@ -91,12 +135,14 @@ const StatsInsight = () => {
               <span>Current</span>
             </div>
             <div className="flex items-center">
-              <div className="w-3 h-3 rounded-full bg-gray-200 mr-1"></div>
+              <div className="w-3 h-3 rounded-full bg-gray-200 dark:bg-gray-700 mr-1"></div>
               <span>Target</span>
             </div>
           </div>
         </div>
       </CardContent>
-    </Card>;
+    </Card>
+  );
 };
+
 export default StatsInsight;

@@ -19,7 +19,10 @@ import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import BackToTop from "./components/BackToTop";
 import Nutrition from "./pages/Nutrition";
-import FoodNutritionTracker from "./components/FoodNutritionTracker";
+import About from "./pages/About";
+import Careers from "./pages/Careers";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import Terms from "./pages/Terms";
 
 const queryClient = new QueryClient();
 
@@ -49,6 +52,10 @@ const AnimatedRoutes = () => {
           <Route path="/challenges" element={<Challenges />} />
           <Route path="/social" element={<Social />} />
           <Route path="/nutrition" element={<Nutrition />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/careers" element={<Careers />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/terms" element={<Terms />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </motion.div>
@@ -57,8 +64,9 @@ const AnimatedRoutes = () => {
 };
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <ThemeProvider defaultTheme="dark">
+  <QueryClient
+Provider client={queryClient}>
+    <ThemeProvider>
       <TooltipProvider>
         <Toaster />
         <Sonner />

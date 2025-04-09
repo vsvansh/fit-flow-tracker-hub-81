@@ -8,17 +8,12 @@ import { Label } from './ui/label';
 import { Edit2 } from 'lucide-react';
 import { toast } from './ui/use-toast';
 import { Slider } from './ui/slider';
+import { launchConfetti } from '@/utils/confettiUtil';
 
 const WaterTrackerWithEdit = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [totalGlasses, setTotalGlasses] = useState(8);
   const [inputValue, setInputValue] = useState('8');
-
-  // Pass totalGlasses to WaterTracker
-  useEffect(() => {
-    // This effect passes the updated totalGlasses value to the WaterTracker component
-    // This would be handled with context or props in a real application
-  }, [totalGlasses]);
 
   const handleSave = () => {
     const newTotal = parseInt(inputValue, 10);
@@ -37,6 +32,11 @@ const WaterTrackerWithEdit = () => {
     toast({
       title: "Water goal updated",
       description: `Your daily water goal is now ${newTotal} glasses`,
+    });
+    
+    launchConfetti({
+      particleCount: 30,
+      spread: 60
     });
   };
 

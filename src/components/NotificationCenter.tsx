@@ -61,8 +61,7 @@ const NotificationCenter = () => {
     },
   ]);
   
-  const [open, setOpen] = useState(false);
-
+  const [isOpen, setIsOpen] = useState(false);
   const unreadCount = notifications.filter(n => !n.read).length;
 
   const markAsRead = (id: string) => {
@@ -83,33 +82,23 @@ const NotificationCenter = () => {
     });
   };
   
-  useEffect(() => {
-    // Add scroll to top functionality for all page transitions
-    const scrollToTop = () => {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    };
-    
-    document.addEventListener('click', (e) => {
-      const target = e.target as HTMLElement;
-      if (target.tagName === 'A' && target.getAttribute('href')?.startsWith('/')) {
-        scrollToTop();
-      }
+  const viewAllNotifications = () => {
+    setIsOpen(false);
+    toast({
+      title: "View All Notifications",
+      description: "In a fully implemented app, this would take you to a notifications page.",
     });
-    
-    return () => {
-      document.removeEventListener('click', scrollToTop);
-    };
-  }, []);
+  };
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
         <Button 
-          variant="outline" 
+          variant="ghost" 
           size="icon"
-          className="relative h-9 w-9 hover:scale-105 transition-transform"
+          className="relative h-9 w-9 rounded-full hover:scale-105 transition-transform"
         >
-          <Bell className="h-4 w-4" />
+          <Bell className="h-5 w-5" />
           <AnimatePresence>
             {unreadCount > 0 && (
               <motion.span 
@@ -202,9 +191,7 @@ const NotificationCenter = () => {
             variant="ghost" 
             size="sm" 
             className="text-xs w-full"
-            onClick={() => {
-              setOpen(false);
-            }}
+            onClick={viewAllNotifications}
           >
             View all notifications
           </Button>

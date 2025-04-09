@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import { Input } from "@/components/ui/input";
+import { launchConfetti } from '@/utils/confettiUtil';
 
 interface WaterTrackerProps {
   dailyGoal?: number;
@@ -32,6 +33,14 @@ const WaterTracker: React.FC<WaterTrackerProps> = ({ dailyGoal = 8 }) => {
         title: "Water added",
         description: "One glass of water added to your tracker. Stay hydrated!",
       });
+      
+      if (waterIntake + 1 === dailyWaterTarget) {
+        launchConfetti();
+        toast({
+          title: "Goal reached!",
+          description: "You've reached your daily water intake goal! 💧",
+        });
+      }
     } else {
       toast({
         title: "Daily goal reached",
@@ -122,7 +131,8 @@ const WaterTracker: React.FC<WaterTrackerProps> = ({ dailyGoal = 8 }) => {
       <CardContent className="pt-2 text-center">
         <div className="flex flex-col items-center justify-center py-2">
           <div className="relative w-24 h-24 mb-2">
-            <svg className="w-full h-full" viewBox="0 0 100 100">
+            <div className="w-full h-full rounded-full border-4 border-gray-100 dark:border-gray-700"></div>
+            <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100">
               <circle 
                 cx="50" 
                 cy="50" 
@@ -140,7 +150,7 @@ const WaterTracker: React.FC<WaterTrackerProps> = ({ dailyGoal = 8 }) => {
                 stroke="#3b82f6" 
                 strokeWidth="8" 
                 strokeLinecap="round"
-                strokeDasharray={`${(waterIntake / dailyWaterTarget) * 251} 251`}
+                strokeDasharray={`${(waterIntake / dailyWaterTarget) * 251.2} 251.2`}
                 transform="rotate(-90 50 50)"
                 className="progress-animate"
               />
