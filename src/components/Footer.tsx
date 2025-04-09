@@ -1,29 +1,22 @@
-
 import { Link } from "react-router-dom";
 import { Footprints, Github, Twitter, Instagram, Facebook, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "@/components/ui/use-toast";
-
 const Footer = () => {
   const currentYear = new Date().getFullYear();
-  
   const handleSubscribe = (e: React.FormEvent) => {
     e.preventDefault();
     const form = e.target as HTMLFormElement;
     const email = (form.elements.namedItem('email') as HTMLInputElement).value;
-    
     toast({
       title: "Newsletter subscription successful!",
-      description: `You've subscribed to our newsletter with: ${email}`,
+      description: `You've subscribed to our newsletter with: ${email}`
     });
-    
     form.reset();
   };
-
-  return (
-    <footer className="bg-gray-50 dark:bg-gray-900 pt-12 pb-8 mt-16 border-t border-gray-200 dark:border-gray-800">
+  return <footer className="bg-gray-50 dark:bg-gray-900 pt-12 pb-8 mt-16 border-t border-gray-200 dark:border-gray-800">
       <div className="container px-4 mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
           <div className="space-y-4">
@@ -109,13 +102,7 @@ const Footer = () => {
             </p>
             <form onSubmit={handleSubscribe} className="space-y-2">
               <div className="flex space-x-2">
-                <Input 
-                  type="email" 
-                  name="email" 
-                  placeholder="Your email address" 
-                  className="h-9"
-                  required 
-                />
+                <Input type="email" name="email" placeholder="Your email address" className="h-9" required />
                 <Button type="submit" size="sm" className="primary-button">
                   Subscribe
                 </Button>
@@ -134,12 +121,10 @@ const Footer = () => {
           <div className="flex items-center space-x-1 mt-2 md:mt-0">
             <span>Made with</span>
             <Heart className="h-4 w-4 text-red-500 fill-red-500" />
-            <span>by the FitFlow Team</span>
+            <span>by Vansh Singla | FitFlow</span>
           </div>
         </div>
       </div>
-    </footer>
-  );
+    </footer>;
 };
-
 export default Footer;
