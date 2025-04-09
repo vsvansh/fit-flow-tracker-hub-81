@@ -57,21 +57,37 @@ const ProgressCircle = ({
     "bg-indigo-500": "stroke-indigo-500",
   };
 
+  const glowColorVariants = {
+    "bg-blue-500": "progress-circle-blue",
+    "bg-green-500": "progress-circle-green",
+    "bg-orange-500": "progress-circle-orange",
+    "bg-red-500": "filter drop-shadow(0 0 6px rgba(239, 68, 68, 0.5))",
+    "bg-purple-500": "filter drop-shadow(0 0 6px rgba(168, 85, 247, 0.5))",
+    "bg-yellow-500": "filter drop-shadow(0 0 6px rgba(234, 179, 8, 0.5))",
+    "bg-pink-500": "filter drop-shadow(0 0 6px rgba(236, 72, 153, 0.5))",
+    "bg-indigo-500": "filter drop-shadow(0 0 6px rgba(99, 102, 241, 0.5))",
+  };
+
   const strokeColor = colorVariants[color as keyof typeof colorVariants] || "stroke-blue-500";
+  const glowEffect = glowColorVariants[color as keyof typeof glowColorVariants];
   
-  // Calculate text color based on progress
+  // Calculate text color based on the provided color
   const getTextColor = () => {
-    if (percentage >= 100) return "text-green-600";
-    if (percentage >= 75) return "text-blue-600";
-    if (percentage >= 50) return "text-orange-500";
-    return "text-red-500";
+    if (color === "bg-green-500") return "text-green-600 dark:text-green-400";
+    if (color === "bg-orange-500") return "text-orange-600 dark:text-orange-400";
+    if (color === "bg-red-500") return "text-red-600 dark:text-red-400";
+    if (color === "bg-purple-500") return "text-purple-600 dark:text-purple-400";
+    if (color === "bg-yellow-500") return "text-yellow-600 dark:text-yellow-400";
+    if (color === "bg-pink-500") return "text-pink-600 dark:text-pink-400";
+    if (color === "bg-indigo-500") return "text-indigo-600 dark:text-indigo-400";
+    return "text-blue-600 dark:text-blue-400"; // Default
   };
 
   return (
     <div className="flex flex-col items-center justify-center">
       <div className={cn("relative", sizeClasses[size])}>
         {/* Background circle */}
-        <svg className="w-full h-full" viewBox="0 0 100 100">
+        <svg className={`w-full h-full ${glowEffect}`} viewBox="0 0 100 100">
           <circle
             cx="50"
             cy="50"
@@ -86,7 +102,7 @@ const ProgressCircle = ({
             cy="50"
             r="38"
             fill="none"
-            className={strokeColor}
+            className={cn(strokeColor)}
             strokeWidth="8"
             strokeDasharray={circumference}
             strokeDashoffset={strokeDashoffset}
@@ -102,7 +118,7 @@ const ProgressCircle = ({
           <span className="text-xs text-gray-500">{unit}</span>
         </div>
       </div>
-      <span className="mt-2 text-sm font-medium text-gray-700">{label}</span>
+      <span className="mt-2 text-sm font-medium text-gray-700 dark:text-gray-300">{label}</span>
       <span className="text-xs text-gray-500">
         {percentage.toFixed(0)}% of {max} {unit}
       </span>

@@ -20,7 +20,7 @@ import {
 import { userProfile } from "@/utils/fitnessData";
 import { cn } from "@/lib/utils";
 import { Badge } from "./ui/badge";
-import { useToast } from "@/components/ui/use-toast";
+import NotificationCenter from "./NotificationCenter";
 import {
   Sheet,
   SheetContent,
@@ -43,7 +43,7 @@ const Navbar = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(true);
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { toast } = useToast();
+  const [userAvatar, setUserAvatar] = useState(userProfile.avatar || "/placeholder.svg");
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -62,23 +62,41 @@ const Navbar = () => {
       setIsScrolled(window.scrollY > 10);
     };
     window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    
+    // Subscribe to profile avatar changes
+    const handleStorageChange = () => {
+      const storedAvatar = localStorage.getItem('userAvatar');
+      if (storedAvatar) {
+        setUserAvatar(storedAvatar);
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Check for existing avatar in localStorage
+    const storedAvatar = localStorage.getItem('userAvatar');
+    if (storedAvatar) {
+      setUserAvatar(storedAvatar);
+    }
+    
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, []);
+
+  // Function to handle route changes and scroll to top
+  const handleRouteChange = (path: string) => {
+    navigate(path);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const handleLogin = () => {
     setIsLoggedIn(true);
-    toast({
-      title: "Logged in successfully",
-      description: "Welcome to FitFlow Tracker!",
-    });
   };
 
   const handleLogout = () => {
     setIsLoggedIn(false);
-    toast({
-      title: "Logged out successfully",
-      description: "See you soon!",
-    });
   };
 
   return (
@@ -93,8 +111,8 @@ const Navbar = () => {
       <div className="container flex h-16 items-center justify-between">
         <div className="flex items-center gap-2 md:gap-10">
           <div className="flex items-center">
-            <Link to="/" className="flex items-center gap-2 mr-2">
-              <Footprints className="h-6 w-6 text-brand-600 dark:text-brand-400" />
+            <Link to="/" className="flex items-center gap-2 mr-2" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+              <Footprints className="h-6 w-6 text-blue-600 dark:text-blue-400" />
               <span className="font-bold text-xl hidden sm:inline-block gradient-text">FitFlow</span>
             </Link>
             {/* Mobile menu trigger */}
@@ -109,7 +127,7 @@ const Navbar = () => {
                 <SheetHeader>
                   <SheetTitle>
                     <div className="flex items-center gap-2">
-                      <Footprints className="h-6 w-6 text-brand-600" />
+                      <Footprints className="h-6 w-6 text-blue-600" />
                       <span className="font-bold text-xl">FitFlow</span>
                     </div>
                   </SheetTitle>
@@ -118,7 +136,7 @@ const Navbar = () => {
                   {isLoggedIn && (
                     <div className="flex items-center gap-3 mb-6 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <Avatar>
-                        <AvatarImage src="/placeholder.svg" alt={userProfile.name} />
+                        <AvatarImage src={userAvatar} alt={userProfile.name} />
                         <AvatarFallback>{userProfile.name.charAt(0)}</AvatarFallback>
                       </Avatar>
                       <div>
@@ -132,10 +150,11 @@ const Navbar = () => {
                       <SheetClose asChild key={item.path}>
                         <Link 
                           to={item.path}
+                          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
                           className={cn(
                             "flex items-center py-2 px-3 text-sm rounded-md w-full",
                             location.pathname === item.path
-                              ? "bg-brand-50 dark:bg-brand-900/20 text-brand-700 dark:text-brand-400 font-medium"
+                              ? "bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 font-medium"
                               : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
                           )}
                         >
@@ -203,17 +222,19 @@ const Navbar = () => {
               <Link
                 key={item.path}
                 to={item.path}
+                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
                 className={cn(
-                  "text-sm font-medium transition-colors hover:text-brand-600 dark:hover:text-brand-400 flex items-center",
+                  "text-sm font-medium transition-colors hover:text-blue-600 dark:hover:text-blue-400 flex items-center",
                   location.pathname === item.path 
-                    ? "text-brand-700 dark:text-brand-400"
+                    ? "text-blue-700 dark:text-blue-400"
                     : "text-gray-700 dark:text-gray-300"
                 )}
               >
+                {item.icon}
                 {item.name}
                 {location.pathname === item.path && (
                   <motion.div 
-                    className="absolute bottom-0 left-0 h-0.5 w-full bg-brand-500"
+                    className="absolute bottom-0 left-0 h-0.5 w-full bg-blue-500"
                     layoutId="navbar-indicator"
                     transition={{ type: "spring", stiffness: 500, damping: 30 }}
                   />
@@ -239,19 +260,14 @@ const Navbar = () => {
             )}
           </Button>
           
-          <Button variant="ghost" size="icon" className="rounded-full relative" aria-label="Notifications">
-            <Bell className="h-5 w-5" />
-            <Badge variant="destructive" className="absolute -top-1 -right-1 h-4 w-4 p-0 flex items-center justify-center">
-              3
-            </Badge>
-          </Button>
+          <NotificationCenter />
 
           {isLoggedIn ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="rounded-full h-9 p-1 flex items-center gap-2" aria-label="User menu">
                   <Avatar className="h-7 w-7">
-                    <AvatarImage src="/placeholder.svg" alt={userProfile.name} />
+                    <AvatarImage src={userAvatar} alt={userProfile.name} />
                     <AvatarFallback>{userProfile.name.charAt(0)}</AvatarFallback>
                   </Avatar>
                   <span className="hidden lg:inline-block text-sm font-medium">{userProfile.name}</span>
@@ -261,11 +277,11 @@ const Navbar = () => {
               <DropdownMenuContent align="end" className="w-56">
                 <DropdownMenuLabel>My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => navigate("/profile")} className="cursor-pointer">
+                <DropdownMenuItem onClick={() => handleRouteChange("/profile")} className="cursor-pointer">
                   <User className="mr-2 h-4 w-4" />
                   <span>Profile</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate("/settings")} className="cursor-pointer">
+                <DropdownMenuItem onClick={() => handleRouteChange("/settings")} className="cursor-pointer">
                   <Settings className="mr-2 h-4 w-4" />
                   <span>Settings</span>
                 </DropdownMenuItem>

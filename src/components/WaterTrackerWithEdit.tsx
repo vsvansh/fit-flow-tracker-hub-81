@@ -7,6 +7,7 @@ import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Edit2 } from 'lucide-react';
 import { toast } from './ui/use-toast';
+import { Slider } from './ui/slider';
 
 const WaterTrackerWithEdit = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -71,6 +72,24 @@ const WaterTrackerWithEdit = () => {
                 min="1"
                 max="20"
               />
+            </div>
+            <div className="py-2">
+              <Label className="mb-2 block">Quick select:</Label>
+              <Slider 
+                value={[parseInt(inputValue) || 8]} 
+                min={1} 
+                max={20} 
+                step={1}
+                onValueChange={(value) => setInputValue(value[0].toString())}
+                className="py-4"
+              />
+              <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                <span>1</span>
+                <span>5</span>
+                <span>10</span>
+                <span>15</span>
+                <span>20</span>
+              </div>
             </div>
           </div>
           <DialogFooter>

@@ -6,7 +6,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Users, MessageSquare, Heart, Share2, Award, Activity, MoreHorizontal, Send, Image as ImageIcon, PlusCircle, Medal, Calendar } from "lucide-react";
+import { 
+  Users, MessageSquare, Heart, Share2, Award, Activity, 
+  MoreHorizontal, Send, ImageIcon, PlusCircle, Medal, 
+  Calendar, Loader2, Search, Bell, UserPlus
+} from "lucide-react";
 import BackToHome from "@/components/BackToHome";
 import { useToast } from "@/components/ui/use-toast";
 import { motion } from "framer-motion";
@@ -46,7 +50,7 @@ const Social = () => {
       id: "1",
       user: {
         name: "Sarah Johnson",
-        avatar: "/placeholder.svg",
+        avatar: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=256&q=80",
       },
       content: "Just completed my daily 10,000 steps goal! Feeling energized and ready for the day.",
       timestamp: "10 minutes ago",
@@ -59,7 +63,7 @@ const Social = () => {
       id: "2",
       user: {
         name: "Mike Wilson",
-        avatar: "/placeholder.svg",
+        avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=256&q=80",
       },
       content: "Earned the 'Early Bird' badge for completing 5,000 steps before 8 AM!",
       timestamp: "45 minutes ago",
@@ -73,6 +77,7 @@ const Social = () => {
       id: "3",
       user: {
         name: "Emma Davis",
+        avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=256&q=80",
       },
       content: "Just invited you to the '50K Weekly Steps' challenge. Join now!",
       timestamp: "2 hours ago",
@@ -85,7 +90,7 @@ const Social = () => {
       id: "4",
       user: {
         name: "Alex Thompson",
-        avatar: "/placeholder.svg",
+        avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=256&q=80",
       },
       content: "Burned 750 calories during today's HIIT workout! Loving the progress I'm seeing this month.",
       timestamp: "3 hours ago",
@@ -98,12 +103,14 @@ const Social = () => {
   ]);
   
   const [postText, setPostText] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [friendsLoading, setFriendsLoading] = useState(false);
   
   const [friends, setFriends] = useState<Friend[]>([
     {
       id: "1",
       name: "Sarah Johnson",
-      avatar: "/placeholder.svg",
+      avatar: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=256&q=80",
       active: true,
       streak: 7,
       stats: {
@@ -114,7 +121,7 @@ const Social = () => {
     {
       id: "2",
       name: "Mike Wilson",
-      avatar: "/placeholder.svg",
+      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=256&q=80",
       active: false,
       lastActive: "2h ago",
       streak: 12,
@@ -126,7 +133,7 @@ const Social = () => {
     {
       id: "3",
       name: "Emma Davis",
-      avatar: "/placeholder.svg",
+      avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=256&q=80",
       active: true,
       streak: 5,
       stats: {
@@ -137,7 +144,7 @@ const Social = () => {
     {
       id: "4",
       name: "Alex Thompson",
-      avatar: "/placeholder.svg",
+      avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=256&q=80",
       active: false,
       lastActive: "1d ago",
       streak: 3,
@@ -149,7 +156,7 @@ const Social = () => {
     {
       id: "5",
       name: "Jessica Lee",
-      avatar: "/placeholder.svg",
+      avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=256&q=80",
       active: true,
       streak: 15,
       stats: {
@@ -191,26 +198,78 @@ const Social = () => {
       return;
     }
     
-    const newPost: FeedItem = {
-      id: `new-${Date.now()}`,
-      user: {
-        name: "Alex Thompson", // Current user
-        avatar: "/placeholder.svg",
-      },
-      content: postText,
-      timestamp: "Just now",
-      likes: 0,
-      comments: 0,
-      liked: false,
-      type: "milestone",
-    };
+    setIsLoading(true);
     
-    setFeedItems([newPost, ...feedItems]);
-    setPostText("");
+    setTimeout(() => {
+      const newPost: FeedItem = {
+        id: `new-${Date.now()}`,
+        user: {
+          name: "Alex Thompson", // Current user
+          avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=256&q=80",
+        },
+        content: postText,
+        timestamp: "Just now",
+        likes: 0,
+        comments: 0,
+        liked: false,
+        type: "milestone",
+      };
+      
+      setFeedItems([newPost, ...feedItems]);
+      setPostText("");
+      setIsLoading(false);
+      
+      toast({
+        title: "Post created!",
+        description: "Your post has been shared with your friends.",
+      });
+    }, 1000);
+  };
+
+  const handleFindFriends = () => {
+    setFriendsLoading(true);
     
+    setTimeout(() => {
+      const newFriends: Friend[] = [
+        {
+          id: "6",
+          name: "Robert Chen",
+          avatar: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=256&q=80",
+          active: true,
+          streak: 4,
+          stats: {
+            steps: 7820,
+            caloriesBurned: 380,
+          },
+        },
+        {
+          id: "7",
+          name: "Olivia Smith",
+          avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=256&q=80",
+          active: false,
+          lastActive: "3h ago",
+          streak: 9,
+          stats: {
+            steps: 9340,
+            caloriesBurned: 452,
+          },
+        }
+      ];
+      
+      setFriends([...friends, ...newFriends]);
+      setFriendsLoading(false);
+      
+      toast({
+        title: "Friends Found!",
+        description: "We found 2 new friends with similar fitness goals.",
+      });
+    }, 2000);
+  };
+
+  const handleJoinEvent = (eventName: string) => {
     toast({
-      title: "Post created!",
-      description: "Your post has been shared with your friends.",
+      title: `Joined ${eventName}!`,
+      description: "You've successfully registered for this event.",
     });
   };
   
@@ -238,6 +297,50 @@ const Social = () => {
     }
   };
 
+  const loadMorePosts = () => {
+    setIsLoading(true);
+    
+    setTimeout(() => {
+      const newPosts: FeedItem[] = [
+        {
+          id: "5",
+          user: {
+            name: "Jennifer Lopez",
+            avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=256&q=80",
+          },
+          content: "Just completed a 5K run in under 30 minutes! New personal best!",
+          timestamp: "5 hours ago",
+          likes: 18,
+          comments: 5,
+          liked: false,
+          type: "milestone",
+        },
+        {
+          id: "6",
+          user: {
+            name: "Robert Chen",
+            avatar: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=256&q=80",
+          },
+          content: "Check out my new workout routine! It's perfect for building core strength.",
+          timestamp: "7 hours ago",
+          likes: 12,
+          comments: 3,
+          liked: false,
+          type: "workout",
+          media: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80",
+        },
+      ];
+      
+      setFeedItems([...feedItems, ...newPosts]);
+      setIsLoading(false);
+      
+      toast({
+        title: "New posts loaded",
+        description: "Showing latest activities from your network",
+      });
+    }, 1500);
+  };
+
   return (
     <div className="container mx-auto px-4 pb-12">
       <BackToHome className="mb-4" />
@@ -261,34 +364,47 @@ const Social = () => {
         className="grid grid-cols-1 md:grid-cols-3 gap-6"
       >
         <motion.div variants={itemVariants} className="md:col-span-2 space-y-6">
-          <Card className="shadow-card">
+          <Card className="shadow-card dark:bg-gray-800/80 backdrop-blur-sm border-gray-200 dark:border-gray-700">
             <CardContent className="p-4">
               <div className="flex items-start gap-3">
                 <Avatar className="h-10 w-10">
-                  <AvatarImage src="/placeholder.svg" alt="Your avatar" />
+                  <AvatarImage src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=256&q=80" alt="Your avatar" />
                   <AvatarFallback>AT</AvatarFallback>
                 </Avatar>
                 <div className="flex-grow space-y-3">
                   <Textarea 
                     placeholder="Share your fitness journey, achievements or updates..." 
-                    className="min-h-20 resize-none"
+                    className="min-h-20 resize-none border border-gray-200 dark:border-gray-700 focus-visible:ring-1 focus-visible:ring-offset-1"
                     value={postText}
                     onChange={(e) => setPostText(e.target.value)}
                   />
                   <div className="flex justify-between items-center">
                     <div className="flex gap-2">
-                      <Button variant="outline" size="sm">
-                        <ImageIcon className="h-4 w-4 mr-1" />
+                      <Button variant="outline" size="sm" className="flex items-center gap-1">
+                        <ImageIcon className="h-4 w-4" />
                         Photo
                       </Button>
-                      <Button variant="outline" size="sm">
-                        <Medal className="h-4 w-4 mr-1" />
+                      <Button variant="outline" size="sm" className="flex items-center gap-1">
+                        <Medal className="h-4 w-4" />
                         Achievement
                       </Button>
                     </div>
-                    <Button onClick={submitPost} className="primary-button">
-                      <Send className="h-4 w-4 mr-1" />
-                      Post
+                    <Button 
+                      onClick={submitPost} 
+                      className="primary-button px-4" 
+                      disabled={isLoading || !postText.trim()}
+                    >
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-1 animate-spin" /> 
+                          Posting...
+                        </>
+                      ) : (
+                        <>
+                          <Send className="h-4 w-4 mr-1" />
+                          Post
+                        </>
+                      )}
                     </Button>
                   </div>
                 </div>
@@ -305,7 +421,7 @@ const Social = () => {
             </TabsList>
             <TabsContent value="all" className="space-y-4 mt-0">
               {feedItems.map((item) => (
-                <Card key={item.id} className="shadow-card overflow-hidden">
+                <Card key={item.id} className="shadow-card overflow-hidden dark:bg-gray-800/80 backdrop-blur-sm border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-300">
                   <CardContent className="p-0">
                     <div className="p-4">
                       <div className="flex items-start justify-between">
@@ -326,25 +442,35 @@ const Social = () => {
                       
                       <div className="mt-3">
                         {item.type === "achievement" && (
-                          <div className="flex items-center text-amber-600 mb-2">
+                          <div className="flex items-center text-amber-600 dark:text-amber-400 mb-2">
                             <Award className="h-4 w-4 mr-1" />
                             <span className="text-xs font-medium">Achievement Unlocked</span>
                           </div>
                         )}
                         {item.type === "milestone" && (
-                          <div className="flex items-center text-green-600 mb-2">
+                          <div className="flex items-center text-green-600 dark:text-green-400 mb-2">
                             <Award className="h-4 w-4 mr-1" />
                             <span className="text-xs font-medium">Milestone Reached</span>
                           </div>
                         )}
                         {item.type === "challenge" && (
-                          <div className="flex items-center text-purple-600 mb-2">
+                          <div className="flex items-center text-purple-600 dark:text-purple-400 mb-2">
                             <Users className="h-4 w-4 mr-1" />
                             <span className="text-xs font-medium">Challenge Invitation</span>
+                            <Button 
+                              size="sm" 
+                              className="ml-2 h-6 text-xs bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300 hover:bg-purple-100 rounded-full"
+                              onClick={() => toast({
+                                title: "Challenge joined!",
+                                description: "You've joined the 50K Weekly Steps challenge"
+                              })}
+                            >
+                              Join
+                            </Button>
                           </div>
                         )}
                         {item.type === "workout" && (
-                          <div className="flex items-center text-blue-600 mb-2">
+                          <div className="flex items-center text-blue-600 dark:text-blue-400 mb-2">
                             <Activity className="h-4 w-4 mr-1" />
                             <span className="text-xs font-medium">Workout Completed</span>
                           </div>
@@ -363,23 +489,23 @@ const Social = () => {
                         </div>
                       )}
                       
-                      <div className="flex items-center justify-between mt-4 pt-3 border-t">
+                      <div className="flex items-center justify-between mt-4 pt-3 border-t dark:border-gray-700">
                         <div className="flex space-x-6">
                           <button
-                            className={`flex items-center ${item.liked ? 'text-red-500' : 'text-gray-500 hover:text-gray-700'}`}
+                            className={`flex items-center ${item.liked ? 'text-red-500' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'}`}
                             onClick={() => toggleLike(item.id)}
                           >
                             <Heart className={`h-4 w-4 mr-1 ${item.liked ? 'fill-red-500' : ''}`} />
                             <span className="text-sm">{item.likes}</span>
                           </button>
-                          <button className="flex items-center text-gray-500 hover:text-gray-700">
+                          <button className="flex items-center text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
                             <MessageSquare className="h-4 w-4 mr-1" />
                             <span className="text-sm">{item.comments}</span>
                           </button>
                         </div>
                         
                         <button 
-                          className="flex items-center text-gray-500 hover:text-gray-700"
+                          className="flex items-center text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
                           onClick={() => sharePost(item.id)}
                         >
                           <Share2 className="h-4 w-4 mr-1" />
@@ -392,13 +518,13 @@ const Social = () => {
                     <div className="bg-gray-50 dark:bg-gray-800/50 p-3">
                       <div className="flex items-center gap-2">
                         <Avatar className="h-8 w-8">
-                          <AvatarImage src="/placeholder.svg" alt="Your avatar" />
+                          <AvatarImage src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=256&q=80" alt="Your avatar" />
                           <AvatarFallback>AT</AvatarFallback>
                         </Avatar>
                         <div className="flex-grow flex">
                           <Input 
                             placeholder="Write a comment..." 
-                            className="h-9 rounded-r-none"
+                            className="h-9 rounded-r-none border-r-0 focus-visible:ring-0 focus-visible:ring-offset-0"
                           />
                           <Button size="sm" className="h-9 rounded-l-none">
                             <Send className="h-4 w-4" />
@@ -411,7 +537,24 @@ const Social = () => {
               ))}
               
               <div className="flex justify-center pt-4">
-                <Button variant="outline">Load More</Button>
+                <Button 
+                  variant="outline"
+                  onClick={loadMorePosts}
+                  disabled={isLoading}
+                  className="flex items-center gap-2"
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Loading...
+                    </>
+                  ) : (
+                    <>
+                      <PlusCircle className="h-4 w-4 mr-1" />
+                      Load More
+                    </>
+                  )}
+                </Button>
               </div>
             </TabsContent>
             
@@ -420,8 +563,46 @@ const Social = () => {
                 feedItems
                   .filter(item => item.type === "achievement")
                   .map(item => (
-                    <Card key={item.id} className="shadow-card">
-                      {/* Same structure as above */}
+                    <Card key={item.id} className="shadow-card dark:bg-gray-800/80 backdrop-blur-sm border-gray-200 dark:border-gray-700">
+                      <CardContent className="p-4">
+                        <div className="flex items-start">
+                          <Avatar className="h-10 w-10 mr-3">
+                            <AvatarImage src={item.user.avatar} alt={item.user.name} />
+                            <AvatarFallback>{item.user.name.charAt(0)}</AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between">
+                              <p className="font-medium">{item.user.name}</p>
+                              <p className="text-xs text-gray-500 dark:text-gray-400">{item.timestamp}</p>
+                            </div>
+                            <div className="flex items-center text-amber-600 dark:text-amber-400 mt-1 mb-2">
+                              <Award className="h-4 w-4 mr-1" />
+                              <span className="text-xs font-medium">Achievement Unlocked</span>
+                            </div>
+                            <p className="text-sm">{item.content}</p>
+                            
+                            {item.media && (
+                              <div className="mt-3 rounded-lg overflow-hidden">
+                                <img src={item.media} alt="Achievement" className="w-full h-auto object-cover" />
+                              </div>
+                            )}
+                            
+                            <div className="flex items-center mt-3 space-x-4">
+                              <button
+                                className={`flex items-center text-xs ${item.liked ? 'text-red-500' : 'text-gray-500 dark:text-gray-400'}`}
+                                onClick={() => toggleLike(item.id)}
+                              >
+                                <Heart className={`h-4 w-4 mr-1 ${item.liked ? 'fill-red-500' : ''}`} />
+                                <span>{item.likes}</span>
+                              </button>
+                              <button className="flex items-center text-xs text-gray-500 dark:text-gray-400">
+                                <MessageSquare className="h-4 w-4 mr-1" />
+                                <span>{item.comments}</span>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
                     </Card>
                   ))
               ) : (
@@ -437,8 +618,46 @@ const Social = () => {
                 feedItems
                   .filter(item => item.type === "workout")
                   .map(item => (
-                    <Card key={item.id} className="shadow-card">
-                      {/* Same structure as above */}
+                    <Card key={item.id} className="shadow-card dark:bg-gray-800/80 backdrop-blur-sm border-gray-200 dark:border-gray-700">
+                      <CardContent className="p-4">
+                        <div className="flex items-start">
+                          <Avatar className="h-10 w-10 mr-3">
+                            <AvatarImage src={item.user.avatar} alt={item.user.name} />
+                            <AvatarFallback>{item.user.name.charAt(0)}</AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between">
+                              <p className="font-medium">{item.user.name}</p>
+                              <p className="text-xs text-gray-500 dark:text-gray-400">{item.timestamp}</p>
+                            </div>
+                            <div className="flex items-center text-blue-600 dark:text-blue-400 mt-1 mb-2">
+                              <Activity className="h-4 w-4 mr-1" />
+                              <span className="text-xs font-medium">Workout Completed</span>
+                            </div>
+                            <p className="text-sm">{item.content}</p>
+                            
+                            {item.media && (
+                              <div className="mt-3 rounded-lg overflow-hidden">
+                                <img src={item.media} alt="Workout" className="w-full h-auto object-cover" />
+                              </div>
+                            )}
+                            
+                            <div className="flex items-center mt-3 space-x-4">
+                              <button
+                                className={`flex items-center text-xs ${item.liked ? 'text-red-500' : 'text-gray-500 dark:text-gray-400'}`}
+                                onClick={() => toggleLike(item.id)}
+                              >
+                                <Heart className={`h-4 w-4 mr-1 ${item.liked ? 'fill-red-500' : ''}`} />
+                                <span>{item.likes}</span>
+                              </button>
+                              <button className="flex items-center text-xs text-gray-500 dark:text-gray-400">
+                                <MessageSquare className="h-4 w-4 mr-1" />
+                                <span>{item.comments}</span>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
                     </Card>
                   ))
               ) : (
@@ -454,8 +673,50 @@ const Social = () => {
                 feedItems
                   .filter(item => item.type === "challenge")
                   .map(item => (
-                    <Card key={item.id} className="shadow-card">
-                      {/* Same structure as above */}
+                    <Card key={item.id} className="shadow-card dark:bg-gray-800/80 backdrop-blur-sm border-gray-200 dark:border-gray-700">
+                      <CardContent className="p-4">
+                        <div className="flex items-start">
+                          <Avatar className="h-10 w-10 mr-3">
+                            <AvatarImage src={item.user.avatar} alt={item.user.name} />
+                            <AvatarFallback>{item.user.name.charAt(0)}</AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between">
+                              <p className="font-medium">{item.user.name}</p>
+                              <p className="text-xs text-gray-500 dark:text-gray-400">{item.timestamp}</p>
+                            </div>
+                            <div className="flex items-center text-purple-600 dark:text-purple-400 mt-1 mb-2">
+                              <Users className="h-4 w-4 mr-1" />
+                              <span className="text-xs font-medium">Challenge Invitation</span>
+                            </div>
+                            <p className="text-sm">{item.content}</p>
+                            
+                            <Button 
+                              className="mt-3 bg-purple-600 hover:bg-purple-700 text-white"
+                              onClick={() => toast({
+                                title: "Challenge joined!",
+                                description: "You've joined the 50K Weekly Steps challenge"
+                              })}
+                            >
+                              Join Challenge
+                            </Button>
+                            
+                            <div className="flex items-center mt-3 space-x-4">
+                              <button
+                                className={`flex items-center text-xs ${item.liked ? 'text-red-500' : 'text-gray-500 dark:text-gray-400'}`}
+                                onClick={() => toggleLike(item.id)}
+                              >
+                                <Heart className={`h-4 w-4 mr-1 ${item.liked ? 'fill-red-500' : ''}`} />
+                                <span>{item.likes}</span>
+                              </button>
+                              <button className="flex items-center text-xs text-gray-500 dark:text-gray-400">
+                                <MessageSquare className="h-4 w-4 mr-1" />
+                                <span>{item.comments}</span>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
                     </Card>
                   ))
               ) : (
@@ -469,17 +730,25 @@ const Social = () => {
         </motion.div>
         
         <motion.div variants={itemVariants} className="space-y-6">
-          <Card className="shadow-card">
+          <Card className="shadow-card dark:bg-gray-800/80 backdrop-blur-sm border-gray-200 dark:border-gray-700">
             <CardHeader>
               <CardTitle className="text-lg flex items-center">
-                <Users className="h-5 w-5 mr-2 text-brand-500" />
+                <Users className="h-5 w-5 mr-2 text-blue-500" />
                 Friends Activity
               </CardTitle>
             </CardHeader>
             <CardContent className="p-4">
+              <div className="mb-4 relative">
+                <Search className="h-4 w-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                <Input 
+                  placeholder="Search friends..." 
+                  className="pl-9"
+                />
+              </div>
+              
               <div className="space-y-5">
                 {friends.map(friend => (
-                  <div key={friend.id} className="flex items-center justify-between">
+                  <div key={friend.id} className="flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700/50 p-2 rounded-lg transition-colors">
                     <div className="flex items-center">
                       <div className="relative">
                         <Avatar className="h-10 w-10 mr-3">
@@ -518,18 +787,32 @@ const Social = () => {
               </div>
               
               <div className="mt-4 text-center">
-                <Button variant="outline" className="w-full">
-                  <PlusCircle className="h-4 w-4 mr-2" />
-                  Find Friends
+                <Button 
+                  variant="outline" 
+                  className="w-full flex items-center justify-center gap-2"
+                  onClick={handleFindFriends}
+                  disabled={friendsLoading}
+                >
+                  {friendsLoading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Finding...
+                    </>
+                  ) : (
+                    <>
+                      <UserPlus className="h-4 w-4" />
+                      Find Friends
+                    </>
+                  )}
                 </Button>
               </div>
             </CardContent>
           </Card>
           
-          <Card className="shadow-card">
+          <Card className="shadow-card dark:bg-gray-800/80 backdrop-blur-sm border-gray-200 dark:border-gray-700">
             <CardHeader>
               <CardTitle className="text-lg flex items-center">
-                <Calendar className="h-5 w-5 mr-2 text-brand-500" />
+                <Calendar className="h-5 w-5 mr-2 text-blue-500" />
                 Upcoming Events
               </CardTitle>
             </CardHeader>
@@ -552,7 +835,7 @@ const Social = () => {
                     participants: 56,
                   }
                 ].map((event, idx) => (
-                  <div key={idx} className="flex items-center justify-between pb-3 border-b last:border-0 last:pb-0">
+                  <div key={idx} className="flex items-center justify-between pb-3 border-b dark:border-gray-700 last:border-0 last:pb-0">
                     <div>
                       <p className="font-medium text-sm">{event.title}</p>
                       <div className="flex items-center text-xs text-gray-500 dark:text-gray-400 mt-1">
@@ -563,7 +846,12 @@ const Social = () => {
                         <span>{event.participants} participants</span>
                       </div>
                     </div>
-                    <Button variant="outline" size="sm" className="h-8">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="h-8"
+                      onClick={() => handleJoinEvent(event.title)}
+                    >
                       Join
                     </Button>
                   </div>
@@ -572,10 +860,10 @@ const Social = () => {
             </CardContent>
           </Card>
           
-          <Card className="shadow-card">
+          <Card className="shadow-card dark:bg-gray-800/80 backdrop-blur-sm border-gray-200 dark:border-gray-700">
             <CardHeader>
               <CardTitle className="text-lg flex items-center">
-                <Medal className="h-5 w-5 mr-2 text-brand-500" />
+                <Medal className="h-5 w-5 mr-2 text-blue-500" />
                 Recent Achievements
               </CardTitle>
             </CardHeader>
@@ -589,11 +877,11 @@ const Social = () => {
                   { name: "Distance Pro", icon: "🏃" },
                   { name: "Consistency King", icon: "👑" },
                 ].map((badge, idx) => (
-                  <div key={idx} className="flex flex-col items-center text-center">
-                    <div className="h-12 w-12 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-2xl mb-2">
+                  <div key={idx} className="flex flex-col items-center text-center badge-card p-3 rounded-lg hover:scale-105 transition-transform duration-200">
+                    <div className="h-12 w-12 rounded-full bg-gray-700/50 dark:bg-gray-600/50 flex items-center justify-center text-2xl mb-2">
                       {badge.icon}
                     </div>
-                    <p className="text-xs font-medium">{badge.name}</p>
+                    <p className="text-xs font-medium text-gray-200">{badge.name}</p>
                   </div>
                 ))}
               </div>
@@ -601,6 +889,21 @@ const Social = () => {
           </Card>
         </motion.div>
       </motion.div>
+      
+      <div className="mt-12 text-center">
+        <p className="text-sm text-gray-500 dark:text-gray-400">© 2025 FitFlow • Privacy Policy • Terms of Service • Help Center</p>
+        <div className="flex justify-center space-x-4 mt-3">
+          <Button variant="ghost" size="sm" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+            Back to Top
+          </Button>
+          <Button variant="ghost" size="sm" onClick={() => toast({ title: "Contact Us", description: "Our support team will get back to you soon!" })}>
+            Contact Us
+          </Button>
+          <Button variant="ghost" size="sm" onClick={() => toast({ title: "Feedback", description: "Thank you for your feedback!" })}>
+            Send Feedback
+          </Button>
+        </div>
+      </div>
     </div>
   );
 };

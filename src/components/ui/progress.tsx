@@ -23,12 +23,14 @@ const Progress = React.forwardRef<
         animation: value && value > 0 ? 'progress-fill 1.5s ease-out' : 'none'
       }}
     />
-    <style jsx>{`
-      @keyframes progress-fill {
-        0% { transform: translateX(-100%); }
-        100% { transform: translateX(-${100 - (value || 0)}%); }
-      }
-    `}</style>
+    <style>
+      {`
+        @keyframes progress-fill {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(-${100 - (value || 0)}%); }
+        }
+      `}
+    </style>
   </ProgressPrimitive.Root>
 ))
 Progress.displayName = ProgressPrimitive.Root.displayName

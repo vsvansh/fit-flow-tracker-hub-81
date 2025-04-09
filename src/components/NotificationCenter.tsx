@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Bell, Water, Trophy, Zap } from "lucide-react";
+import { Bell, Trophy, Zap, DropletIcon } from "lucide-react";
 import {
   Popover,
   PopoverContent,
@@ -31,7 +31,7 @@ const NotificationCenter = () => {
       time: "Just now",
       read: false,
       type: "reminder",
-      icon: <Water className="h-4 w-4 text-blue-500" />
+      icon: <DropletIcon className="h-4 w-4 text-blue-500" />
     },
     {
       id: "2",
@@ -167,7 +167,7 @@ const NotificationCenter = () => {
                         }`}>
                           {notification.type === "achievement" && <Trophy className="h-4 w-4" />}
                           {notification.type === "alert" && <Bell className="h-4 w-4" />}
-                          {notification.type === "reminder" && <Water className="h-4 w-4" />}
+                          {notification.type === "reminder" && <DropletIcon className="h-4 w-4" />}
                           {notification.type === "update" && <Zap className="h-4 w-4" />}
                         </div>
                       )}
