@@ -1,109 +1,49 @@
 
-import { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useState, useContext, useEffect } from 'react';
 
-type Theme = "dark" | "light" | "system";
+type Theme = 'light' | 'dark';
 
-type ThemeProviderProps = {
-  children: React.ReactNode;
-  defaultTheme?: Theme;
-  storageKey?: string;
-};
-
-type ThemeProviderState = {
+interface ThemeContextProps {
   theme: Theme;
   toggleTheme: () => void;
   setTheme: (theme: Theme) => void;
-};
+}
 
-const initialState: ThemeProviderState = {
-  theme: "dark", // Changed default from "system" to "dark"
-  setTheme: () => null,
-  toggleTheme: () => null,
-};
+const ThemeContext = createContext<ThemeContextProps | undefined>(undefined);
 
-const ThemeProviderContext = createContext<ThemeProviderState>(initialState);
+export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [theme, setTheme] = useState<Theme>(() => {
+    // Get stored theme or use dark mode as default
+    const storedTheme = localStorage.getItem('theme') as Theme | null;
+    return storedTheme || 'dark';
+  });
 
-export function ThemeProvider({
-  children,
-  defaultTheme = "dark", // Changed default from "system" to "dark"
-  storageKey = "ui-theme",
-  ...props
-}: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>(
-    () => (localStorage.getItem(storageKey) as Theme) || defaultTheme
-  );
-
+  // Update theme class on document and store in localStorage
   useEffect(() => {
     const root = window.document.documentElement;
     
-    root.classList.remove("light", "dark");
-
-    if (theme === "system") {
-      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches
-        ? "dark"
-        : "light";
-
-      root.classList.add(systemTheme);
-      
-      // Apply additional styles for dark mode
-      if (systemTheme === "dark") {
-        root.style.setProperty('--background-gradient', 'linear-gradient(to bottom, #1a1f2c, #0f172a)');
-        document.body.style.background = 'var(--background-gradient)';
-      } else {
-        root.style.removeProperty('--background-gradient');
-        document.body.style.background = '';
-      }
-      return;
-    }
-
+    root.classList.remove('light', 'dark');
     root.classList.add(theme);
-    
-    // Apply additional styles for dark mode
-    if (theme === "dark") {
-      root.style.setProperty('--background-gradient', 'linear-gradient(to bottom, #1a1f2c, #0f172a)');
-      document.body.style.background = 'var(--background-gradient)';
-    } else {
-      root.style.removeProperty('--background-gradient');
-      document.body.style.background = '';
-    }
+    localStorage.setItem('theme', theme);
   }, [theme]);
 
-  const value = {
-    theme,
-    setTheme: (theme: Theme) => {
-      localStorage.setItem(storageKey, theme);
-      setTheme(theme);
-    },
-    toggleTheme: () => {
-      setTheme(prevTheme => {
-        if (prevTheme === "system") {
-          const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches
-            ? "dark"
-            : "light";
-          const newTheme = systemTheme === "dark" ? "light" : "dark";
-          localStorage.setItem(storageKey, newTheme);
-          return newTheme;
-        }
-        
-        const newTheme = prevTheme === "dark" ? "light" : "dark";
-        localStorage.setItem(storageKey, newTheme);
-        return newTheme;
-      });
-    },
+  const toggleTheme = () => {
+    setTheme(prev => (prev === 'light' ? 'dark' : 'light'));
   };
 
   return (
-    <ThemeProviderContext.Provider {...props} value={value}>
+    <ThemeContext.Provider value={{ theme, toggleTheme, setTheme }}>
       {children}
-    </ThemeProviderContext.Provider>
+    </ThemeContext.Provider>
   );
-}
+};
 
 export const useTheme = () => {
-  const context = useContext(ThemeProviderContext);
-
-  if (context === undefined)
-    throw new Error("useTheme must be used within a ThemeProvider");
-
+  const context = useContext(ThemeContext);
+  
+  if (context === undefined) {
+    throw new Error('useTheme must be used within a ThemeProvider');
+  }
+  
   return context;
 };

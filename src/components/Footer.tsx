@@ -1,11 +1,16 @@
+
 import { Link } from "react-router-dom";
 import { Footprints, Github, Twitter, Instagram, Facebook, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "@/components/ui/use-toast";
+import { useNavigate } from "react-router-dom";
+
 const Footer = () => {
   const currentYear = new Date().getFullYear();
+  const navigate = useNavigate();
+  
   const handleSubscribe = (e: React.FormEvent) => {
     e.preventDefault();
     const form = e.target as HTMLFormElement;
@@ -16,7 +21,51 @@ const Footer = () => {
     });
     form.reset();
   };
-  return <footer className="bg-gray-50 dark:bg-gray-900 pt-12 pb-8 mt-16 border-t border-gray-200 dark:border-gray-800">
+  
+  const handleAboutClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    toast({
+      title: "About Us",
+      description: "FitFlow is a comprehensive fitness tracking platform designed to help you achieve your health goals."
+    });
+  };
+  
+  const handleCareersClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    toast({
+      title: "Careers",
+      description: "Join our team at FitFlow and help build the future of fitness technology."
+    });
+  };
+  
+  const handlePrivacyClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    navigate("/privacy-policy");
+    toast({
+      title: "Privacy Policy",
+      description: "We're committed to protecting your privacy and personal data."
+    });
+  };
+  
+  const handleTermsClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    navigate("/terms");
+    toast({
+      title: "Terms of Service",
+      description: "By using FitFlow, you agree to our Terms of Service."
+    });
+  };
+  
+  const handleSocialMediaClick = (platform: string) => (e: React.MouseEvent) => {
+    e.preventDefault();
+    toast({
+      title: `Connect on ${platform}`,
+      description: `Follow us on ${platform} for fitness tips and updates.`
+    });
+  };
+  
+  return (
+    <footer className="bg-gray-50 dark:bg-gray-900 pt-12 pb-8 mt-16 border-t border-gray-200 dark:border-gray-800">
       <div className="container px-4 mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
           <div className="space-y-4">
@@ -28,16 +77,32 @@ const Footer = () => {
               Track your fitness journey, set goals, and stay motivated with our comprehensive fitness tracking platform.
             </p>
             <div className="flex space-x-4">
-              <a href="#" className="text-gray-500 hover:text-brand-600 dark:text-gray-400 dark:hover:text-brand-400 transition-colors duration-200">
+              <a 
+                href="#" 
+                className="text-gray-500 hover:text-brand-600 dark:text-gray-400 dark:hover:text-brand-400 transition-colors duration-200"
+                onClick={handleSocialMediaClick("Twitter")}
+              >
                 <Twitter className="h-5 w-5" />
               </a>
-              <a href="#" className="text-gray-500 hover:text-brand-600 dark:text-gray-400 dark:hover:text-brand-400 transition-colors duration-200">
+              <a 
+                href="#" 
+                className="text-gray-500 hover:text-brand-600 dark:text-gray-400 dark:hover:text-brand-400 transition-colors duration-200"
+                onClick={handleSocialMediaClick("Facebook")}
+              >
                 <Facebook className="h-5 w-5" />
               </a>
-              <a href="#" className="text-gray-500 hover:text-brand-600 dark:text-gray-400 dark:hover:text-brand-400 transition-colors duration-200">
+              <a 
+                href="#" 
+                className="text-gray-500 hover:text-brand-600 dark:text-gray-400 dark:hover:text-brand-400 transition-colors duration-200"
+                onClick={handleSocialMediaClick("Instagram")}
+              >
                 <Instagram className="h-5 w-5" />
               </a>
-              <a href="#" className="text-gray-500 hover:text-brand-600 dark:text-gray-400 dark:hover:text-brand-400 transition-colors duration-200">
+              <a 
+                href="#" 
+                className="text-gray-500 hover:text-brand-600 dark:text-gray-400 dark:hover:text-brand-400 transition-colors duration-200"
+                onClick={handleSocialMediaClick("GitHub")}
+              >
                 <Github className="h-5 w-5" />
               </a>
             </div>
@@ -73,22 +138,38 @@ const Footer = () => {
             <h3 className="font-medium text-base">Company</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <a href="#" className="text-gray-600 dark:text-gray-400 hover:text-brand-600 dark:hover:text-brand-400 transition-colors duration-200">
+                <a 
+                  href="#" 
+                  className="text-gray-600 dark:text-gray-400 hover:text-brand-600 dark:hover:text-brand-400 transition-colors duration-200"
+                  onClick={handleAboutClick}
+                >
                   About Us
                 </a>
               </li>
               <li>
-                <a href="#" className="text-gray-600 dark:text-gray-400 hover:text-brand-600 dark:hover:text-brand-400 transition-colors duration-200">
+                <a 
+                  href="#" 
+                  className="text-gray-600 dark:text-gray-400 hover:text-brand-600 dark:hover:text-brand-400 transition-colors duration-200"
+                  onClick={handleCareersClick}
+                >
                   Careers
                 </a>
               </li>
               <li>
-                <a href="#" className="text-gray-600 dark:text-gray-400 hover:text-brand-600 dark:hover:text-brand-400 transition-colors duration-200">
+                <a 
+                  href="#" 
+                  className="text-gray-600 dark:text-gray-400 hover:text-brand-600 dark:hover:text-brand-400 transition-colors duration-200"
+                  onClick={handlePrivacyClick}
+                >
                   Privacy Policy
                 </a>
               </li>
               <li>
-                <a href="#" className="text-gray-600 dark:text-gray-400 hover:text-brand-600 dark:hover:text-brand-400 transition-colors duration-200">
+                <a 
+                  href="#" 
+                  className="text-gray-600 dark:text-gray-400 hover:text-brand-600 dark:hover:text-brand-400 transition-colors duration-200"
+                  onClick={handleTermsClick}
+                >
                   Terms of Service
                 </a>
               </li>
@@ -125,6 +206,8 @@ const Footer = () => {
           </div>
         </div>
       </div>
-    </footer>;
+    </footer>
+  );
 };
+
 export default Footer;

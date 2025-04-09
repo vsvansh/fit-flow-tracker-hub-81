@@ -2,8 +2,14 @@
 import { motion } from "framer-motion";
 import BackToHome from "@/components/BackToHome";
 import NutritionTracker from "@/components/NutritionTracker";
+import { useEffect } from "react";
 
 const Nutrition = () => {
+  // Scroll to top on page load
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+  
   return (
     <div className="min-h-[calc(100vh-64px)] bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 transition-all duration-300">
       <div className="container px-4 py-8 mx-auto max-w-7xl">

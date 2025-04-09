@@ -282,3 +282,7 @@ export const getWeeklyStats = () => {
 export const calculateCompletion = (current: number, goal: number) => {
   return Math.min(100, Math.round((current / goal) * 100));
 };
+
+export const scrollToTop = () => {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+};

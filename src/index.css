@@ -88,9 +88,11 @@
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: radial-gradient(circle at 15% 15%, rgba(59, 130, 246, 0.12) 0%, transparent 45%),
-                radial-gradient(circle at 85% 30%, rgba(124, 58, 237, 0.1) 0%, transparent 40%),
-                radial-gradient(circle at 50% 80%, rgba(99, 102, 241, 0.08) 0%, transparent 50%);
+    background: 
+      radial-gradient(circle at 15% 15%, rgba(59, 130, 246, 0.12) 0%, transparent 45%),
+      radial-gradient(circle at 85% 30%, rgba(124, 58, 237, 0.1) 0%, transparent 40%),
+      radial-gradient(circle at 50% 80%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
+      radial-gradient(circle at 20% 60%, rgba(16, 185, 129, 0.05) 0%, transparent 35%);
     pointer-events: none;
     z-index: -1;
   }
@@ -130,6 +132,33 @@
     @apply bg-white dark:bg-gray-800 rounded-xl shadow-card border border-gray-100 dark:border-gray-700 hover:shadow-card-hover transition-shadow duration-300 ease-in-out;
   }
   
+  /* Dashboard card hover effects */
+  .dashboard-stats-card {
+    @apply transition-all duration-300 ease-in-out;
+    transform-origin: center;
+  }
+  
+  .dashboard-stats-card:hover {
+    @apply shadow-lg;
+    transform: translateY(-5px) scale(1.02);
+  }
+  
+  .blue-glow:hover {
+    box-shadow: 0 5px 15px rgba(59, 130, 246, 0.5);
+  }
+  
+  .orange-glow:hover {
+    box-shadow: 0 5px 15px rgba(249, 115, 22, 0.5);
+  }
+  
+  .green-glow:hover {
+    box-shadow: 0 5px 15px rgba(16, 185, 129, 0.5);
+  }
+  
+  .purple-glow:hover {
+    box-shadow: 0 5px 15px rgba(168, 85, 247, 0.5);
+  }
+  
   /* Button styling */
   .primary-button {
     @apply bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-medium rounded-lg transition-all duration-200;
@@ -148,11 +177,6 @@
     @apply bg-gray-300 dark:bg-gray-600 rounded-full hover:bg-gray-400 dark:hover:bg-gray-500 transition-colors duration-200;
   }
   
-  /* Card hover effects */
-  .dashboard-card {
-    @apply transition-all duration-300 hover:transform hover:scale-105 hover:shadow-lg;
-  }
-  
   /* Progress circle glow effects */
   .progress-circle-blue {
     filter: drop-shadow(0 0 6px rgba(59, 130, 246, 0.5));
@@ -166,8 +190,46 @@
     filter: drop-shadow(0 0 6px rgba(16, 185, 129, 0.5));
   }
   
+  .progress-circle-purple {
+    filter: drop-shadow(0 0 6px rgba(168, 85, 247, 0.5));
+  }
+  
   /* Badges dark mode */
   .badge-card {
     @apply bg-gray-800 dark:bg-gray-700/70 border border-gray-700/50 backdrop-blur-sm;
+  }
+  
+  .achievement-card {
+    @apply rounded-lg p-4 border transition-all duration-300 hover:shadow-md;
+  }
+  
+  .achievement-card-blue {
+    @apply border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/30 hover:shadow-blue-200/50 dark:hover:shadow-blue-800/30;
+  }
+  
+  .achievement-card-green {
+    @apply border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/30 hover:shadow-green-200/50 dark:hover:shadow-green-800/30;
+  }
+  
+  .achievement-card-amber {
+    @apply border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/30 hover:shadow-amber-200/50 dark:hover:shadow-amber-800/30;
+  }
+  
+  .achievement-card-purple {
+    @apply border-purple-200 dark:border-purple-800 bg-purple-50 dark:bg-purple-900/30 hover:shadow-purple-200/50 dark:hover:shadow-purple-800/30;
+  }
+  
+  .achievement-card-red {
+    @apply border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/30 hover:shadow-red-200/50 dark:hover:shadow-red-800/30;
+  }
+  
+  /* Animation for progress bars */
+  @keyframes progress-fill {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(var(--progress-value)); }
+  }
+  
+  .progress-animate {
+    animation: progress-fill 1.5s ease-out forwards;
   }
 }

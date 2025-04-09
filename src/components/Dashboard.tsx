@@ -1,4 +1,3 @@
-
 import { format } from "date-fns";
 import { getTodayActivity, fitnessGoals, getStreakCount } from "@/utils/fitnessData";
 import ActivitySummary from "./ActivitySummary";
@@ -12,7 +11,6 @@ import HabitTracker from "./HabitTracker";
 import SocialFeed from "./SocialFeed";
 import AIRecommendations from "./AIRecommendations";
 import WaterTracker from "./WaterTracker";
-import NotificationCenter from "./NotificationCenter";
 import { 
   Calendar, Heart, Clock, Footprints, Award, Bell, Settings, 
   Trophy, Zap, Users
@@ -23,6 +21,7 @@ import { useTheme } from "@/providers/ThemeProvider";
 import { Moon, Sun } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 
 const Dashboard = () => {
   const today = format(new Date(), "EEEE, MMMM d, yyyy");
@@ -36,6 +35,11 @@ const Dashboard = () => {
   const caloriesGoal = fitnessGoals.find(goal => goal.name === "Calories Burned")?.target || 500;
   const distanceGoal = fitnessGoals.find(goal => goal.name === "Distance")?.target || 8;
   const activeMinutesGoal = fitnessGoals.find(goal => goal.name === "Active Minutes")?.target || 60;
+  
+  // Scroll to top when component mounts
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-7xl transition-all duration-300 ease-in-out">
@@ -83,7 +87,7 @@ const Dashboard = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-        <div className="bg-gradient-to-br from-blue-50 to-white dark:from-blue-900/20 dark:to-gray-800/50 rounded-lg shadow p-4 flex items-center justify-between hover:shadow-md transition-all duration-200">
+        <div className="bg-gradient-to-br from-blue-50 to-white dark:from-blue-900/20 dark:to-gray-800/50 rounded-lg shadow p-4 flex items-center justify-between dashboard-stats-card blue-glow">
           <div className="flex items-center">
             <div className="rounded-full bg-blue-100 dark:bg-blue-900/40 p-3 mr-3">
               <Footprints className="h-5 w-5 text-blue-600 dark:text-blue-400" />
@@ -96,7 +100,7 @@ const Dashboard = () => {
           </div>
         </div>
         
-        <div className="bg-gradient-to-br from-orange-50 to-white dark:from-orange-900/20 dark:to-gray-800/50 rounded-lg shadow p-4 flex items-center justify-between hover:shadow-md transition-all duration-200">
+        <div className="bg-gradient-to-br from-orange-50 to-white dark:from-orange-900/20 dark:to-gray-800/50 rounded-lg shadow p-4 flex items-center justify-between dashboard-stats-card orange-glow">
           <div className="flex items-center">
             <div className="rounded-full bg-orange-100 dark:bg-orange-900/40 p-3 mr-3">
               <Heart className="h-5 w-5 text-red-500 dark:text-red-400" />
@@ -109,7 +113,7 @@ const Dashboard = () => {
           </div>
         </div>
         
-        <div className="bg-gradient-to-br from-green-50 to-white dark:from-green-900/20 dark:to-gray-800/50 rounded-lg shadow p-4 flex items-center justify-between hover:shadow-md transition-all duration-200">
+        <div className="bg-gradient-to-br from-green-50 to-white dark:from-green-900/20 dark:to-gray-800/50 rounded-lg shadow p-4 flex items-center justify-between dashboard-stats-card green-glow">
           <div className="flex items-center">
             <div className="rounded-full bg-green-100 dark:bg-green-900/40 p-3 mr-3">
               <Footprints className="h-5 w-5 text-green-600 dark:text-green-400" />
@@ -122,7 +126,7 @@ const Dashboard = () => {
           </div>
         </div>
         
-        <div className="bg-gradient-to-br from-amber-50 to-white dark:from-amber-900/20 dark:to-gray-800/50 rounded-lg shadow p-4 flex items-center justify-between hover:shadow-md transition-all duration-200">
+        <div className="bg-gradient-to-br from-amber-50 to-white dark:from-amber-900/20 dark:to-gray-800/50 rounded-lg shadow p-4 flex items-center justify-between dashboard-stats-card purple-glow">
           <div className="flex items-center">
             <div className="rounded-full bg-amber-100 dark:bg-amber-900/40 p-3 mr-3">
               <Award className="h-5 w-5 text-amber-600 dark:text-amber-400" />

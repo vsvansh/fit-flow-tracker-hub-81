@@ -1,109 +1,113 @@
 
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Award, Trophy, Flame, Users, Medal } from "lucide-react";
+import { Trophy, Medal, Star, Award, Crown } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
+import { motion } from "framer-motion";
 
-interface Badge {
-  name: string;
-  description: string;
-  icon: React.ReactNode;
-  achieved: boolean;
-  progress?: number;
-}
+const achievementData = [
+  {
+    id: 1,
+    title: "Step Master",
+    description: "Walk 10,000 steps in a single day",
+    progress: 100,
+    icon: <Trophy className="h-5 w-5 text-blue-500" />,
+    date: "Achieved: April 2, 2025",
+    color: "blue",
+    complete: true
+  },
+  {
+    id: 2,
+    title: "Calorie Crusher",
+    description: "Burn 500 calories in one workout",
+    progress: 75,
+    icon: <Medal className="h-5 w-5 text-amber-500" />,
+    date: "In progress: 375/500",
+    color: "amber",
+    complete: false
+  },
+  {
+    id: 3,
+    title: "Early Bird",
+    description: "Complete a workout before 8 AM",
+    progress: 100,
+    icon: <Star className="h-5 w-5 text-green-500" />,
+    date: "Achieved: March 29, 2025",
+    color: "green",
+    complete: true
+  },
+  {
+    id: 4,
+    title: "Marathon Runner",
+    description: "Run a total of 42.2 km",
+    progress: 65,
+    icon: <Award className="h-5 w-5 text-purple-500" />,
+    date: "In progress: 27.4/42.2 km",
+    color: "purple",
+    complete: false
+  },
+  {
+    id: 5,
+    title: "Consistency King",
+    description: "Log activity for 7 days in a row",
+    progress: 85,
+    icon: <Crown className="h-5 w-5 text-red-500" />,
+    date: "In progress: 6/7 days",
+    color: "red",
+    complete: false
+  }
+];
 
 const Achievements = () => {
-  const badges: Badge[] = [
-    {
-      name: "Step Master",
-      description: "Complete 10,000 steps in a day",
-      icon: <Award className="h-8 w-8 text-yellow-500" />,
-      achieved: true,
-    },
-    {
-      name: "Perfect Week",
-      description: "Achieve all goals for 7 consecutive days",
-      icon: <Trophy className="h-8 w-8 text-blue-500" />,
-      achieved: false,
-      progress: 71,
-    },
-    {
-      name: "Distance Champion",
-      description: "Walk 100km in a month",
-      icon: <Medal className="h-8 w-8 text-green-500" />,
-      achieved: false,
-      progress: 32,
-    },
-    {
-      name: "Social Stepper",
-      description: "Connect with 5 friends",
-      icon: <Users className="h-8 w-8 text-purple-500" />,
-      achieved: false,
-      progress: 20,
-    },
-    {
-      name: "Streak Keeper",
-      description: "Maintain a 5-day streak",
-      icon: <Flame className="h-8 w-8 text-orange-500" />,
-      achieved: false,
-      progress: 40,
-    },
-  ];
-
   return (
     <Card className="shadow">
-      <CardHeader className="pb-2">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-xl font-bold">Badges & Achievements</CardTitle>
-          <Trophy className="h-5 w-5 text-amber-500" />
-        </div>
+      <CardHeader>
+        <CardTitle className="text-xl font-bold flex items-center">
+          <Trophy className="h-6 w-6 mr-2 text-amber-500" />
+          Badges & Achievements
+        </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {badges.map((badge, index) => (
-            <div 
-              key={index} 
-              className={`p-3 rounded-lg border transition-transform duration-300 hover:scale-105 hover:shadow-md ${
-                badge.achieved 
-                  ? 'bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800' 
-                  : 'bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700'
-              }`}
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          {achievementData.map((achievement) => (
+            <motion.div
+              key={achievement.id}
+              className={`achievement-card achievement-card-${achievement.color}`}
+              whileHover={{ scale: 1.03 }}
+              transition={{ duration: 0.3 }}
             >
-              <div className="flex flex-col items-center text-center p-2">
-                <div className={`rounded-full p-3 ${
-                  badge.achieved 
-                    ? 'bg-amber-100 dark:bg-amber-900/50' 
-                    : 'bg-gray-100 dark:bg-gray-800'
-                }`}>
-                  {badge.icon}
+              <div className="flex flex-col items-center text-center">
+                <div className={`h-12 w-12 rounded-full bg-${achievement.color}-100 dark:bg-${achievement.color}-900/40 flex items-center justify-center mb-3`}>
+                  {achievement.icon}
                 </div>
-                <h3 className={`mt-2 font-semibold ${
-                  badge.achieved 
-                    ? 'text-amber-700 dark:text-amber-400' 
-                    : 'text-gray-700 dark:text-gray-300'
-                }`}>
-                  {badge.name}
-                </h3>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{badge.description}</p>
-                
-                {!badge.achieved && badge.progress !== undefined && (
-                  <div className="w-full mt-3">
-                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
-                      <div 
-                        className="bg-blue-500 h-1.5 rounded-full animate-pulse" 
-                        style={{ width: `${badge.progress}%` }}
-                      />
-                    </div>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{badge.progress}% completed</p>
-                  </div>
-                )}
-                
-                {badge.achieved && (
-                  <span className="inline-block px-2 py-1 mt-2 bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-400 text-xs font-medium rounded-full">
-                    Achieved
-                  </span>
-                )}
+                <h3 className="font-medium text-sm mb-1">{achievement.title}</h3>
+                <p className="text-xs text-gray-600 dark:text-gray-400 mb-3">{achievement.description}</p>
+                <div className="w-full mb-1">
+                  <Progress value={achievement.progress} className={`h-1.5 bg-${achievement.color}-100 dark:bg-${achievement.color}-900/30`} />
+                </div>
+                <div className="flex items-center justify-center mt-2">
+                  {achievement.complete ? (
+                    <Badge variant="outline" className={`text-xs bg-${achievement.color}-100 dark:bg-${achievement.color}-900/30 text-${achievement.color}-700 dark:text-${achievement.color}-300 border-${achievement.color}-200 dark:border-${achievement.color}-700`}>
+                      {achievement.date}
+                    </Badge>
+                  ) : (
+                    <p className={`text-xs text-${achievement.color}-600 dark:text-${achievement.color}-400`}>{achievement.date}</p>
+                  )}
+                </div>
               </div>
-            </div>
+            </motion.div>
           ))}
+        </div>
+        
+        <div className="mt-6 flex justify-center">
+          <motion.button
+            className="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-medium rounded-lg transition-all duration-200"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            View All Achievements
+          </motion.button>
         </div>
       </CardContent>
     </Card>
