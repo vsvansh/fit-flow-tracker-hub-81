@@ -10,6 +10,7 @@ import {
   Heart, Clock, Zap, Calendar, Users, Trophy 
 } from "lucide-react";
 import { getTodayActivity, fitnessGoals, getStreakCount, getWeeklyStats } from "@/utils/fitnessData";
+import { launchConfetti } from "@/utils/confettiUtil";
 
 import ActivitySummary from "@/components/ActivitySummary";
 import ActivityChart from "@/components/ActivityChart";
@@ -23,7 +24,6 @@ import SocialFeed from "@/components/SocialFeed";
 import AIRecommendations from "@/components/AIRecommendations";
 import WaterTracker from "@/components/WaterTracker";
 import { motion } from "framer-motion";
-import { launchConfetti } from "@/utils/confetti";
 
 const Index = () => {
   const navigate = useNavigate();

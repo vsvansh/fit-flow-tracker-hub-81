@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getWeeklyStats, getStreakCount } from "@/utils/fitnessData";
 import { BarChart, Bar, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts";
@@ -12,7 +11,6 @@ const StatsInsight = () => {
   const [activeBar, setActiveBar] = useState<string | null>(null);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
-  // Find best performing day based on steps
   const getBestDay = () => {
     const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     const today = new Date();
@@ -24,7 +22,6 @@ const StatsInsight = () => {
     return dayLabels[6]; // For demo, we'll just return the last day
   };
 
-  // Performance data for the chart
   const performanceData = [{
     name: 'Steps',
     target: 10000,
@@ -144,11 +141,10 @@ const StatsInsight = () => {
                 label={customBarLabel}
                 onMouseEnter={(data, index) => handleBarHover(data.name, index)}
                 onClick={(data) => handleBarClick(data.name)}
-                style={(entry, index) => ({
-                  filter: hoveredIndex === index ? 'drop-shadow(0 0 6px rgba(59, 130, 246, 0.4))' : 'none',
-                  transform: `translateY(${hoveredIndex === index ? -5 : 0}px)`,
-                  fill: hoveredIndex === index ? '#60a5fa' : entry.fill
-                })}
+                style={{
+                  cursor: 'pointer',
+                  filter: activeBar ? 'drop-shadow(0 0 6px rgba(59, 130, 246, 0.4))' : 'none',
+                }}
               />
               <Bar 
                 dataKey="target" 
