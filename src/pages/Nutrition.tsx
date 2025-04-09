@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -12,10 +11,9 @@ import {
   Apple, Coffee, Droplet, PlusCircle, Utensils, FileText,
   BarChart, ChevronRight, Clock, CalendarDays, ArrowRight,
   ArrowUp, ArrowDown, Info, Filter, Flame, Carrot, Cherry,
-  Beef, Egg, Bookmark, Plus, RefreshCcw, Switch, Layers
+  Beef, Egg, Bookmark, Plus, RefreshCcw, Layers
 } from "lucide-react";
 import BackToHome from "@/components/BackToHome";
-import { useState as useHookState } from '@hookstate/core';
 import NutritionTracker from "@/components/NutritionTracker";
 import FoodJournal from "@/components/FoodJournal";
 import MealPlanner from "@/components/MealPlanner";
@@ -23,12 +21,11 @@ import NutrientInsights from "@/components/NutrientInsights";
 import NutritionGoals from "@/components/NutritionGoals";
 import { motion } from "framer-motion";
 
-// Sample data
 const macroData = {
-  calories: { current: 1850, goal: 2200 },
-  protein: { current: 85, goal: 110, unit: 'g' },
-  carbs: { current: 210, goal: 250, unit: 'g' },
-  fat: { current: 65, goal: 70, unit: 'g' }
+  calories: { current: 1850, goal: 2200, unit: "kcal" },
+  protein: { current: 85, goal: 110, unit: "g" },
+  carbs: { current: 210, goal: 250, unit: "g" },
+  fat: { current: 65, goal: 70, unit: "g" }
 };
 
 const recentMeals = [
@@ -73,7 +70,6 @@ const Nutrition = () => {
   const [viewMode, setViewMode] = useState<'classic' | 'new'>('classic');
   const [activeTab, setActiveTab] = useState('overview');
 
-  // Toggle between classic and new view
   const toggleViewMode = () => {
     setViewMode(viewMode === 'classic' ? 'new' : 'classic');
     toast({
@@ -145,7 +141,7 @@ const ClassicNutritionView = ({ activeTab, setActiveTab }: { activeTab: string, 
                 <div className="text-3xl font-bold mb-2">
                   {data.current}
                   <span className="text-sm text-gray-500 dark:text-gray-400 ml-1">
-                    {key !== 'calories' ? data.unit : 'kcal'}
+                    {data.unit ?? ''}
                   </span>
                 </div>
                 <Progress 
@@ -153,7 +149,7 @@ const ClassicNutritionView = ({ activeTab, setActiveTab }: { activeTab: string, 
                   className="h-2 w-full mb-1"
                 />
                 <div className="text-xs text-gray-500 dark:text-gray-400">
-                  {data.current} / {data.goal} {key !== 'calories' ? data.unit : 'kcal'}
+                  {data.current} / {data.goal} {data.unit ?? ''}
                 </div>
               </div>
             </CardContent>
@@ -323,11 +319,10 @@ const ClassicNutritionView = ({ activeTab, setActiveTab }: { activeTab: string, 
                   <h3 className="font-medium mb-2">Daily Intake Breakdown</h3>
                   <div className="h-40 w-40 mx-auto relative">
                     <div className="h-full w-full rounded-full border-8 border-blue-500 overflow-hidden"></div>
-                    <div className="absolute top-0 left-0 h-full w-full rounded-full border-t-8 border-r-8 border-green-500 rotate-45 overflow-hidden"></div>
-                    <div className="absolute top-0 left-0 h-full w-full rounded-full border-b-8 border-l-8 border-red-500 -rotate-45 overflow-hidden"></div>
-                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center">
-                      <div className="text-xl font-bold">{macroData.calories.current}</div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400">kcal</div>
+                    <div className="absolute top-0 left-0 h-full bg-green-200 dark:bg-green-900/40 rounded-full" style={{ width: '80%' }}></div>
+                    <div className="absolute top-0 left-0 h-full bg-green-500 dark:bg-green-600 rounded-full" style={{ width: '70%' }}></div>
+                    <div className="absolute inset-0 flex items-center justify-end pr-2">
+                      <span className="text-xs text-gray-700 dark:text-gray-300">1850 / 2200 avg</span>
                     </div>
                   </div>
                   <div className="flex justify-center mt-4 space-x-4">

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,7 +12,6 @@ import {
 } from "lucide-react";
 import { launchConfetti } from "@/utils/confettiUtil";
 
-// Sample nutrient data
 const nutrientData = [
   { name: "Vitamin A", value: 80, goal: 100, unit: "μg", category: "Fat-soluble Vitamins" },
   { name: "Vitamin C", value: 65, goal: 90, unit: "mg", category: "Water-soluble Vitamins" },
@@ -37,7 +35,6 @@ const nutrientData = [
   { name: "Omega-3", value: 1.2, goal: 1.6, unit: "g", category: "Other" }
 ];
 
-// Weekly trends
 const weeklyTrends = [
   { nutrient: "Calcium", trend: "+12%", direction: "up" },
   { nutrient: "Vitamin D", trend: "+20%", direction: "up" },
@@ -46,7 +43,6 @@ const weeklyTrends = [
   { nutrient: "Sodium", trend: "-10%", direction: "down" },
 ];
 
-// Recommendations based on data
 const recommendations = [
   {
     nutrient: "Vitamin D",
@@ -70,15 +66,12 @@ const NutrientInsights = () => {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [viewMode, setViewMode] = useState("list");
   
-  // Filter nutrients based on selected category
   const filteredNutrients = selectedCategory === "All" 
     ? nutrientData 
     : nutrientData.filter(nutrient => nutrient.category === selectedCategory);
   
-  // Categories for filtering
   const categories = ["All", ...new Set(nutrientData.map(item => item.category))];
   
-  // Handle clicking on a nutrient for more info
   const handleNutrientClick = (nutrient: typeof nutrientData[0]) => {
     const percentage = Math.round((nutrient.value / nutrient.goal) * 100);
     
@@ -87,7 +80,6 @@ const NutrientInsights = () => {
       description: `Current: ${nutrient.value}${nutrient.unit} (${percentage}% of daily goal)`,
     });
     
-    // Launch confetti for nutrients at 100% or more
     if (percentage >= 100) {
       launchConfetti({
         particleCount: 30,
@@ -97,7 +89,6 @@ const NutrientInsights = () => {
     }
   };
   
-  // Animation variants
   const containerVariants = {
     hidden: { opacity: 0 },
     show: {
@@ -289,12 +280,11 @@ const NutrientInsights = () => {
                 {recommendations.map((rec, idx) => (
                   <motion.div 
                     key={idx} 
-                    className="border border-green-100 dark:border-green-900/30 rounded-lg p-3"
+                    className="border border-green-100 dark:border-green-900/30 rounded-lg p-3 hover:shadow-md transition-all"
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 * idx }}
                     whileHover={{ scale: 1.02 }}
-                    className="border rounded-lg p-3 hover:shadow-md transition-all"
                   >
                     <div className="flex justify-between items-start">
                       <div className="font-medium flex items-center">
