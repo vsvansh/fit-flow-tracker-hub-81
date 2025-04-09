@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { 
@@ -26,7 +25,7 @@ import {
   SheetTrigger,
   SheetClose,
 } from "@/components/ui/sheet";
-import { mockUser } from "@/utils/fitnessData"; 
+import { mockUser } from "@/utils/fitnessData-extension";
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -65,7 +64,6 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
   
-  // Listen for avatar updates
   useEffect(() => {
     const handleAvatarUpdate = () => {
       setAvatar(getCurrentAvatar());

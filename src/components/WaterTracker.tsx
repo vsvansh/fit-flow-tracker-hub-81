@@ -9,11 +9,21 @@ import {
 import { toast } from "@/components/ui/use-toast";
 import { Input } from "@/components/ui/input";
 
-const WaterTracker = () => {
+interface WaterTrackerProps {
+  dailyGoal?: number;
+}
+
+const WaterTracker: React.FC<WaterTrackerProps> = ({ dailyGoal = 8 }) => {
   const [waterIntake, setWaterIntake] = useState(3);
-  const [dailyWaterTarget, setDailyWaterTarget] = useState(8);
+  const [dailyWaterTarget, setDailyWaterTarget] = useState(dailyGoal);
   const [isEditing, setIsEditing] = useState(false);
-  const [editValue, setEditValue] = useState('8');
+  const [editValue, setEditValue] = useState(dailyGoal.toString());
+  
+  // Update dailyWaterTarget when dailyGoal prop changes
+  useEffect(() => {
+    setDailyWaterTarget(dailyGoal);
+    setEditValue(dailyGoal.toString());
+  }, [dailyGoal]);
   
   const addWater = () => {
     if (waterIntake < dailyWaterTarget) {

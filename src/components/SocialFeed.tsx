@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -10,9 +9,9 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "@/components/ui/use-toast";
 import { 
   Users, MessageSquare, Heart, Award, Dumbbell, Trophy, Share2, Send,
-  ThumbsUp, MessageCircle, UserPlus, Search
+  ThumbsUp, MessageCircle, UserPlus, Search, Footprints
 } from "lucide-react";
-import confetti from 'canvas-confetti';
+import { launchConfetti } from "@/utils/confettiUtil";
 
 const socialData = [
   {
@@ -81,7 +80,7 @@ const friendSuggestions = [
 ];
 
 const triggerConfetti = () => {
-  confetti({
+  launchConfetti({
     particleCount: 100,
     spread: 70,
     origin: { y: 0.6 }

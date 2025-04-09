@@ -11,11 +11,16 @@ interface ThemeContextProps {
 
 const ThemeContext = createContext<ThemeContextProps | undefined>(undefined);
 
-export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+interface ThemeProviderProps {
+  children: React.ReactNode;
+  defaultTheme?: Theme;
+}
+
+export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children, defaultTheme = 'dark' }) => {
   const [theme, setTheme] = useState<Theme>(() => {
-    // Get stored theme or use dark mode as default
+    // Get stored theme or use default theme
     const storedTheme = localStorage.getItem('theme') as Theme | null;
-    return storedTheme || 'dark';
+    return storedTheme || defaultTheme;
   });
 
   // Update theme class on document and store in localStorage
