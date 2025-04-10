@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { 
   Footprints, Menu, X, Bell, Settings, LogOut, 
-  User, Home, Activity, Utensils, Medal, Users, Moon, Sun
+  User, Home, Activity, Utensils, Medal, Users, Moon, Sun, Gamepad
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { 
@@ -92,6 +92,7 @@ const Navbar = () => {
     { name: "Nutrition", path: "/nutrition", icon: <Utensils className="h-4 w-4 mr-2" /> },
     { name: "Challenges", path: "/challenges", icon: <Medal className="h-4 w-4 mr-2" /> },
     { name: "Social", path: "/social", icon: <Users className="h-4 w-4 mr-2" /> },
+    { name: "Gaming", path: "/gaming", icon: <Gamepad className="h-4 w-4 mr-2" /> },
   ];
   
   return (
