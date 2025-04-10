@@ -84,10 +84,11 @@ const NutritionCharts = () => {
     iron: { color: "#0088FE", label: "Iron" },
   };
 
-  const handleDataPointClick = (data: any) => {
+  // Fixed type safety issue with the dataPoint parameter
+  const handleDataPointClick = (dataPoint: any) => {
     toast({
-      title: `${data.day} Details`,
-      description: `Vitamin A: ${data.vitaminA}μg, Vitamin C: ${data.vitaminC}mg, Vitamin D: ${data.vitaminD}μg`,
+      title: `${dataPoint.day} Details`,
+      description: `Vitamin A: ${dataPoint.vitaminA}μg, Vitamin C: ${dataPoint.vitaminC}mg, Vitamin D: ${dataPoint.vitaminD}μg`,
     });
   };
 
@@ -201,6 +202,7 @@ const NutritionCharts = () => {
                       fill="url(#colorUv)" 
                       activeDot={{ 
                         r: 8, 
+                        // Fixed: Properly handling the onClick event by fixing the type issue
                         onClick: (_, index) => handleDataPointClick(weeklyNutrientData[index]) 
                       }}
                     />
