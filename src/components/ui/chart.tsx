@@ -1,3 +1,4 @@
+
 import * as React from "react"
 import * as RechartsPrimitive from "recharts"
 
@@ -353,6 +354,22 @@ function getPayloadConfigFromPayload(
     : config[key as keyof typeof config]
 }
 
+// Adding additional utility components for nutrition charts
+const LineChart = RechartsPrimitive.LineChart;
+const Line = RechartsPrimitive.Line;
+const BarChart = RechartsPrimitive.BarChart;
+const Bar = RechartsPrimitive.Bar;
+const PieChart = RechartsPrimitive.PieChart;
+const Pie = RechartsPrimitive.Pie;
+const Cell = RechartsPrimitive.Cell;
+const XAxis = RechartsPrimitive.XAxis;
+const YAxis = RechartsPrimitive.YAxis;
+const CartesianGrid = RechartsPrimitive.CartesianGrid;
+const Legend = RechartsPrimitive.Legend;
+const Tooltip = RechartsPrimitive.Tooltip;
+const AreaChart = RechartsPrimitive.AreaChart;
+const Area = RechartsPrimitive.Area;
+
 export {
   ChartContainer,
   ChartTooltip,
@@ -360,4 +377,19 @@ export {
   ChartLegend,
   ChartLegendContent,
   ChartStyle,
+  // Export additional components
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Legend,
+  Tooltip,
+  AreaChart,
+  Area
 }

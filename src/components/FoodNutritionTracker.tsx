@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { 
   Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter 
@@ -10,9 +11,12 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { 
   Utensils, Coffee, Salad, Pizza, Apple, Droplet, 
-  Search, Clock, BarChart3, Mic, Plus, QrCode 
+  Search, Clock, BarChart3, Mic, Plus, QrCode,
+  LineChart, PieChart, ArrowRight
 } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
+import { motion } from "framer-motion";
+import InteractiveNutritionCharts from "./InteractiveNutritionCharts";
 
 // Sample food database - fix the category type to match FoodItem interface
 const sampleFoods = [
@@ -57,6 +61,7 @@ const FoodNutritionTracker = () => {
     dinner: [],
     snack: []
   });
+  const [showCharts, setShowCharts] = useState(false);
   
   // Daily targets
   const dailyCalorieTarget = 2000;
@@ -132,7 +137,7 @@ const FoodNutritionTracker = () => {
     });
   };
   
-  // Simulate barcode scanning - replace Scanner with QrCode
+  // Simulate barcode scanning
   const handleBarcodeScanner = () => {
     toast({
       title: "Barcode Scanner",
@@ -302,106 +307,131 @@ const FoodNutritionTracker = () => {
           </TabsContent>
           
           <TabsContent value="nutrition">
-            <div className="space-y-6">
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <p className="font-medium">Daily Calories</p>
-                  <div className="flex items-center">
-                    <span className="font-medium text-xl">{totalCalories}</span>
-                    <span className="text-sm text-muted-foreground ml-1">/ {dailyCalorieTarget} cal</span>
-                  </div>
-                </div>
-                <Progress value={(totalCalories / dailyCalorieTarget) * 100} className="h-2" />
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>0</span>
-                  <span>{Math.round((totalCalories / dailyCalorieTarget) * 100)}% consumed</span>
-                  <span>{dailyCalorieTarget}</span>
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <p className="font-medium flex items-center text-blue-600">
-                      <Badge className="mr-1 bg-blue-100 text-blue-600 hover:bg-blue-200 border-blue-200">C</Badge>
-                      Carbs
-                    </p>
-                    <span className="text-sm">{totalCarbs}g / {dailyCarbsTarget}g</span>
-                  </div>
-                  <Progress value={(totalCarbs / dailyCarbsTarget) * 100} className="h-2 bg-blue-100 [&>div]:bg-blue-500" />
-                </div>
-                
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <p className="font-medium flex items-center text-red-600">
-                      <Badge className="mr-1 bg-red-100 text-red-600 hover:bg-red-200 border-red-200">P</Badge>
-                      Protein
-                    </p>
-                    <span className="text-sm">{totalProtein}g / {dailyProteinTarget}g</span>
-                  </div>
-                  <Progress value={(totalProtein / dailyProteinTarget) * 100} className="h-2 bg-red-100 [&>div]:bg-red-500" />
-                </div>
-                
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <p className="font-medium flex items-center text-amber-600">
-                      <Badge className="mr-1 bg-amber-100 text-amber-600 hover:bg-amber-200 border-amber-200">F</Badge>
-                      Fat
-                    </p>
-                    <span className="text-sm">{totalFat}g / {dailyFatTarget}g</span>
-                  </div>
-                  <Progress value={(totalFat / dailyFatTarget) * 100} className="h-2 bg-amber-100 [&>div]:bg-amber-500" />
-                </div>
-              </div>
-              
-              <div className="p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
-                <h4 className="font-medium mb-2 flex items-center">
-                  <BarChart3 className="h-4 w-4 mr-1 text-blue-600" /> 
-                  Macronutrient Distribution
-                </h4>
-                <div className="h-6 w-full rounded-full overflow-hidden bg-gray-100 dark:bg-gray-800 flex">
-                  <div 
-                    className="h-full bg-blue-500" 
-                    style={{ width: `${Math.round((totalCarbs * 4 / totalCalories) * 100) || 0}%` }}
-                  ></div>
-                  <div 
-                    className="h-full bg-red-500" 
-                    style={{ width: `${Math.round((totalProtein * 4 / totalCalories) * 100) || 0}%` }}
-                  ></div>
-                  <div 
-                    className="h-full bg-amber-500" 
-                    style={{ width: `${Math.round((totalFat * 9 / totalCalories) * 100) || 0}%` }}
-                  ></div>
-                </div>
-                <div className="flex justify-between mt-2 text-xs">
-                  <span className="text-blue-600">{Math.round((totalCarbs * 4 / totalCalories) * 100) || 0}% Carbs</span>
-                  <span className="text-red-600">{Math.round((totalProtein * 4 / totalCalories) * 100) || 0}% Protein</span>
-                  <span className="text-amber-600">{Math.round((totalFat * 9 / totalCalories) * 100) || 0}% Fat</span>
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                {Object.entries(dailyLog).map(([category, foods]) => {
-                  const categoryCalories = foods.reduce((sum, food) => sum + food.calories * (food.quantity || 1), 0);
-                  return (
-                    <Card key={category} className="border shadow-sm">
-                      <CardHeader className="p-3 pb-0">
-                        <CardTitle className="text-sm flex items-center capitalize">
-                          {getMealIcon(category)} {category}
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent className="p-3 pt-1">
-                        <p className="text-lg font-medium">{categoryCalories} cal</p>
-                        <Progress 
-                          value={(categoryCalories / dailyCalorieTarget) * 100} 
-                          className="h-1.5 mt-1" 
-                        />
-                      </CardContent>
-                    </Card>
-                  );
-                })}
-              </div>
+            <div className="mb-4 flex justify-between items-center">
+              <h3 className="font-medium text-lg">Nutrition Overview</h3>
+              <Button
+                variant="outline"
+                className="flex items-center gap-2"
+                onClick={() => setShowCharts(!showCharts)}
+              >
+                {showCharts ? (
+                  <>
+                    <BarChart3 className="h-4 w-4" />
+                    <span>Show Stats</span>
+                  </>
+                ) : (
+                  <>
+                    <LineChart className="h-4 w-4" />
+                    <span>Show Charts</span>
+                  </>
+                )}
+              </Button>
             </div>
+            
+            {showCharts ? (
+              <InteractiveNutritionCharts />
+            ) : (
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <p className="font-medium">Daily Calories</p>
+                    <div className="flex items-center">
+                      <span className="font-medium text-xl">{totalCalories}</span>
+                      <span className="text-sm text-muted-foreground ml-1">/ {dailyCalorieTarget} cal</span>
+                    </div>
+                  </div>
+                  <Progress value={(totalCalories / dailyCalorieTarget) * 100} className="h-2" />
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>0</span>
+                    <span>{Math.round((totalCalories / dailyCalorieTarget) * 100)}% consumed</span>
+                    <span>{dailyCalorieTarget}</span>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <p className="font-medium flex items-center text-blue-600">
+                        <Badge className="mr-1 bg-blue-100 text-blue-600 hover:bg-blue-200 border-blue-200">C</Badge>
+                        Carbs
+                      </p>
+                      <span className="text-sm">{totalCarbs}g / {dailyCarbsTarget}g</span>
+                    </div>
+                    <Progress value={(totalCarbs / dailyCarbsTarget) * 100} className="h-2 bg-blue-100 [&>div]:bg-blue-500" />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <p className="font-medium flex items-center text-red-600">
+                        <Badge className="mr-1 bg-red-100 text-red-600 hover:bg-red-200 border-red-200">P</Badge>
+                        Protein
+                      </p>
+                      <span className="text-sm">{totalProtein}g / {dailyProteinTarget}g</span>
+                    </div>
+                    <Progress value={(totalProtein / dailyProteinTarget) * 100} className="h-2 bg-red-100 [&>div]:bg-red-500" />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <p className="font-medium flex items-center text-amber-600">
+                        <Badge className="mr-1 bg-amber-100 text-amber-600 hover:bg-amber-200 border-amber-200">F</Badge>
+                        Fat
+                      </p>
+                      <span className="text-sm">{totalFat}g / {dailyFatTarget}g</span>
+                    </div>
+                    <Progress value={(totalFat / dailyFatTarget) * 100} className="h-2 bg-amber-100 [&>div]:bg-amber-500" />
+                  </div>
+                </div>
+                
+                <div className="p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
+                  <h4 className="font-medium mb-2 flex items-center">
+                    <BarChart3 className="h-4 w-4 mr-1 text-blue-600" /> 
+                    Macronutrient Distribution
+                  </h4>
+                  <div className="h-6 w-full rounded-full overflow-hidden bg-gray-100 dark:bg-gray-800 flex">
+                    <div 
+                      className="h-full bg-blue-500" 
+                      style={{ width: `${Math.round((totalCarbs * 4 / totalCalories) * 100) || 0}%` }}
+                    ></div>
+                    <div 
+                      className="h-full bg-red-500" 
+                      style={{ width: `${Math.round((totalProtein * 4 / totalCalories) * 100) || 0}%` }}
+                    ></div>
+                    <div 
+                      className="h-full bg-amber-500" 
+                      style={{ width: `${Math.round((totalFat * 9 / totalCalories) * 100) || 0}%` }}
+                    ></div>
+                  </div>
+                  <div className="flex justify-between mt-2 text-xs">
+                    <span className="text-blue-600">{Math.round((totalCarbs * 4 / totalCalories) * 100) || 0}% Carbs</span>
+                    <span className="text-red-600">{Math.round((totalProtein * 4 / totalCalories) * 100) || 0}% Protein</span>
+                    <span className="text-amber-600">{Math.round((totalFat * 9 / totalCalories) * 100) || 0}% Fat</span>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  {Object.entries(dailyLog).map(([category, foods]) => {
+                    const categoryCalories = foods.reduce((sum, food) => sum + food.calories * (food.quantity || 1), 0);
+                    return (
+                      <Card key={category} className="border shadow-sm">
+                        <CardHeader className="p-3 pb-0">
+                          <CardTitle className="text-sm flex items-center capitalize">
+                            {getMealIcon(category)} {category}
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="p-3 pt-1">
+                          <p className="text-lg font-medium">{categoryCalories} cal</p>
+                          <Progress 
+                            value={(categoryCalories / dailyCalorieTarget) * 100} 
+                            className="h-1.5 mt-1" 
+                          />
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </TabsContent>
           
           <TabsContent value="insights">
@@ -437,21 +467,31 @@ const FoodNutritionTracker = () => {
                 </ul>
               </div>
               
-              <div className="p-4 border rounded-lg">
+              <motion.div 
+                className="p-4 border rounded-lg"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+              >
                 <h3 className="font-medium mb-2">Recent Trends</h3>
                 <div className="h-40 w-full bg-gray-100 dark:bg-gray-800 rounded-lg flex items-end justify-between p-4">
                   {[1180, 1420, 1650, 1890, 2100, 1940, totalCalories].map((cal, index) => (
-                    <div key={index} className="flex flex-col items-center">
+                    <motion.div 
+                      key={index} 
+                      className="flex flex-col items-center"
+                      initial={{ height: 0 }}
+                      animate={{ height: `${(cal / dailyCalorieTarget) * 100}px` }}
+                      transition={{ duration: 0.5, delay: index * 0.1 }}
+                    >
                       <div 
                         className="w-8 bg-blue-500 dark:bg-blue-400 rounded-t" 
                         style={{ height: `${(cal / dailyCalorieTarget) * 100}px`, maxHeight: '100px' }}
                       ></div>
                       <span className="text-xs mt-1">{["M", "T", "W", "T", "F", "S", "S"][index]}</span>
-                    </div>
+                    </motion.div>
                   ))}
                 </div>
                 <p className="text-xs text-center mt-2 text-muted-foreground">Last 7 days calorie intake</p>
-              </div>
+              </motion.div>
               
               <div className="grid grid-cols-2 gap-4">
                 <div className="p-4 border rounded-lg">
@@ -461,6 +501,19 @@ const FoodNutritionTracker = () => {
                   <p className="text-sm text-muted-foreground mt-1">
                     Most calories consumed during lunch (42%)
                   </p>
+                  <Button 
+                    variant="link" 
+                    size="sm" 
+                    className="text-blue-600 p-0 h-auto mt-2"
+                    onClick={() => {
+                      toast({
+                        title: "Meal Timing Analysis",
+                        description: "Analyzing your optimal meal timing patterns..."
+                      });
+                    }}
+                  >
+                    View Details <ArrowRight className="h-3 w-3 ml-1" />
+                  </Button>
                 </div>
                 
                 <div className="p-4 border rounded-lg">
@@ -470,6 +523,19 @@ const FoodNutritionTracker = () => {
                   <p className="text-sm text-muted-foreground mt-1">
                     5 of 8 glasses consumed today
                   </p>
+                  <Button 
+                    variant="link" 
+                    size="sm" 
+                    className="text-blue-600 p-0 h-auto mt-2"
+                    onClick={() => {
+                      toast({
+                        title: "Hydration Tracker",
+                        description: "Opening your hydration tracking details..."
+                      });
+                    }}
+                  >
+                    Add Water <Plus className="h-3 w-3 ml-1" />
+                  </Button>
                 </div>
               </div>
             </div>
@@ -478,10 +544,22 @@ const FoodNutritionTracker = () => {
       </CardContent>
       
       <CardFooter className="flex justify-between border-t pt-4">
-        <Button variant="outline" className="text-sm">
+        <Button 
+          variant="outline" 
+          className="text-sm"
+          onClick={() => {
+            toast({
+              title: "Generating Reports",
+              description: "Creating your detailed nutrition report..."
+            });
+          }}
+        >
           View Detailed Reports
         </Button>
-        <Button className="bg-green-600 hover:bg-green-700 text-white">
+        <Button 
+          className="bg-green-600 hover:bg-green-700 text-white"
+          onClick={() => setSearchTerm("a")}
+        >
           Add New Food
         </Button>
       </CardFooter>

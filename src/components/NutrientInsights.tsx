@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,9 +9,11 @@ import { motion } from "framer-motion";
 import { useToast } from "@/components/ui/use-toast";
 import {
   BarChart2, Heart, ArrowRight, Info, Calendar, 
-  TrendingUp, TrendingDown, BarChart, PieChart, Activity
+  TrendingUp, TrendingDown, BarChart, PieChart, Activity,
+  LineChart, ChevronDown, ChevronUp
 } from "lucide-react";
 import { launchConfetti } from "@/utils/confettiUtil";
+import NutritionCharts from "./NutritionCharts";
 
 const nutrientData = [
   { name: "Vitamin A", value: 80, goal: 100, unit: "μg", category: "Fat-soluble Vitamins" },
@@ -65,12 +68,18 @@ const NutrientInsights = () => {
   const { toast } = useToast();
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [viewMode, setViewMode] = useState("list");
+  const [showCharts, setShowCharts] = useState(false);
+  const [expandedSections, setExpandedSections] = useState<{[key: string]: boolean}>({
+    weeklyTrends: false,
+    recommendations: false,
+    upcomingReports: false
+  });
   
   const filteredNutrients = selectedCategory === "All" 
     ? nutrientData 
     : nutrientData.filter(nutrient => nutrient.category === selectedCategory);
   
-  const categories = ["All", ...new Set(nutrientData.map(item => item.category))];
+  const categories = ["All", ...Array.from(new Set(nutrientData.map(item => item.category)))];
   
   const handleNutrientClick = (nutrient: typeof nutrientData[0]) => {
     const percentage = Math.round((nutrient.value / nutrient.goal) * 100);
@@ -87,6 +96,13 @@ const NutrientInsights = () => {
         origin: { y: 0.6 }
       });
     }
+  };
+
+  const toggleSection = (section: string) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
   };
   
   const containerVariants = {
@@ -114,96 +130,123 @@ const NutrientInsights = () => {
         <Card className="shadow-md overflow-hidden border-0 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20">
           <CardHeader className="pb-2 relative">
             <div className="absolute top-0 right-0 h-32 w-32 bg-blue-400 dark:bg-blue-600 rounded-full blur-3xl opacity-20 -mr-10 -mt-10"></div>
-            <CardTitle className="text-xl font-bold flex items-center">
-              <BarChart2 className="h-5 w-5 mr-2 text-purple-600 dark:text-purple-400" />
-              Nutrient Insights
-            </CardTitle>
-            <CardDescription>
-              Track your micronutrient intake and discover patterns
-            </CardDescription>
+            <div className="flex justify-between items-center">
+              <div>
+                <CardTitle className="text-xl font-bold flex items-center">
+                  <BarChart2 className="h-5 w-5 mr-2 text-purple-600 dark:text-purple-400" />
+                  Nutrient Insights
+                </CardTitle>
+                <CardDescription>
+                  Track your micronutrient intake and discover patterns
+                </CardDescription>
+              </div>
+              <Button
+                variant="outline"
+                className="h-9 px-4 flex items-center gap-2 border-purple-200 dark:border-purple-800"
+                onClick={() => setShowCharts(!showCharts)}
+              >
+                {showCharts ? (
+                  <>
+                    <BarChart className="h-4 w-4" />
+                    <span>Show List View</span>
+                  </>
+                ) : (
+                  <>
+                    <LineChart className="h-4 w-4" />
+                    <span>Show Charts</span>
+                  </>
+                )}
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="flex justify-between items-center mb-4">
-              <Tabs defaultValue={selectedCategory} onValueChange={setSelectedCategory} className="w-full">
-                <TabsList className="w-full">
-                  {categories.map(category => (
-                    <TabsTrigger key={category} value={category} className="flex-1">
-                      {category}
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
-              </Tabs>
-              
-              <div className="flex space-x-2 ml-4">
-                <Button 
-                  variant={viewMode === "list" ? "default" : "outline"} 
-                  size="sm"
-                  onClick={() => setViewMode("list")}
-                  className="h-8 px-2"
-                >
-                  <BarChart className="h-4 w-4" />
-                </Button>
-                <Button 
-                  variant={viewMode === "chart" ? "default" : "outline"} 
-                  size="sm"
-                  onClick={() => setViewMode("chart")}
-                  className="h-8 px-2"
-                >
-                  <PieChart className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-            
-            {viewMode === "list" ? (
-              <motion.div 
-                className="space-y-4"
-                variants={containerVariants}
-                initial="hidden"
-                animate="show"
-              >
-                {filteredNutrients.map((nutrient, idx) => (
-                  <motion.div 
-                    key={nutrient.name} 
-                    className="border rounded-lg p-3 hover:shadow-md transition-all cursor-pointer hover:border-purple-200 dark:hover:border-purple-700"
-                    onClick={() => handleNutrientClick(nutrient)}
-                    variants={itemVariants}
-                  >
-                    <div className="flex justify-between items-center mb-1">
-                      <div className="font-medium">{nutrient.name}</div>
-                      <Badge className={
-                        (nutrient.value / nutrient.goal) >= 1 ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400" :
-                        (nutrient.value / nutrient.goal) >= 0.8 ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400" :
-                        (nutrient.value / nutrient.goal) >= 0.5 ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400" :
-                        "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
-                      }>
-                        {Math.round((nutrient.value / nutrient.goal) * 100)}%
-                      </Badge>
-                    </div>
-                    <div className="flex justify-between text-sm mb-1">
-                      <span className="text-gray-500 dark:text-gray-400">{nutrient.value} / {nutrient.goal} {nutrient.unit}</span>
-                    </div>
-                    <Progress 
-                      value={(nutrient.value / nutrient.goal) * 100} 
-                      className={`h-2 ${
-                        (nutrient.value / nutrient.goal) >= 1 ? '[&>div]:bg-green-500' :
-                        (nutrient.value / nutrient.goal) >= 0.8 ? '[&>div]:bg-blue-500' :
-                        (nutrient.value / nutrient.goal) >= 0.5 ? '[&>div]:bg-yellow-500' :
-                        '[&>div]:bg-red-500'
-                      }`}
-                    />
-                  </motion.div>
-                ))}
-              </motion.div>
+            {showCharts ? (
+              <NutritionCharts />
             ) : (
-              <div className="flex justify-center items-center h-80 mt-4">
-                <div className="text-center text-gray-500 dark:text-gray-400">
-                  <Activity className="h-12 w-12 mx-auto mb-2" />
-                  <p>Interactive nutrient chart view coming soon!</p>
-                  <Button className="mt-4" onClick={() => setViewMode("list")}>
-                    Switch to List View
-                  </Button>
+              <>
+                <div className="flex justify-between items-center mb-4">
+                  <Tabs defaultValue={selectedCategory} onValueChange={setSelectedCategory} className="w-full">
+                    <TabsList className="w-full">
+                      {categories.map(category => (
+                        <TabsTrigger key={category} value={category} className="flex-1">
+                          {category}
+                        </TabsTrigger>
+                      ))}
+                    </TabsList>
+                  </Tabs>
+                  
+                  <div className="flex space-x-2 ml-4">
+                    <Button 
+                      variant={viewMode === "list" ? "default" : "outline"} 
+                      size="sm"
+                      onClick={() => setViewMode("list")}
+                      className="h-8 px-2"
+                    >
+                      <BarChart className="h-4 w-4" />
+                    </Button>
+                    <Button 
+                      variant={viewMode === "chart" ? "default" : "outline"} 
+                      size="sm"
+                      onClick={() => setViewMode("chart")}
+                      className="h-8 px-2"
+                    >
+                      <PieChart className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
-              </div>
+                
+                {viewMode === "list" ? (
+                  <motion.div 
+                    className="space-y-4"
+                    variants={containerVariants}
+                    initial="hidden"
+                    animate="show"
+                  >
+                    {filteredNutrients.map((nutrient, idx) => (
+                      <motion.div 
+                        key={nutrient.name} 
+                        className="border rounded-lg p-3 hover:shadow-md transition-all cursor-pointer hover:border-purple-200 dark:hover:border-purple-700"
+                        onClick={() => handleNutrientClick(nutrient)}
+                        variants={itemVariants}
+                      >
+                        <div className="flex justify-between items-center mb-1">
+                          <div className="font-medium">{nutrient.name}</div>
+                          <Badge className={
+                            (nutrient.value / nutrient.goal) >= 1 ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400" :
+                            (nutrient.value / nutrient.goal) >= 0.8 ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400" :
+                            (nutrient.value / nutrient.goal) >= 0.5 ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400" :
+                            "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
+                          }>
+                            {Math.round((nutrient.value / nutrient.goal) * 100)}%
+                          </Badge>
+                        </div>
+                        <div className="flex justify-between text-sm mb-1">
+                          <span className="text-gray-500 dark:text-gray-400">{nutrient.value} / {nutrient.goal} {nutrient.unit}</span>
+                        </div>
+                        <Progress 
+                          value={(nutrient.value / nutrient.goal) * 100} 
+                          className={`h-2 ${
+                            (nutrient.value / nutrient.goal) >= 1 ? '[&>div]:bg-green-500' :
+                            (nutrient.value / nutrient.goal) >= 0.8 ? '[&>div]:bg-blue-500' :
+                            (nutrient.value / nutrient.goal) >= 0.5 ? '[&>div]:bg-yellow-500' :
+                            '[&>div]:bg-red-500'
+                          }`}
+                        />
+                      </motion.div>
+                    ))}
+                  </motion.div>
+                ) : (
+                  <div className="flex justify-center items-center h-80 mt-4">
+                    <div className="text-center text-gray-500 dark:text-gray-400">
+                      <Activity className="h-12 w-12 mx-auto mb-2" />
+                      <p>Interactive nutrient chart view coming soon!</p>
+                      <Button className="mt-4" onClick={() => setViewMode("list")}>
+                        Switch to List View
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </CardContent>
         </Card>
@@ -217,14 +260,27 @@ const NutrientInsights = () => {
         >
           <Card className="shadow-md bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-0">
             <CardHeader className="pb-2">
-              <CardTitle className="text-lg font-bold flex items-center">
-                <TrendingUp className="h-5 w-5 mr-2 text-blue-600 dark:text-blue-400" />
-                Weekly Trends
-              </CardTitle>
+              <div className="flex justify-between items-center">
+                <CardTitle className="text-lg font-bold flex items-center">
+                  <TrendingUp className="h-5 w-5 mr-2 text-blue-600 dark:text-blue-400" />
+                  Weekly Trends
+                </CardTitle>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  onClick={() => toggleSection('weeklyTrends')}
+                  className="h-8 w-8"
+                >
+                  {expandedSections.weeklyTrends ? 
+                    <ChevronUp className="h-4 w-4" /> : 
+                    <ChevronDown className="h-4 w-4" />
+                  }
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {weeklyTrends.map((item, idx) => (
+                {weeklyTrends.slice(0, expandedSections.weeklyTrends ? weeklyTrends.length : 3).map((item, idx) => (
                   <motion.div 
                     key={idx} 
                     className="flex justify-between items-center"
@@ -255,7 +311,11 @@ const NutrientInsights = () => {
                 ))}
               </div>
               
-              <Button variant="ghost" className="w-full mt-4 text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/20">
+              <Button 
+                variant="ghost" 
+                className="w-full mt-4 text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/20"
+                onClick={() => toast({ title: "Detailed Report", description: "Navigating to detailed nutrient trends report..." })}
+              >
                 View Detailed Report
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
@@ -270,14 +330,27 @@ const NutrientInsights = () => {
         >
           <Card className="shadow-md bg-gradient-to-br from-green-50 to-teal-50 dark:from-green-900/20 dark:to-teal-900/20 border-0">
             <CardHeader className="pb-2">
-              <CardTitle className="text-lg font-bold flex items-center">
-                <Heart className="h-5 w-5 mr-2 text-green-600 dark:text-green-400" />
-                Personalized Recommendations
-              </CardTitle>
+              <div className="flex justify-between items-center">
+                <CardTitle className="text-lg font-bold flex items-center">
+                  <Heart className="h-5 w-5 mr-2 text-green-600 dark:text-green-400" />
+                  Personalized Recommendations
+                </CardTitle>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  onClick={() => toggleSection('recommendations')}
+                  className="h-8 w-8"
+                >
+                  {expandedSections.recommendations ? 
+                    <ChevronUp className="h-4 w-4" /> : 
+                    <ChevronDown className="h-4 w-4" />
+                  }
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {recommendations.map((rec, idx) => (
+                {recommendations.slice(0, expandedSections.recommendations ? recommendations.length : 2).map((rec, idx) => (
                   <motion.div 
                     key={idx} 
                     className="border border-green-100 dark:border-green-900/30 rounded-lg p-3 hover:shadow-md transition-all"
@@ -292,14 +365,28 @@ const NutrientInsights = () => {
                           {rec.nutrient}
                         </Badge>
                       </div>
-                      <Info className="h-4 w-4 text-gray-400" />
+                      <Info 
+                        className="h-4 w-4 text-gray-400 cursor-pointer" 
+                        onClick={() => toast({
+                          title: `${rec.nutrient} Information`,
+                          description: "Additional details about this recommendation and its benefits."
+                        })}
+                      />
                     </div>
                     <p className="text-sm mt-2 text-gray-600 dark:text-gray-300">
                       {rec.message}
                     </p>
                     <div className="flex flex-wrap gap-2 mt-3">
                       {rec.actions.map((action, idx) => (
-                        <Badge key={idx} variant="outline" className="text-xs font-normal">
+                        <Badge 
+                          key={idx} 
+                          variant="outline" 
+                          className="text-xs font-normal cursor-pointer"
+                          onClick={() => toast({
+                            title: "Action Selected",
+                            description: `You've selected: ${action}`
+                          })}
+                        >
                           {action}
                         </Badge>
                       ))}
@@ -308,7 +395,11 @@ const NutrientInsights = () => {
                 ))}
               </div>
               
-              <Button variant="ghost" className="w-full mt-4 text-green-600 hover:text-green-700 hover:bg-green-50 dark:text-green-400 dark:hover:bg-green-900/20">
+              <Button 
+                variant="ghost" 
+                className="w-full mt-4 text-green-600 hover:text-green-700 hover:bg-green-50 dark:text-green-400 dark:hover:bg-green-900/20"
+                onClick={() => toast({ title: "Recommendations", description: "Loading more personalized nutrition recommendations..." })}
+              >
                 Get More Recommendations
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
@@ -324,10 +415,23 @@ const NutrientInsights = () => {
       >
         <Card className="shadow-md">
           <CardHeader className="pb-2">
-            <CardTitle className="text-lg font-bold flex items-center">
-              <Calendar className="h-5 w-5 mr-2 text-purple-600 dark:text-purple-400" />
-              Upcoming Nutrient Reports
-            </CardTitle>
+            <div className="flex justify-between items-center">
+              <CardTitle className="text-lg font-bold flex items-center">
+                <Calendar className="h-5 w-5 mr-2 text-purple-600 dark:text-purple-400" />
+                Upcoming Nutrient Reports
+              </CardTitle>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => toggleSection('upcomingReports')}
+                className="h-8 w-8"
+              >
+                {expandedSections.upcomingReports ? 
+                  <ChevronUp className="h-4 w-4" /> : 
+                  <ChevronDown className="h-4 w-4" />
+                }
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -355,6 +459,10 @@ const NutrientInsights = () => {
                   key={idx}
                   whileHover={{ scale: 1.03 }}
                   className="border rounded-lg p-3 hover:shadow-md transition-all cursor-pointer"
+                  onClick={() => toast({
+                    title: report.title,
+                    description: `This report will be available on ${report.date}`
+                  })}
                 >
                   <div className="flex justify-between items-start">
                     <div>
