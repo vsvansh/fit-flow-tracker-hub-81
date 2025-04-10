@@ -148,10 +148,16 @@ const Navbar = () => {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src={avatar} alt="Profile" />
-                    <AvatarFallback className="bg-brand-600 text-white">VS</AvatarFallback>
-                  </Avatar>
+                  <div className="relative">
+                    <div className="absolute inset-0 rounded-full bg-purple-400 dark:bg-purple-600 blur-sm opacity-70 animate-pulse"></div>
+                    <Avatar className="h-8 w-8 relative">
+                      {avatar ? (
+                        <AvatarImage src={avatar} alt="Profile" />
+                      ) : (
+                        <AvatarFallback className="bg-brand-600 text-white font-bold">VS</AvatarFallback>
+                      )}
+                    </Avatar>
+                  </div>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56" align="end" forceMount>

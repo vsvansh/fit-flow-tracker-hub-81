@@ -9,10 +9,12 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
 import { Switch } from "@/components/ui/switch";
-import { Award, Trophy, Calendar, Users, Plus, CheckCircle, ArrowRight, Flag, Timer, Target } from "lucide-react";
+import { Award, Trophy, Calendar, Users, Plus, CheckCircle, ArrowRight, Flag, Timer, Target, Check } from "lucide-react";
 import BackToHome from "@/components/BackToHome";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { motion } from "framer-motion";
+import { launchConfetti, celebrationConfetti } from "@/utils/confettiUtil";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 interface Challenge {
   id: string;
@@ -26,6 +28,7 @@ interface Challenge {
   participants?: number;
   completed: boolean;
   category?: string;
+  joined?: boolean;
 }
 
 interface LeaderboardEntry {
@@ -40,6 +43,7 @@ const Challenges = () => {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("all");
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [showFullLeaderboard, setShowFullLeaderboard] = useState(false);
   
   const [challenges, setChallenges] = useState<Challenge[]>([
     {
@@ -53,6 +57,7 @@ const Challenges = () => {
       deadline: "Today, 8:00 AM",
       completed: false,
       category: "steps",
+      joined: false,
     },
     {
       id: "2",
@@ -66,6 +71,7 @@ const Challenges = () => {
       participants: 8,
       completed: false,
       category: "distance",
+      joined: false,
     },
     {
       id: "3",
@@ -78,6 +84,7 @@ const Challenges = () => {
       deadline: "Today",
       completed: true,
       category: "calories",
+      joined: true,
     },
     {
       id: "4",
@@ -91,6 +98,7 @@ const Challenges = () => {
       participants: 12,
       completed: false,
       category: "steps",
+      joined: false,
     },
     {
       id: "5",
@@ -103,6 +111,7 @@ const Challenges = () => {
       deadline: "Sunday",
       completed: false,
       category: "steps",
+      joined: false,
     },
     {
       id: "6",
@@ -115,10 +124,35 @@ const Challenges = () => {
       deadline: "5 days left",
       completed: false,
       category: "streaks",
+      joined: false,
     },
   ]);
   
-  const leaderboard: LeaderboardEntry[] = [
+  const [events, setEvents] = useState([
+    {
+      title: "Weekend Hiking Challenge",
+      date: "April 13-14, 2025",
+      desc: "Join the community hiking challenge and track your steps in nature.",
+      icon: <Flag className="h-10 w-10 text-green-500" />,
+      registered: false
+    },
+    {
+      title: "Virtual 5K Run",
+      date: "April 20, 2025",
+      desc: "Complete a 5K run anywhere, anytime. Record your results and compare with others.",
+      icon: <Timer className="h-10 w-10 text-brand-500" />,
+      registered: false
+    },
+    {
+      title: "Step Challenge Marathon",
+      date: "May 1-31, 2025",
+      desc: "A month-long step challenge with weekly milestones and amazing rewards.",
+      icon: <Target className="h-10 w-10 text-purple-500" />,
+      registered: false
+    }
+  ]);
+  
+  const allLeaderboard: LeaderboardEntry[] = [
     { rank: 1, name: "Mike Wilson", avatar: "/placeholder.svg", score: 12345 },
     { rank: 2, name: "Sarah Johnson", avatar: "/placeholder.svg", score: 11287 },
     { rank: 3, name: "Alex Thompson", avatar: "/placeholder.svg", score: 10932 },
@@ -127,7 +161,16 @@ const Challenges = () => {
     { rank: 6, name: "Olivia Martinez", avatar: "/placeholder.svg", score: 8761 },
     { rank: 7, name: "David Kim", avatar: "/placeholder.svg", score: 8245 },
     { rank: 8, name: "Sophie Chen", avatar: "/placeholder.svg", score: 7890 },
+    { rank: 9, name: "Robert Garcia", avatar: "/placeholder.svg", score: 7654 },
+    { rank: 10, name: "Lisa Wang", avatar: "/placeholder.svg", score: 7432 },
+    { rank: 11, name: "Jordan Smith", avatar: "/placeholder.svg", score: 7210 },
+    { rank: 12, name: "Mei Li", avatar: "/placeholder.svg", score: 6975 },
+    { rank: 13, name: "Carlos Lopez", avatar: "/placeholder.svg", score: 6821 },
+    { rank: 14, name: "Aisha Khan", avatar: "/placeholder.svg", score: 6654 },
+    { rank: 15, name: "Daniel Park", avatar: "/placeholder.svg", score: 6432 },
   ];
+  
+  const leaderboard = showFullLeaderboard ? allLeaderboard : allLeaderboard.slice(0, 8);
   
   // Form state for new challenge
   const [newChallenge, setNewChallenge] = useState({
@@ -164,9 +207,22 @@ const Challenges = () => {
       : challenges.filter(c => !c.completed);
       
   const joinChallenge = (id: string) => {
+    setChallenges(prev => prev.map(challenge => 
+      challenge.id === id 
+        ? { ...challenge, joined: true } 
+        : challenge
+    ));
+    
     toast({
       title: "Challenge joined!",
       description: "You've successfully joined the challenge.",
+    });
+    
+    launchConfetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.6 },
+      colors: ['#10B981', '#3B82F6', '#6366F1', '#EC4899', '#F59E0B']
     });
   };
   
@@ -184,6 +240,7 @@ const Challenges = () => {
       unit: newChallenge.unit,
       deadline: newChallenge.deadline,
       completed: false,
+      joined: false,
       category: newChallenge.unit === "steps" ? "steps" : 
                newChallenge.unit === "km" ? "distance" :
                newChallenge.unit === "cal" ? "calories" : "other"
@@ -209,10 +266,32 @@ const Challenges = () => {
   };
 
   const registerForEvent = (index: number) => {
+    const updatedEvents = [...events];
+    updatedEvents[index].registered = true;
+    setEvents(updatedEvents);
+    
     toast({
       title: "Registration successful!",
       description: "You've registered for the event. We'll send you more details soon.",
     });
+    
+    launchConfetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.6 },
+      colors: ['#10B981', '#3B82F6', '#6366F1', '#EC4899', '#F59E0B']
+    });
+  };
+  
+  const toggleFullLeaderboard = () => {
+    setShowFullLeaderboard(prev => !prev);
+    
+    if (!showFullLeaderboard) {
+      toast({
+        title: "Leaderboard",
+        description: "Viewing complete leaderboard",
+      });
+    }
   };
   
   // Container animations
@@ -275,7 +354,7 @@ const Challenges = () => {
                     Create Challenge
                   </Button>
                 </DialogTrigger>
-                <DialogContent>
+                <DialogContent className="max-h-[90vh] overflow-y-auto my-4">
                   <DialogHeader>
                     <DialogTitle>Create New Challenge</DialogTitle>
                     <DialogDescription>
@@ -455,14 +534,32 @@ const Challenges = () => {
                                 </div>
                               )}
                               
-                              <Button 
-                                size="sm" 
-                                variant={challenge.completed ? "outline" : "default"} 
-                                className={challenge.completed ? "pointer-events-none" : ""}
-                                onClick={() => !challenge.completed && joinChallenge(challenge.id)}
-                              >
-                                {challenge.completed ? "Completed" : "Join Challenge"}
-                              </Button>
+                              {challenge.completed ? (
+                                <Button 
+                                  size="sm" 
+                                  variant="outline" 
+                                  className="pointer-events-none"
+                                >
+                                  Completed
+                                </Button>
+                              ) : challenge.joined ? (
+                                <Button 
+                                  size="sm" 
+                                  variant="outline" 
+                                  className="bg-green-500 text-white hover:bg-green-600 border-green-500"
+                                >
+                                  <Check className="mr-1 h-3 w-3" />
+                                  Joined Challenge
+                                </Button>
+                              ) : (
+                                <Button 
+                                  size="sm" 
+                                  variant="default" 
+                                  onClick={() => joinChallenge(challenge.id)}
+                                >
+                                  Join Challenge
+                                </Button>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -544,17 +641,64 @@ const Challenges = () => {
                         </td>
                         <td className="py-3 px-4 text-center">
                           {!entry.isUser && (
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              className="h-8 w-8 p-0 hover:bg-gray-100 dark:hover:bg-gray-800"
-                              onClick={() => toast({
-                                title: "User profile",
-                                description: `Viewing profile of ${entry.name}`,
-                              })}
-                            >
-                              <ArrowRight className="h-4 w-4" />
-                            </Button>
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  className="h-8 w-8 p-0 hover:bg-gray-100 dark:hover:bg-gray-800"
+                                >
+                                  <ArrowRight className="h-4 w-4" />
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-80">
+                                <div className="flex flex-col space-y-4">
+                                  <div className="flex items-center space-x-4">
+                                    <div className="h-12 w-12 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-500 dark:text-gray-400">
+                                      {entry.avatar ? (
+                                        <img src={entry.avatar} alt={entry.name} className="h-12 w-12 rounded-full" />
+                                      ) : (
+                                        entry.name.charAt(0)
+                                      )}
+                                    </div>
+                                    <div>
+                                      <h4 className="font-semibold">{entry.name}</h4>
+                                      <p className="text-sm text-gray-500 dark:text-gray-400">Rank #{entry.rank}</p>
+                                    </div>
+                                  </div>
+                                  
+                                  <div className="grid grid-cols-2 gap-2 text-sm">
+                                    <div className="flex flex-col space-y-1">
+                                      <span className="text-gray-500 dark:text-gray-400">Steps</span>
+                                      <span className="font-medium">{entry.score.toLocaleString()}</span>
+                                    </div>
+                                    <div className="flex flex-col space-y-1">
+                                      <span className="text-gray-500 dark:text-gray-400">Distance</span>
+                                      <span className="font-medium">{Math.round(entry.score / 1500)} km</span>
+                                    </div>
+                                    <div className="flex flex-col space-y-1">
+                                      <span className="text-gray-500 dark:text-gray-400">Challenges</span>
+                                      <span className="font-medium">{Math.floor(Math.random() * 10) + 2}</span>
+                                    </div>
+                                    <div className="flex flex-col space-y-1">
+                                      <span className="text-gray-500 dark:text-gray-400">Completed</span>
+                                      <span className="font-medium">{Math.floor(Math.random() * 8) + 1}</span>
+                                    </div>
+                                  </div>
+                                  
+                                  <div className="flex justify-between space-x-2">
+                                    <Button size="sm" variant="outline" className="w-full">
+                                      <Users className="mr-1 h-3 w-3" />
+                                      Follow
+                                    </Button>
+                                    <Button size="sm" className="w-full">
+                                      <Trophy className="mr-1 h-3 w-3" />
+                                      Challenge
+                                    </Button>
+                                  </div>
+                                </div>
+                              </PopoverContent>
+                            </Popover>
                           )}
                         </td>
                       </tr>
@@ -566,12 +710,9 @@ const Challenges = () => {
               <div className="mt-4 text-center">
                 <Button 
                   variant="outline"
-                  onClick={() => toast({
-                    title: "Leaderboard",
-                    description: "Viewing complete leaderboard",
-                  })}
+                  onClick={toggleFullLeaderboard}
                 >
-                  View Complete Leaderboard
+                  {showFullLeaderboard ? "Show Less" : "View Complete Leaderboard"}
                 </Button>
               </div>
             </CardContent>
@@ -588,26 +729,7 @@ const Challenges = () => {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {[
-                  {
-                    title: "Weekend Hiking Challenge",
-                    date: "April 13-14, 2025",
-                    desc: "Join the community hiking challenge and track your steps in nature.",
-                    icon: <Flag className="h-10 w-10 text-green-500" />,
-                  },
-                  {
-                    title: "Virtual 5K Run",
-                    date: "April 20, 2025",
-                    desc: "Complete a 5K run anywhere, anytime. Record your results and compare with others.",
-                    icon: <Timer className="h-10 w-10 text-brand-500" />,
-                  },
-                  {
-                    title: "Step Challenge Marathon",
-                    date: "May 1-31, 2025",
-                    desc: "A month-long step challenge with weekly milestones and amazing rewards.",
-                    icon: <Target className="h-10 w-10 text-purple-500" />,
-                  }
-                ].map((event, idx) => (
+                {events.map((event, idx) => (
                   <motion.div
                     key={idx}
                     whileHover={{ 
@@ -624,14 +746,25 @@ const Challenges = () => {
                         <h3 className="font-semibold mb-1">{event.title}</h3>
                         <p className="text-sm text-blue-600 dark:text-blue-400 mb-2">{event.date}</p>
                         <p className="text-sm text-gray-600 dark:text-gray-300 mb-4 flex-grow">{event.desc}</p>
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => registerForEvent(idx)}
-                          className="mt-auto hover:bg-primary hover:text-primary-foreground transition-colors"
-                        >
-                          Register
-                        </Button>
+                        {event.registered ? (
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            className="mt-auto bg-green-500 text-white hover:bg-green-600 border-green-500"
+                          >
+                            <Check className="mr-1 h-3 w-3" />
+                            Registered
+                          </Button>
+                        ) : (
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => registerForEvent(idx)}
+                            className="mt-auto hover:bg-primary hover:text-primary-foreground transition-colors"
+                          >
+                            Register
+                          </Button>
+                        )}
                       </CardContent>
                     </Card>
                   </motion.div>
