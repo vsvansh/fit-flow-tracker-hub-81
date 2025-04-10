@@ -72,7 +72,7 @@ const FitnessInsights = () => {
   };
 
   return (
-    <Card className="shadow">
+    <Card className="shadow hover:shadow-lg transition-shadow duration-300">
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <CardTitle className="text-xl font-bold">Smart Insights & Analysis</CardTitle>
@@ -210,17 +210,17 @@ const FitnessInsights = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <Button 
             onClick={handleVegetableRecipes}
-            className="bg-green-600 hover:bg-green-700 text-white">
+            className="bg-green-600 hover:bg-green-700 text-white transition-all duration-300 transform hover:scale-[1.02]">
             View Vegetable Recipes
           </Button>
           <Button 
             onClick={handleCreateMealSchedule}
-            className="bg-blue-600 hover:bg-blue-700 text-white">
+            className="bg-blue-600 hover:bg-blue-700 text-white transition-all duration-300 transform hover:scale-[1.02]">
             Create Meal Schedule
           </Button>
           <Button 
             onClick={handleSetWaterReminders}
-            className="bg-cyan-600 hover:bg-cyan-700 text-white">
+            className="bg-cyan-600 hover:bg-cyan-700 text-white transition-all duration-300 transform hover:scale-[1.02]">
             Set Water Reminders
           </Button>
         </div>
