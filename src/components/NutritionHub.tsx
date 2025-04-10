@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -723,4 +724,114 @@ const features = [
             </div>
             
             <div className="flex gap-2">
-              <Button className="flex-1"
+              <Button className="flex-1" onClick={() => {
+                toast({
+                  title: "Shopping List",
+                  description: "Your shopping list has been saved."
+                });
+              }}>
+                Save List
+              </Button>
+              <Button className="flex-1" variant="outline" onClick={() => {
+                toast({
+                  title: "Shopping List",
+                  description: "Your shopping list has been shared."
+                });
+              }}>
+                Share List
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    ),
+    tag: "original"
+  }
+];
+
+// Main component for Nutrition Hub
+const NutritionHub = () => {
+  const [selectedFeature, setSelectedFeature] = useState("tracker");
+  const [showOriginal, setShowOriginal] = useState(true);
+
+  // Initialize avatar on component mount
+  useEffect(() => {
+    initializeAvatar();
+  }, []);
+
+  // Get the component for the selected feature
+  const SelectedComponent = features.find(
+    (feature) => feature.id === selectedFeature
+  )?.component || (() => <div>Feature not found</div>);
+
+  return (
+    <div className="space-y-6">
+      {/* Filter tabs for feature categories */}
+      <div className="flex justify-between items-center">
+        <div className="flex items-center gap-2">
+          <Switch
+            id="feature-toggle"
+            checked={showOriginal}
+            onCheckedChange={setShowOriginal}
+          />
+          <Label htmlFor="feature-toggle">
+            {showOriginal ? "Original Features" : "Enhanced Features"}
+          </Label>
+        </div>
+        
+        <div className="text-right text-sm text-muted-foreground">
+          Select a feature to explore
+        </div>
+      </div>
+
+      {/* Feature Grid */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+        {features
+          .filter((feature) => 
+            showOriginal 
+              ? feature.tag === "original" 
+              : feature.tag === "enhanced"
+          )
+          .map((feature) => (
+            <motion.div
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.98 }}
+              key={feature.id}
+              className={`p-4 rounded-lg cursor-pointer transition-all flex flex-col items-center justify-center text-center border ${
+                selectedFeature === feature.id
+                  ? "border-green-500 bg-green-50 dark:bg-green-900/20"
+                  : "hover:border-green-300 dark:hover:border-green-700"
+              }`}
+              onClick={() => setSelectedFeature(feature.id)}
+            >
+              <div
+                className={`w-12 h-12 rounded-full flex items-center justify-center mb-2 ${
+                  selectedFeature === feature.id
+                    ? "bg-green-100 dark:bg-green-900/30 text-green-600"
+                    : "bg-gray-100 dark:bg-gray-800"
+                }`}
+              >
+                <feature.icon className="h-6 w-6" />
+              </div>
+              <h3 className="font-medium text-sm mb-1">{feature.name}</h3>
+              <p className="text-xs text-muted-foreground">
+                {feature.description}
+              </p>
+            </motion.div>
+          ))}
+      </div>
+
+      {/* Selected Feature Component */}
+      <motion.div
+        key={selectedFeature}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+      >
+        <SelectedComponent />
+      </motion.div>
+    </div>
+  );
+};
+
+export default NutritionHub;
