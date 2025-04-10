@@ -38,7 +38,6 @@ const NutritionTracker = () => {
   const [showGlowEffect, setShowGlowEffect] = useState(false);
   const [showCalorieDialog, setShowCalorieDialog] = useState(false);
   const [newCalories, setNewCalories] = useState(calories);
-  const [templateSaved, setTemplateSaved] = useState(false);
 
   useEffect(() => {
     if (showGlowEffect) {
@@ -95,19 +94,6 @@ const NutritionTracker = () => {
     toast({
       title: "Calories updated",
       description: `Your daily calorie intake has been updated to ${newCalories} kcal.`,
-    });
-  };
-
-  const handleSaveTemplate = () => {
-    setTemplateSaved(true);
-    confetti({
-      particleCount: 100,
-      spread: 70,
-      origin: { y: 0.6 }
-    });
-    toast({
-      title: "Template saved",
-      description: "Your meal template has been saved successfully.",
     });
   };
 
@@ -178,7 +164,7 @@ const NutritionTracker = () => {
                   </div>
                   <Progress
                     value={((key === 'protein' ? protein : key === 'carbs' ? carbs : key === 'fat' ? fat : fiber) / data.goal) * 100}
-                    className="h-2 w-full mb-1 transition-all duration-300 hover:h-3"
+                    className="h-2 w-full mb-1"
                   />
                   <div className="text-xs text-gray-500 dark:text-gray-400">
                     {key === 'protein' ? protein : key === 'carbs' ? carbs : key === 'fat' ? fat : fiber} / {data.goal} {data.unit}
@@ -197,7 +183,7 @@ const NutritionTracker = () => {
                 </div>
                 <Progress
                   value={(waterIntake / 8) * 100}
-                  className="h-2 w-full mb-1 transition-all duration-300 hover:h-3"
+                  className="h-2 w-full mb-1"
                 />
                 <div className="text-xs text-gray-500 dark:text-gray-400">
                   {waterIntake} / 8 cups
@@ -238,10 +224,7 @@ const NutritionTracker = () => {
                   <span className="relative z-10">Update Calories</span>
                   <span className="absolute inset-0 bg-blue-400 opacity-0 group-hover:opacity-20 group-active:opacity-30 transition-opacity duration-300 rounded"></span>
                 </Button>
-                <Progress 
-                  value={(calories / nutritionData.calories.goal) * 100} 
-                  className="h-2 transition-all duration-300 hover:h-3" 
-                />
+                <Progress value={(calories / nutritionData.calories.goal) * 100} className="h-2" />
                 <div className="flex justify-between mt-1 text-xs text-gray-500 dark:text-gray-400">
                   <span>0 kcal</span>
                   <span>{nutritionData.calories.goal} kcal</span>
@@ -261,10 +244,7 @@ const NutritionTracker = () => {
                   <span className="relative z-10">Add Water</span>
                   <span className="absolute inset-0 bg-blue-400 opacity-0 group-hover:opacity-20 group-active:opacity-30 transition-opacity duration-300 rounded"></span>
                 </Button>
-                <Progress 
-                  value={(waterIntake / 8) * 100} 
-                  className="h-2 mt-3 transition-all duration-300 hover:h-3" 
-                />
+                <Progress value={(waterIntake / 8) * 100} className="h-2 mt-3" />
                 <div className="flex justify-between mt-1 text-xs text-gray-500 dark:text-gray-400">
                   <span>0 cups</span>
                   <span>8 cups</span>

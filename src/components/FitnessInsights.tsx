@@ -3,13 +3,10 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Button } from "@/components/ui/button";
-import { toast } from "@/components/ui/use-toast";
 import { 
   TrendingUp, Flame, Calendar, BarChart2, Brain, Activity, 
   Heart, Target, AlertCircle, Zap 
 } from 'lucide-react';
-import confetti from "canvas-confetti";
 
 const FitnessInsights = () => {
   const [currentDay] = useState(new Date());
@@ -45,34 +42,8 @@ const FitnessInsights = () => {
   // Calculate nutrient density score (simplified demo)
   const nutrientDensityScore = 82; // out of 100
 
-  const handleVegetableRecipes = () => {
-    toast({
-      title: "Vegetable Recipes",
-      description: "Loading vegetable recipes based on your preferences...",
-    });
-  };
-
-  const handleCreateMealSchedule = () => {
-    toast({
-      title: "Meal Schedule",
-      description: "Creating your personalized meal schedule...",
-    });
-  };
-
-  const handleSetWaterReminders = () => {
-    toast({
-      title: "Water Reminders",
-      description: "Water reminder notifications have been set for every 2 hours.",
-    });
-    confetti({
-      particleCount: 50,
-      spread: 70,
-      origin: { y: 0.6 }
-    });
-  };
-
   return (
-    <Card className="shadow hover:shadow-lg transition-shadow duration-300">
+    <Card className="shadow">
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <CardTitle className="text-xl font-bold">Smart Insights & Analysis</CardTitle>
@@ -81,7 +52,7 @@ const FitnessInsights = () => {
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 p-4 rounded-lg transition-all duration-300 hover:shadow-md hover:shadow-blue-100 dark:hover:shadow-blue-900/20">
+          <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 p-4 rounded-lg">
             <div className="flex items-center mb-2">
               <TrendingUp className="h-5 w-5 text-blue-600 dark:text-blue-400 mr-2" />
               <h3 className="font-medium text-blue-800 dark:text-blue-300">Goal Prediction</h3>
@@ -95,7 +66,7 @@ const FitnessInsights = () => {
             </p>
           </div>
           
-          <div className="bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/20 dark:to-amber-800/20 p-4 rounded-lg transition-all duration-300 hover:shadow-md hover:shadow-amber-100 dark:hover:shadow-amber-900/20">
+          <div className="bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/20 dark:to-amber-800/20 p-4 rounded-lg">
             <div className="flex items-center mb-2">
               <Flame className="h-5 w-5 text-amber-600 dark:text-amber-400 mr-2" />
               <h3 className="font-medium text-amber-800 dark:text-amber-300">Calorie Balance</h3>
@@ -126,7 +97,7 @@ const FitnessInsights = () => {
           </h3>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div className="border p-3 rounded-lg transition-all duration-300 hover:shadow-md">
+            <div className="border p-3 rounded-lg">
               <div className="flex justify-between mb-1">
                 <span className="text-sm">Weight Change Goal</span>
                 <span className="text-sm font-medium">{weeklyStats.weightChangeGoal} kg/week</span>
@@ -137,21 +108,21 @@ const FitnessInsights = () => {
               </div>
               <Progress 
                 value={(Math.abs(weeklyStats.actualWeightChange) / Math.abs(weeklyStats.weightChangeGoal)) * 100} 
-                className="h-1.5 mt-2 transition-all duration-300 hover:h-2.5" 
+                className="h-1.5 mt-2" 
               />
               <p className="text-xs text-right mt-1">
                 {Math.round((Math.abs(weeklyStats.actualWeightChange) / Math.abs(weeklyStats.weightChangeGoal)) * 100)}% of goal pace
               </p>
             </div>
             
-            <div className="border p-3 rounded-lg transition-all duration-300 hover:shadow-md">
+            <div className="border p-3 rounded-lg">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm">Nutrient Density Score</span>
                 <Badge className="bg-green-100 text-green-700 hover:bg-green-200">Good</Badge>
               </div>
               <div className="flex items-center">
                 <div className="w-full mr-4">
-                  <Progress value={nutrientDensityScore} className="h-2 transition-all duration-300 hover:h-3" />
+                  <Progress value={nutrientDensityScore} className="h-2" />
                 </div>
                 <span className="font-bold text-lg">{nutrientDensityScore}</span>
               </div>
@@ -205,24 +176,6 @@ const FitnessInsights = () => {
               </div>
             </div>
           </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <Button 
-            onClick={handleVegetableRecipes}
-            className="bg-green-600 hover:bg-green-700 text-white transition-all duration-300 transform hover:scale-[1.02]">
-            View Vegetable Recipes
-          </Button>
-          <Button 
-            onClick={handleCreateMealSchedule}
-            className="bg-blue-600 hover:bg-blue-700 text-white transition-all duration-300 transform hover:scale-[1.02]">
-            Create Meal Schedule
-          </Button>
-          <Button 
-            onClick={handleSetWaterReminders}
-            className="bg-cyan-600 hover:bg-cyan-700 text-white transition-all duration-300 transform hover:scale-[1.02]">
-            Set Water Reminders
-          </Button>
         </div>
       </CardContent>
     </Card>
