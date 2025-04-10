@@ -50,12 +50,22 @@ const FitnessInsights = () => {
       title: "Vegetable Recipes",
       description: "Loading vegetable recipes based on your preferences...",
     });
+    confetti({
+      particleCount: 50,
+      spread: 70,
+      origin: { y: 0.6 }
+    });
   };
 
   const handleCreateMealSchedule = () => {
     toast({
       title: "Meal Schedule",
       description: "Creating your personalized meal schedule...",
+    });
+    confetti({
+      particleCount: 50,
+      spread: 70,
+      origin: { y: 0.6 }
     });
   };
 
@@ -210,17 +220,17 @@ const FitnessInsights = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <Button 
             onClick={handleVegetableRecipes}
-            className="bg-green-600 hover:bg-green-700 text-white">
+            className="bg-green-600 hover:bg-green-700 text-white transition-all duration-300 hover:shadow-md hover:scale-[1.02]">
             View Vegetable Recipes
           </Button>
           <Button 
             onClick={handleCreateMealSchedule}
-            className="bg-blue-600 hover:bg-blue-700 text-white">
+            className="bg-blue-600 hover:bg-blue-700 text-white transition-all duration-300 hover:shadow-md hover:scale-[1.02]">
             Create Meal Schedule
           </Button>
           <Button 
             onClick={handleSetWaterReminders}
-            className="bg-cyan-600 hover:bg-cyan-700 text-white">
+            className="bg-cyan-600 hover:bg-cyan-700 text-white transition-all duration-300 hover:shadow-md hover:scale-[1.02]">
             Set Water Reminders
           </Button>
         </div>

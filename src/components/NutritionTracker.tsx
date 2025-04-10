@@ -233,7 +233,7 @@ const NutritionTracker = () => {
                 </div>
                 <Button
                   onClick={() => setShowCalorieDialog(true)}
-                  className="w-full mb-3 bg-blue-600 hover:bg-blue-700 text-white relative overflow-hidden group"
+                  className="w-full mb-3 bg-blue-600 hover:bg-blue-700 text-white relative overflow-hidden group transition-all duration-300 hover:scale-[1.02]"
                 >
                   <span className="relative z-10">Update Calories</span>
                   <span className="absolute inset-0 bg-blue-400 opacity-0 group-hover:opacity-20 group-active:opacity-30 transition-opacity duration-300 rounded"></span>
@@ -256,7 +256,7 @@ const NutritionTracker = () => {
                 </div>
                 <Button 
                   onClick={handleAddWater} 
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white relative overflow-hidden group"
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white relative overflow-hidden group transition-all duration-300 hover:scale-[1.02]"
                 >
                   <span className="relative z-10">Add Water</span>
                   <span className="absolute inset-0 bg-blue-400 opacity-0 group-hover:opacity-20 group-active:opacity-30 transition-opacity duration-300 rounded"></span>
