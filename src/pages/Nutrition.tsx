@@ -9,12 +9,16 @@ import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/components/ui/use-toast";
 import { Switch } from "@/components/Switch";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import {
   Apple, Coffee, Droplet, PlusCircle, Utensils, FileText,
   BarChart, ChevronRight, Clock, CalendarDays, ArrowRight,
   ArrowUp, ArrowDown, Info, Filter, Flame, Carrot, Cherry,
-  Beef, Egg, Bookmark, Plus, RefreshCcw, Layers
+  Beef, Egg, Bookmark, Plus, RefreshCcw, Layers, Check,
+  Search, Star, X
 } from "lucide-react";
+import confetti from "canvas-confetti";
 import BackToHome from "@/components/BackToHome";
 import NutritionTracker from "@/components/NutritionTracker";
 import FoodJournal from "@/components/FoodJournal";
@@ -71,12 +75,98 @@ const Nutrition = () => {
   const { toast } = useToast();
   const [viewMode, setViewMode] = useState<'classic' | 'new'>('classic');
   const [activeTab, setActiveTab] = useState('overview');
-
+  const [showAddMealDialog, setShowAddMealDialog] = useState(false);
+  const [showMealDetailsDialog, setShowMealDetailsDialog] = useState(false);
+  const [showWeekPlanDialog, setShowWeekPlanDialog] = useState(false);
+  const [showCustomizeMealDialog, setShowCustomizeMealDialog] = useState(false);
+  const [planSaved, setPlanSaved] = useState(false);
+  const [selectedMeal, setSelectedMeal] = useState<{meal: string, time: string, content: string, calories: number} | null>(null);
+  const [isTemplateSaved, setIsTemplateSaved] = useState(false);
+  
   const toggleViewMode = () => {
     setViewMode(viewMode === 'classic' ? 'new' : 'classic');
     toast({
       title: `Switched to ${viewMode === 'classic' ? 'new' : 'classic'} view`,
       description: `Now showing the ${viewMode === 'classic' ? 'new' : 'classic'} nutrition interface.`,
+    });
+  };
+
+  const handleAddMeal = () => {
+    setShowAddMealDialog(false);
+    toast({
+      title: "Meal Added",
+      description: "Your meal has been added to your journal.",
+    });
+  };
+
+  const handleMealDetails = (meal: {meal: string, time: string, content: string, calories: number}) => {
+    setSelectedMeal(meal);
+    setShowMealDetailsDialog(true);
+  };
+
+  const handleSavePlan = () => {
+    setPlanSaved(true);
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.6 }
+    });
+    toast({
+      title: "Plan Saved",
+      description: "Your current meal plan has been saved successfully.",
+    });
+    
+    // Reset the saved state after 3 seconds
+    setTimeout(() => {
+      setPlanSaved(false);
+    }, 3000);
+  };
+
+  const handleGenerateNewPlan = () => {
+    toast({
+      title: "New Plan Generated",
+      description: "A new meal plan has been generated based on your preferences.",
+    });
+  };
+
+  const handleSaveTemplate = () => {
+    setIsTemplateSaved(true);
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.6 }
+    });
+    toast({
+      title: "Template Saved",
+      description: "Your template has been saved successfully.",
+    });
+  };
+
+  const handleFilter = () => {
+    toast({
+      title: "Filter Applied",
+      description: "Your journal has been filtered according to your preferences.",
+    });
+  };
+
+  const handleViewRecipes = () => {
+    toast({
+      title: "Vegetable Recipes",
+      description: "Viewing recommended vegetable recipes.",
+    });
+  };
+
+  const handleCreateMealSchedule = () => {
+    toast({
+      title: "Meal Schedule",
+      description: "Opening meal schedule creation tool.",
+    });
+  };
+
+  const handleSetWaterReminders = () => {
+    toast({
+      title: "Water Reminders",
+      description: "Water reminder settings have been updated.",
     });
   };
 
@@ -94,7 +184,7 @@ const Nutrition = () => {
           </p>
         </div>
         
-        <div className="mt-4 md:mt-0 flex items-center gap-3 bg-gradient-to-r from-green-100 to-emerald-100 dark:from-green-900/30 dark:to-emerald-900/30 p-3 rounded-full shadow-md">
+        <div className="mt-4 md:mt-0 flex items-center gap-3 bg-gradient-to-r from-green-100 to-emerald-100 dark:from-green-900/30 dark:to-emerald-900/30 p-3 rounded-full shadow-md relative overflow-hidden group">
           <span className={`text-sm font-medium transition-colors ${viewMode === 'classic' ? 'text-green-800 dark:text-green-300' : 'text-gray-500 dark:text-gray-400'}`}>
             Classic View
           </span>
@@ -102,26 +192,298 @@ const Nutrition = () => {
             checked={viewMode === 'new'}
             onCheckedChange={toggleViewMode}
             size="lg"
-            className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-green-600 data-[state=checked]:to-emerald-500 data-[state=unchecked]:bg-gradient-to-r data-[state=unchecked]:from-gray-400 data-[state=unchecked]:to-gray-300 relative overflow-hidden group"
+            className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-green-600 data-[state=checked]:to-emerald-500 data-[state=unchecked]:bg-gradient-to-r data-[state=unchecked]:from-gray-400 data-[state=unchecked]:to-gray-300 relative overflow-hidden"
           />
           <span className={`text-sm font-medium transition-colors ${viewMode === 'new' ? 'text-green-800 dark:text-green-300' : 'text-gray-500 dark:text-gray-400'}`}>
             New Interface
           </span>
           
           <div className="absolute inset-0 -z-10 bg-green-300 dark:bg-green-700 opacity-0 group-hover:opacity-20 blur-xl rounded-full transition-opacity duration-700"></div>
+          
+          {/* Add a pulse effect */}
+          <div className="absolute inset-0 -z-10 bg-green-400 dark:bg-green-600 opacity-0 animate-pulse rounded-full blur-lg"></div>
+          <div className="absolute inset-0 -z-10 bg-emerald-400 dark:bg-emerald-600 opacity-0 animate-pulse rounded-full blur-lg" style={{ animationDelay: "0.5s" }}></div>
         </div>
       </div>
       
       {viewMode === 'classic' ? (
-        <ClassicNutritionView activeTab={activeTab} setActiveTab={setActiveTab} />
+        <ClassicNutritionView 
+          activeTab={activeTab} 
+          setActiveTab={setActiveTab} 
+          showAddMealDialog={showAddMealDialog}
+          setShowAddMealDialog={setShowAddMealDialog}
+          handleAddMeal={handleAddMeal}
+          showMealDetailsDialog={showMealDetailsDialog}
+          setShowMealDetailsDialog={setShowMealDetailsDialog}
+          selectedMeal={selectedMeal}
+          handleMealDetails={handleMealDetails}
+          showWeekPlanDialog={showWeekPlanDialog}
+          setShowWeekPlanDialog={setShowWeekPlanDialog}
+          showCustomizeMealDialog={showCustomizeMealDialog}
+          setShowCustomizeMealDialog={setShowCustomizeMealDialog}
+          planSaved={planSaved}
+          handleSavePlan={handleSavePlan}
+          handleGenerateNewPlan={handleGenerateNewPlan}
+        />
       ) : (
-        <NewNutritionView />
+        <NewNutritionView 
+          isTemplateSaved={isTemplateSaved}
+          handleSaveTemplate={handleSaveTemplate}
+          handleFilter={handleFilter}
+          handleViewRecipes={handleViewRecipes}
+          handleCreateMealSchedule={handleCreateMealSchedule}
+          handleSetWaterReminders={handleSetWaterReminders}
+        />
       )}
+
+      {/* Meal Details Dialog */}
+      <Dialog open={showMealDetailsDialog} onOpenChange={setShowMealDetailsDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{selectedMeal?.meal} Details</DialogTitle>
+            <DialogDescription>
+              {selectedMeal?.time}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <h3 className="font-medium mb-2">Meal Contents</h3>
+              <p>{selectedMeal?.content}</p>
+            </div>
+            <div>
+              <h3 className="font-medium mb-2">Nutritional Information</h3>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="border rounded p-2">
+                  <span className="text-sm text-gray-500">Calories</span>
+                  <p className="font-bold">{selectedMeal?.calories} kcal</p>
+                </div>
+                <div className="border rounded p-2">
+                  <span className="text-sm text-gray-500">Protein</span>
+                  <p className="font-bold">24g</p>
+                </div>
+                <div className="border rounded p-2">
+                  <span className="text-sm text-gray-500">Carbs</span>
+                  <p className="font-bold">45g</p>
+                </div>
+                <div className="border rounded p-2">
+                  <span className="text-sm text-gray-500">Fat</span>
+                  <p className="font-bold">15g</p>
+                </div>
+              </div>
+            </div>
+            <div>
+              <h3 className="font-medium mb-2">Preparation</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Prepare the ingredients, cook according to the recipe, and enjoy your {selectedMeal?.meal.toLowerCase()}.
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              onClick={() => setShowMealDetailsDialog(false)}
+            >
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Meal Dialog */}
+      <Dialog open={showAddMealDialog} onOpenChange={setShowAddMealDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add New Meal</DialogTitle>
+            <DialogDescription>
+              Record what you ate, when, and how you felt
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Meal Type</label>
+                <select className="w-full p-2 border rounded">
+                  <option>Breakfast</option>
+                  <option>Lunch</option>
+                  <option>Dinner</option>
+                  <option>Snack</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Time</label>
+                <Input defaultValue="12:00 PM" />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Foods (comma separated)</label>
+              <textarea className="w-full p-2 border rounded" rows={3} placeholder="E.g., Oatmeal, Blueberries, Almond milk"></textarea>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Estimated Calories</label>
+                <Input type="number" defaultValue="0" />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">How I Felt</label>
+                <select className="w-full p-2 border rounded">
+                  <option>Energetic</option>
+                  <option>Satisfied</option>
+                  <option>Neutral</option>
+                  <option>Tired</option>
+                  <option>Hungry</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAddMealDialog(false)}>Cancel</Button>
+            <Button onClick={handleAddMeal}>Add Meal</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Week Plan Dialog */}
+      <Dialog open={showWeekPlanDialog} onOpenChange={setShowWeekPlanDialog}>
+        <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <DialogTitle>Weekly Meal Plan</DialogTitle>
+            <DialogDescription>
+              Your complete meal plan for the week
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-6 py-4 max-h-[60vh] overflow-y-auto">
+            {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"].map(day => (
+              <div key={day} className="space-y-3">
+                <h3 className="font-medium border-b pb-1">{day}</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  {["Breakfast", "Lunch", "Dinner"].map(mealType => (
+                    <div key={mealType} className="border rounded-lg p-3">
+                      <div className="flex justify-between items-center mb-2">
+                        <h4 className="font-medium">{mealType}</h4>
+                        <Badge variant="outline">450 kcal</Badge>
+                      </div>
+                      <p className="text-sm">
+                        {mealType === "Breakfast" ? "Oatmeal with berries and yogurt" : 
+                         mealType === "Lunch" ? "Quinoa salad with grilled chicken" : 
+                         "Baked salmon with roasted vegetables"}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowWeekPlanDialog(false)}>Close</Button>
+            <Button onClick={() => {
+              toast({
+                title: "Plan Downloaded",
+                description: "Your weekly meal plan has been downloaded."
+              });
+              setShowWeekPlanDialog(false);
+            }}>
+              Download Plan
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Customize Meal Plan Dialog */}
+      <Dialog open={showCustomizeMealDialog} onOpenChange={setShowCustomizeMealDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Customize Meal Plan</DialogTitle>
+            <DialogDescription>
+              Adjust your meal plan based on your preferences
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Dietary Preferences</label>
+              <div className="flex flex-wrap gap-2">
+                {["Vegetarian", "Vegan", "Keto", "Paleo", "Low Carb", "High Protein"].map(pref => (
+                  <Badge key={pref} variant="outline" className="cursor-pointer hover:bg-green-50 dark:hover:bg-green-900/20">
+                    {pref}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+            <Separator />
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Calorie Target</label>
+              <Input type="range" min="1200" max="3000" defaultValue="2200" />
+              <div className="flex justify-between text-xs">
+                <span>1200 kcal</span>
+                <span>2200 kcal</span>
+                <span>3000 kcal</span>
+              </div>
+            </div>
+            <Separator />
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Exclude Ingredients</label>
+              <Input placeholder="E.g., peanuts, shellfish, etc." />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Meal Complexity</label>
+              <select className="w-full p-2 border rounded">
+                <option>Simple (15 min or less)</option>
+                <option>Moderate (15-30 min)</option>
+                <option>Complex (30+ min)</option>
+              </select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCustomizeMealDialog(false)}>Cancel</Button>
+            <Button onClick={() => {
+              toast({
+                title: "Preferences Saved",
+                description: "Your meal plan preferences have been updated."
+              });
+              setShowCustomizeMealDialog(false);
+            }}>
+              Save Preferences
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
 
-const ClassicNutritionView = ({ activeTab, setActiveTab }: { activeTab: string, setActiveTab: (tab: string) => void }) => {
+const ClassicNutritionView = ({ 
+  activeTab, 
+  setActiveTab, 
+  showAddMealDialog,
+  setShowAddMealDialog,
+  handleAddMeal,
+  showMealDetailsDialog,
+  setShowMealDetailsDialog,
+  selectedMeal,
+  handleMealDetails,
+  showWeekPlanDialog,
+  setShowWeekPlanDialog,
+  showCustomizeMealDialog,
+  setShowCustomizeMealDialog,
+  planSaved,
+  handleSavePlan,
+  handleGenerateNewPlan
+}: { 
+  activeTab: string, 
+  setActiveTab: (tab: string) => void,
+  showAddMealDialog: boolean,
+  setShowAddMealDialog: (show: boolean) => void,
+  handleAddMeal: () => void,
+  showMealDetailsDialog: boolean,
+  setShowMealDetailsDialog: (show: boolean) => void,
+  selectedMeal: {meal: string, time: string, content: string, calories: number} | null,
+  handleMealDetails: (meal: {meal: string, time: string, content: string, calories: number}) => void,
+  showWeekPlanDialog: boolean,
+  setShowWeekPlanDialog: (show: boolean) => void,
+  showCustomizeMealDialog: boolean,
+  setShowCustomizeMealDialog: (show: boolean) => void,
+  planSaved: boolean,
+  handleSavePlan: () => void,
+  handleGenerateNewPlan: () => void
+}) => {
   const { toast } = useToast();
   const [water, setWater] = useState(waterIntake.current);
   
@@ -135,20 +497,6 @@ const ClassicNutritionView = ({ activeTab, setActiveTab }: { activeTab: string, 
     }
   };
 
-  const handleViewFullWeekPlan = () => {
-    toast({
-      title: "Full Week Plan",
-      description: "Viewing your complete meal plan for the week.",
-    });
-  };
-
-  const handleCustomizeMealPlan = () => {
-    toast({
-      title: "Customize Meal Plan",
-      description: "Opening meal plan customization options.",
-    });
-  };
-  
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -227,12 +575,7 @@ const ClassicNutritionView = ({ activeTab, setActiveTab }: { activeTab: string, 
                 
                 <Button 
                   className="w-full bg-green-600 hover:bg-green-700"
-                  onClick={() => {
-                    toast({
-                      title: "Log New Meal",
-                      description: "Opening form to log a new meal."
-                    });
-                  }}
+                  onClick={() => setShowAddMealDialog(true)}
                 >
                   <PlusCircle className="mr-2 h-4 w-4" />
                   Log New Meal
@@ -359,13 +702,14 @@ const ClassicNutritionView = ({ activeTab, setActiveTab }: { activeTab: string, 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <h3 className="font-medium mb-2">Daily Intake Breakdown</h3>
-                  <div className="h-40 w-40 mx-auto relative">
+                  <div className="h-40 w-40 mx-auto relative group hover:scale-105 transition-transform">
+                    <div className="absolute inset-0 bg-green-400 dark:bg-green-600 blur-lg opacity-0 group-hover:opacity-30 transition-opacity duration-300 rounded-full"></div>
                     <svg viewBox="0 0 100 100" className="w-full h-full">
                       <circle cx="50" cy="50" r="40" fill="none" stroke="#ddd" strokeWidth="20" />
                       <circle cx="50" cy="50" r="40" fill="none" stroke="#3b82f6" strokeWidth="20" strokeDasharray="251.2" strokeDashoffset="50.24" transform="rotate(-90 50 50)" />
                       <circle cx="50" cy="50" r="40" fill="none" stroke="#22c55e" strokeWidth="20" strokeDasharray="251.2" strokeDashoffset="125.6" transform="rotate(-90 50 50)" />
                       <circle cx="50" cy="50" r="40" fill="none" stroke="#ef4444" strokeWidth="20" strokeDasharray="251.2" strokeDashoffset="188.4" transform="rotate(-90 50 50)" />
-                      <text x="50" y="50" textAnchor="middle" dominantBaseline="middle" fill="currentColor" className="text-sm font-medium">
+                      <text x="50" y="50" textAnchor="middle" dominantBaseline="middle" fill="currentColor" className="text-xs font-medium">
                         1850/2200
                       </text>
                     </svg>
@@ -389,49 +733,113 @@ const ClassicNutritionView = ({ activeTab, setActiveTab }: { activeTab: string, 
                 <div>
                   <h3 className="font-medium mb-2">Weekly Trends</h3>
                   <div className="space-y-4">
-                    <div className="flex items-center">
+                    <motion.div 
+                      className="flex items-center group"
+                      whileHover={{ scale: 1.01 }}
+                    >
                       <div className="w-24 text-sm">Calories</div>
-                      <div className="flex-grow h-8 bg-gray-100 dark:bg-gray-800 rounded-full relative">
-                        <div className="absolute top-0 left-0 h-full bg-green-200 dark:bg-green-900/40 rounded-full" style={{ width: '80%' }}></div>
-                        <div className="absolute top-0 left-0 h-full bg-green-500 dark:bg-green-600 rounded-full" style={{ width: '70%' }}></div>
+                      <div className="flex-grow h-8 bg-gray-100 dark:bg-gray-800 rounded-full relative overflow-hidden">
+                        <motion.div 
+                          className="absolute top-0 left-0 h-full bg-green-200 dark:bg-green-900/40 rounded-full" 
+                          style={{ width: '80%' }}
+                          initial={{ width: 0 }}
+                          animate={{ width: '80%' }}
+                          transition={{ duration: 1, delay: 0.1 }}
+                        ></motion.div>
+                        <motion.div 
+                          className="absolute top-0 left-0 h-full bg-green-500 dark:bg-green-600 rounded-full" 
+                          style={{ width: '70%' }}
+                          initial={{ width: 0 }}
+                          animate={{ width: '70%' }}
+                          transition={{ duration: 1, delay: 0.2 }}
+                        ></motion.div>
                         <div className="absolute inset-0 flex items-center justify-end pr-2">
                           <span className="text-xs text-gray-700 dark:text-gray-300">1850 / 2200 avg</span>
                         </div>
+                        <div className="absolute inset-0 bg-green-400 dark:bg-green-600 opacity-0 group-hover:opacity-10 transition-opacity duration-300 rounded-full"></div>
                       </div>
-                    </div>
+                    </motion.div>
                     
-                    <div className="flex items-center">
+                    <motion.div 
+                      className="flex items-center group"
+                      whileHover={{ scale: 1.01 }}
+                    >
                       <div className="w-24 text-sm">Protein</div>
-                      <div className="flex-grow h-8 bg-gray-100 dark:bg-gray-800 rounded-full relative">
-                        <div className="absolute top-0 left-0 h-full bg-blue-200 dark:bg-blue-900/40 rounded-full" style={{ width: '85%' }}></div>
-                        <div className="absolute top-0 left-0 h-full bg-blue-500 dark:bg-blue-600 rounded-full" style={{ width: '75%' }}></div>
+                      <div className="flex-grow h-8 bg-gray-100 dark:bg-gray-800 rounded-full relative overflow-hidden">
+                        <motion.div 
+                          className="absolute top-0 left-0 h-full bg-blue-200 dark:bg-blue-900/40 rounded-full" 
+                          style={{ width: '85%' }}
+                          initial={{ width: 0 }}
+                          animate={{ width: '85%' }}
+                          transition={{ duration: 1, delay: 0.3 }}
+                        ></motion.div>
+                        <motion.div 
+                          className="absolute top-0 left-0 h-full bg-blue-500 dark:bg-blue-600 rounded-full" 
+                          style={{ width: '75%' }}
+                          initial={{ width: 0 }}
+                          animate={{ width: '75%' }}
+                          transition={{ duration: 1, delay: 0.4 }}
+                        ></motion.div>
                         <div className="absolute inset-0 flex items-center justify-end pr-2">
                           <span className="text-xs text-gray-700 dark:text-gray-300">85g / 110g avg</span>
                         </div>
+                        <div className="absolute inset-0 bg-blue-400 dark:bg-blue-600 opacity-0 group-hover:opacity-10 transition-opacity duration-300 rounded-full"></div>
                       </div>
-                    </div>
+                    </motion.div>
                     
-                    <div className="flex items-center">
+                    <motion.div 
+                      className="flex items-center group"
+                      whileHover={{ scale: 1.01 }}
+                    >
                       <div className="w-24 text-sm">Carbs</div>
-                      <div className="flex-grow h-8 bg-gray-100 dark:bg-gray-800 rounded-full relative">
-                        <div className="absolute top-0 left-0 h-full bg-purple-200 dark:bg-purple-900/40 rounded-full" style={{ width: '90%' }}></div>
-                        <div className="absolute top-0 left-0 h-full bg-purple-500 dark:bg-purple-600 rounded-full" style={{ width: '85%' }}></div>
+                      <div className="flex-grow h-8 bg-gray-100 dark:bg-gray-800 rounded-full relative overflow-hidden">
+                        <motion.div 
+                          className="absolute top-0 left-0 h-full bg-purple-200 dark:bg-purple-900/40 rounded-full" 
+                          style={{ width: '90%' }}
+                          initial={{ width: 0 }}
+                          animate={{ width: '90%' }}
+                          transition={{ duration: 1, delay: 0.5 }}
+                        ></motion.div>
+                        <motion.div 
+                          className="absolute top-0 left-0 h-full bg-purple-500 dark:bg-purple-600 rounded-full" 
+                          style={{ width: '85%' }}
+                          initial={{ width: 0 }}
+                          animate={{ width: '85%' }}
+                          transition={{ duration: 1, delay: 0.6 }}
+                        ></motion.div>
                         <div className="absolute inset-0 flex items-center justify-end pr-2">
                           <span className="text-xs text-gray-700 dark:text-gray-300">210g / 250g avg</span>
                         </div>
+                        <div className="absolute inset-0 bg-purple-400 dark:bg-purple-600 opacity-0 group-hover:opacity-10 transition-opacity duration-300 rounded-full"></div>
                       </div>
-                    </div>
+                    </motion.div>
                     
-                    <div className="flex items-center">
+                    <motion.div 
+                      className="flex items-center group"
+                      whileHover={{ scale: 1.01 }}
+                    >
                       <div className="w-24 text-sm">Fat</div>
-                      <div className="flex-grow h-8 bg-gray-100 dark:bg-gray-800 rounded-full relative">
-                        <div className="absolute top-0 left-0 h-full bg-yellow-200 dark:bg-yellow-900/40 rounded-full" style={{ width: '95%' }}></div>
-                        <div className="absolute top-0 left-0 h-full bg-yellow-500 dark:bg-yellow-600 rounded-full" style={{ width: '90%' }}></div>
+                      <div className="flex-grow h-8 bg-gray-100 dark:bg-gray-800 rounded-full relative overflow-hidden">
+                        <motion.div 
+                          className="absolute top-0 left-0 h-full bg-yellow-200 dark:bg-yellow-900/40 rounded-full" 
+                          style={{ width: '95%' }}
+                          initial={{ width: 0 }}
+                          animate={{ width: '95%' }}
+                          transition={{ duration: 1, delay: 0.7 }}
+                        ></motion.div>
+                        <motion.div 
+                          className="absolute top-0 left-0 h-full bg-yellow-500 dark:bg-yellow-600 rounded-full" 
+                          style={{ width: '90%' }}
+                          initial={{ width: 0 }}
+                          animate={{ width: '90%' }}
+                          transition={{ duration: 1, delay: 0.8 }}
+                        ></motion.div>
                         <div className="absolute inset-0 flex items-center justify-end pr-2">
                           <span className="text-xs text-gray-700 dark:text-gray-300">65g / 70g avg</span>
                         </div>
+                        <div className="absolute inset-0 bg-yellow-400 dark:bg-yellow-600 opacity-0 group-hover:opacity-10 transition-opacity duration-300 rounded-full"></div>
                       </div>
-                    </div>
+                    </motion.div>
                   </div>
                 </div>
               </div>
@@ -466,12 +874,7 @@ const ClassicNutritionView = ({ activeTab, setActiveTab }: { activeTab: string, 
                             variant="ghost" 
                             size="sm" 
                             className="h-8 px-2"
-                            onClick={() => {
-                              toast({
-                                title: "Recipe Details",
-                                description: `Viewing detailed recipe for ${meal.content}.`
-                              });
-                            }}
+                            onClick={() => handleMealDetails(meal)}
                           >
                             Details <ArrowRight className="ml-1 h-3 w-3" />
                           </Button>
@@ -485,13 +888,13 @@ const ClassicNutritionView = ({ activeTab, setActiveTab }: { activeTab: string, 
               <div className="mt-4 flex justify-between">
                 <Button 
                   variant="outline"
-                  onClick={handleCustomizeMealPlan}
+                  onClick={() => setShowCustomizeMealDialog(true)}
                 >
                   <Filter className="mr-2 h-4 w-4" />
                   Customize Meal Plan
                 </Button>
                 <Button
-                  onClick={handleViewFullWeekPlan}
+                  onClick={() => setShowWeekPlanDialog(true)}
                 >
                   <Bookmark className="mr-2 h-4 w-4" />
                   View Full Week Plan
@@ -508,26 +911,55 @@ const ClassicNutritionView = ({ activeTab, setActiveTab }: { activeTab: string, 
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-7 gap-2">
-                {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(day => (
-                  <div key={day} className="border rounded-lg p-2">
-                    <div className="font-medium text-center mb-2">{day}</div>
-                    <div className="space-y-2">
+                {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day, index) => (
+                  <motion.div 
+                    key={day} 
+                    className="border rounded-lg p-2 relative overflow-hidden group"
+                    whileHover={{ scale: 1.02 }}
+                    transition={{ type: "spring", stiffness: 300 }}
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-green-400/10 to-blue-400/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <motion.div 
+                      className="absolute inset-0 bg-blue-400/10 dark:bg-blue-600/10 rounded-lg"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: [0, 0.2, 0] }}
+                      transition={{ 
+                        duration: 2, 
+                        repeat: Infinity, 
+                        delay: index * 0.3,
+                        repeatType: "reverse" 
+                      }}
+                    ></motion.div>
+                    <div className="font-medium text-center mb-2 relative z-10">{day}</div>
+                    <div className="space-y-2 relative z-10">
                       {["Breakfast", "Lunch", "Dinner"].map(mealType => (
-                        <div 
-                          key={mealType} 
-                          className="border border-dashed rounded p-2 text-center text-sm hover:bg-green-50 dark:hover:bg-green-900/20 cursor-pointer transition-colors"
-                          onClick={() => {
-                            toast({
-                              title: `${mealType} on ${day}`,
-                              description: "Opening meal editor."
-                            });
-                          }}
-                        >
-                          {mealType}
-                        </div>
+                        <Popover key={mealType}>
+                          <PopoverTrigger asChild>
+                            <div className="border border-dashed rounded p-2 text-center text-sm hover:bg-green-50 dark:hover:bg-green-900/20 cursor-pointer transition-colors">
+                              {mealType}
+                            </div>
+                          </PopoverTrigger>
+                          <PopoverContent>
+                            <div className="space-y-3">
+                              <h3 className="font-medium">{mealType} for {day}</h3>
+                              <p className="text-sm">
+                                {mealType === "Breakfast" ? "Oatmeal with blueberries and almond milk" : 
+                                 mealType === "Lunch" ? "Mediterranean salad with grilled chicken" : 
+                                 "Baked tilapia with roasted vegetables"}
+                              </p>
+                              <div className="flex justify-between text-sm">
+                                <span>Calories: {mealType === "Breakfast" ? "380" : mealType === "Lunch" ? "520" : "450"} kcal</span>
+                                <span>Protein: {mealType === "Breakfast" ? "15g" : mealType === "Lunch" ? "35g" : "28g"}</span>
+                              </div>
+                              <Button size="sm" className="w-full">
+                                Edit Meal
+                              </Button>
+                            </div>
+                          </PopoverContent>
+                        </Popover>
                       ))}
                     </div>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
               
@@ -556,24 +988,24 @@ const ClassicNutritionView = ({ activeTab, setActiveTab }: { activeTab: string, 
               
               <div className="flex justify-between">
                 <Button 
-                  variant="outline"
-                  onClick={() => {
-                    toast({
-                      title: "Plan Saved",
-                      description: "Your current meal plan has been saved."
-                    });
-                  }}
+                  variant={planSaved ? "default" : "outline"}
+                  onClick={handleSavePlan}
+                  className={planSaved ? "bg-green-600 hover:bg-green-700" : ""}
                 >
-                  <Bookmark className="mr-2 h-4 w-4" />
-                  Save Current Plan
+                  {planSaved ? (
+                    <>
+                      <Check className="mr-2 h-4 w-4" />
+                      Plan Saved
+                    </>
+                  ) : (
+                    <>
+                      <Bookmark className="mr-2 h-4 w-4" />
+                      Save Current Plan
+                    </>
+                  )}
                 </Button>
                 <Button
-                  onClick={() => {
-                    toast({
-                      title: "New Plan Generated",
-                      description: "A new meal plan has been generated based on your preferences."
-                    });
-                  }}
+                  onClick={handleGenerateNewPlan}
                 >
                   <RefreshCcw className="mr-2 h-4 w-4" />
                   Generate New Plan
@@ -592,9 +1024,7 @@ const ClassicNutritionView = ({ activeTab, setActiveTab }: { activeTab: string, 
                 className="pl-8 w-64"
               />
               <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
+                <Search className="h-4 w-4 text-gray-500" />
               </div>
             </div>
           </div>
@@ -603,7 +1033,7 @@ const ClassicNutritionView = ({ activeTab, setActiveTab }: { activeTab: string, 
             {[
               {
                 title: "Quinoa Veggie Bowl",
-                image: "https://source.unsplash.com/random/300x200?quinoa",
+                image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
                 prepTime: "25 min",
                 difficulty: "Easy",
                 calories: 420,
@@ -611,7 +1041,7 @@ const ClassicNutritionView = ({ activeTab, setActiveTab }: { activeTab: string, 
               },
               {
                 title: "Grilled Salmon with Asparagus",
-                image: "https://source.unsplash.com/random/300x200?salmon",
+                image: "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
                 prepTime: "30 min",
                 difficulty: "Medium",
                 calories: 380,
@@ -619,7 +1049,7 @@ const ClassicNutritionView = ({ activeTab, setActiveTab }: { activeTab: string, 
               },
               {
                 title: "Berry Protein Smoothie",
-                image: "https://source.unsplash.com/random/300x200?smoothie",
+                image: "https://images.unsplash.com/photo-1502741224143-90386d7f8c82?q=80&w=2069&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
                 prepTime: "10 min",
                 difficulty: "Easy",
                 calories: 310,
@@ -685,7 +1115,21 @@ const ClassicNutritionView = ({ activeTab, setActiveTab }: { activeTab: string, 
   );
 };
 
-const NewNutritionView = () => {
+const NewNutritionView = ({ 
+  isTemplateSaved, 
+  handleSaveTemplate, 
+  handleFilter,
+  handleViewRecipes,
+  handleCreateMealSchedule,
+  handleSetWaterReminders
+}: { 
+  isTemplateSaved: boolean, 
+  handleSaveTemplate: () => void, 
+  handleFilter: () => void,
+  handleViewRecipes: () => void,
+  handleCreateMealSchedule: () => void,
+  handleSetWaterReminders: () => void
+}) => {
   return (
     <div className="space-y-6">
       <Tabs defaultValue="tracker" className="space-y-4">
@@ -702,7 +1146,37 @@ const NewNutritionView = () => {
         </TabsContent>
         
         <TabsContent value="journal" className="space-y-6">
-          <FoodJournal />
+          <Card className="shadow-md">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-xl font-bold flex items-center">
+                <FileText className="h-5 w-5 mr-2 text-green-600 dark:text-green-400" />
+                Food Journal
+              </CardTitle>
+              <CardDescription>
+                Keep track of meals, moods, and thoughts about your nutrition
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex justify-between items-center">
+                <h3 className="font-medium">Meals for April 10, 2025</h3>
+                <div className="flex gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className={`h-8 ${isTemplateSaved ? 'text-green-600 border-green-600' : 'text-gray-600'}`}
+                    onClick={handleSaveTemplate}
+                  >
+                    <Star className={`h-3 w-3 mr-1 ${isTemplateSaved ? 'fill-green-600' : ''}`} />
+                    {isTemplateSaved ? 'Template Saved' : 'Save as Template'}
+                  </Button>
+                  <Button variant="outline" size="sm" className="h-8" onClick={handleFilter}>
+                    <Filter className="h-3 w-3 mr-1" />
+                    Filter
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
         
         <TabsContent value="meals" className="space-y-6">
@@ -710,7 +1184,50 @@ const NewNutritionView = () => {
         </TabsContent>
         
         <TabsContent value="insights" className="space-y-6">
-          <NutrientInsights />
+          <Card>
+            <CardHeader className="pb-0">
+              <CardTitle className="text-lg">Recommendations Based on Your Journal</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-4">
+              <div className="space-y-4">
+                {[
+                  {
+                    title: "Add More Vegetables",
+                    description: "Your journal shows limited vegetable intake over the past week. Try adding a vegetable to each meal.",
+                    action: "View Vegetable Recipes",
+                    handler: handleViewRecipes
+                  },
+                  {
+                    title: "Consistent Meal Timing",
+                    description: "You report higher energy when you eat at consistent times. Try to maintain your meal schedule.",
+                    action: "Create Meal Schedule",
+                    handler: handleCreateMealSchedule
+                  },
+                  {
+                    title: "Increase Water Intake",
+                    description: "Days when you drink 8+ cups of water correlate with better mood and energy in your journal.",
+                    action: "Set Water Reminders",
+                    handler: handleSetWaterReminders
+                  }
+                ].map((recommendation, idx) => (
+                  <div key={idx} className="border rounded-lg p-4">
+                    <h3 className="font-medium">{recommendation.title}</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                      {recommendation.description}
+                    </p>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="mt-3"
+                      onClick={recommendation.handler}
+                    >
+                      {recommendation.action}
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
         
         <TabsContent value="goals" className="space-y-6">

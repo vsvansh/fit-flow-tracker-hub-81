@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -31,9 +32,11 @@ import {
   Filter,
   Star,
   FileText,
-  CalendarDays
+  CalendarDays,
+  Check
 } from "lucide-react";
 import { format } from "date-fns";
+import confetti from "canvas-confetti";
 
 // Sample journal entries
 const sampleEntries = [
@@ -130,6 +133,7 @@ const FoodJournal = () => {
     calories: 0,
     mood: "Neutral"
   });
+  const [isTemplateSaved, setIsTemplateSaved] = useState(false);
   
   // Find current entry for the selected date
   const currentEntry = entries.find(entry => 
@@ -229,6 +233,26 @@ const FoodJournal = () => {
     toast({
       title: "Note updated",
       description: "Your journal note has been updated.",
+    });
+  };
+
+  const handleSaveTemplate = () => {
+    setIsTemplateSaved(true);
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.6 }
+    });
+    toast({
+      title: "Template Saved",
+      description: "Your meal template has been saved for future use.",
+    });
+  };
+
+  const handleFilter = () => {
+    toast({
+      title: "Filtering Applied",
+      description: "Your journal has been filtered based on your selections.",
     });
   };
 
@@ -365,11 +389,21 @@ const FoodJournal = () => {
                       <div className="flex justify-between items-center">
                         <h3 className="font-medium">Meals for {format(date, "MMMM d, yyyy")}</h3>
                         <div className="flex gap-2">
-                          <Button variant="outline" size="sm" className="h-8 text-green-600">
-                            <Star className="h-3 w-3 mr-1" />
-                            Save as Template
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className={`h-8 ${isTemplateSaved ? 'text-green-600 border-green-600' : 'text-green-600'}`}
+                            onClick={handleSaveTemplate}
+                          >
+                            <Star className={`h-3 w-3 mr-1 ${isTemplateSaved ? 'fill-green-600' : ''}`} />
+                            {isTemplateSaved ? 'Template Saved' : 'Save as Template'}
                           </Button>
-                          <Button variant="outline" size="sm" className="h-8">
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="h-8"
+                            onClick={handleFilter}
+                          >
                             <Filter className="h-3 w-3 mr-1" />
                             Filter
                           </Button>

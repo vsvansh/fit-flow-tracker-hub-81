@@ -12,9 +12,11 @@ import {
   BarChart, ArrowRight, Info, Filter, Carrot, Cherry,
   PlusCircle, Clock, CalendarDays, ArrowUp, ArrowDown,
   TrendingUp, TrendingDown, Heart, FileText, Star,
-  Activity
+  Activity, Check
 } from "lucide-react";
 import confetti from "canvas-confetti";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 
 // Update the nutrition data to ensure unit is always defined
 const nutritionData = {
@@ -34,6 +36,8 @@ const NutritionTracker = () => {
   const [fiber, setFiber] = useState(nutritionData.fiber.consumed);
   const [waterIntake, setWaterIntake] = useState(5);
   const [showGlowEffect, setShowGlowEffect] = useState(false);
+  const [showCalorieDialog, setShowCalorieDialog] = useState(false);
+  const [newCalories, setNewCalories] = useState(calories);
 
   useEffect(() => {
     if (showGlowEffect) {
@@ -82,6 +86,15 @@ const NutritionTracker = () => {
         });
       }
     }
+  };
+
+  const handleSaveCalories = () => {
+    setCalories(newCalories);
+    setShowCalorieDialog(false);
+    toast({
+      title: "Calories updated",
+      description: `Your daily calorie intake has been updated to ${newCalories} kcal.`,
+    });
   };
 
   const containerVariants = {
@@ -204,13 +217,13 @@ const NutritionTracker = () => {
                   <span className="text-sm text-gray-600 dark:text-gray-400">Consumed</span>
                   <span className="text-sm font-medium">{calories} kcal</span>
                 </div>
-                <Input
-                  type="number"
-                  placeholder="Enter calories consumed"
-                  className="mb-3"
-                  value={calories}
-                  onChange={(e) => handleInputChange("calories", parseInt(e.target.value) || 0)}
-                />
+                <Button
+                  onClick={() => setShowCalorieDialog(true)}
+                  className="w-full mb-3 bg-blue-600 hover:bg-blue-700 text-white relative overflow-hidden group"
+                >
+                  <span className="relative z-10">Update Calories</span>
+                  <span className="absolute inset-0 bg-blue-400 opacity-0 group-hover:opacity-20 group-active:opacity-30 transition-opacity duration-300 rounded"></span>
+                </Button>
                 <Progress value={(calories / nutritionData.calories.goal) * 100} className="h-2" />
                 <div className="flex justify-between mt-1 text-xs text-gray-500 dark:text-gray-400">
                   <span>0 kcal</span>
@@ -241,6 +254,36 @@ const NutritionTracker = () => {
           </CardContent>
         </Card>
       </motion.div>
+
+      <Dialog open={showCalorieDialog} onOpenChange={setShowCalorieDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Update Calorie Intake</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Daily Calories</label>
+              <Input
+                type="number"
+                value={newCalories}
+                onChange={(e) => setNewCalories(parseInt(e.target.value) || 0)}
+                className="w-full"
+              />
+            </div>
+            <div className="text-sm text-gray-500">
+              Your recommended daily intake is {nutritionData.calories.goal} kcal based on your profile.
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCalorieDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveCalories}>
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </motion.div>
   );
 };

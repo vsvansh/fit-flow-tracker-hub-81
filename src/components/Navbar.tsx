@@ -147,9 +147,11 @@ const Navbar = () => {
             
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                <Button variant="ghost" className="relative h-8 w-8 rounded-full group">
                   <div className="relative">
-                    <div className="absolute inset-0 rounded-full bg-purple-400 dark:bg-purple-600 blur-sm opacity-70 animate-pulse"></div>
+                    {/* Enhanced pulsing glow effect */}
+                    <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-400 to-indigo-500 dark:from-purple-600 dark:to-indigo-700 blur-sm opacity-60 animate-pulse group-hover:opacity-80"></div>
+                    <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-300 to-blue-400 dark:from-purple-500 dark:to-blue-600 blur-md opacity-40 animate-pulse" style={{ animationDelay: "0.5s" }}></div>
                     <Avatar className="h-8 w-8 relative">
                       {avatar ? (
                         <AvatarImage src={avatar} alt="Profile" />
