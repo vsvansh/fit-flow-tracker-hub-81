@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { 
   Card, CardContent, CardHeader, CardTitle, CardDescription 
@@ -89,12 +88,14 @@ const NutritionCharts = () => {
   };
   
   // Custom tooltip for the pie chart
-  // Fix the type issue by properly typing the event parameter
-  const handlePieChartClick = (data: any, index: number) => {
-    toast({
-      title: "Macro Details",
-      description: `${data.name}: ${data.value}g (${Math.round((data.value / (250 + 120 + 70)) * 100)}% of total)`
-    });
+  // Fixed typing issue by properly handling the parameters
+  const handlePieChartClick = (data: any) => {
+    if (data && data.name) {
+      toast({
+        title: "Macro Details",
+        description: `${data.name}: ${data.value}g (${Math.round((data.value / (250 + 120 + 70)) * 100)}% of total)`
+      });
+    }
   };
 
   return (
@@ -230,7 +231,7 @@ const NutritionCharts = () => {
                         outerRadius={100}
                         fill="#8884d8"
                         dataKey="value"
-                        onClick={handlePieChartClick}
+                        onClick={(data) => handlePieChartClick(data)}
                       >
                         {macroDistributionData.map((entry, index) => (
                           <Cell 
@@ -355,11 +356,14 @@ const NutritionCharts = () => {
                         name="Avg. Daily Calories" 
                         activeDot={{ 
                           r: 8, 
-                          onClick: (event, payload) => {
-                            toast({
-                              title: `${payload.payload.name} Calories`,
-                              description: `Average daily calories: ${payload.payload.calories}`
-                            });
+                          onClick: (data) => {
+                            const payload = data.payload;
+                            if (payload) {
+                              toast({
+                                title: `${payload.name} Calories`,
+                                description: `Average daily calories: ${payload.calories}`
+                              });
+                            }
                           }
                         }}
                       />
@@ -371,11 +375,14 @@ const NutritionCharts = () => {
                         name="Weight (lbs)"
                         activeDot={{ 
                           r: 8, 
-                          onClick: (event, payload) => {
-                            toast({
-                              title: `${payload.payload.name} Weight`,
-                              description: `Weight: ${payload.payload.weight} lbs`
-                            });
+                          onClick: (data) => {
+                            const payload = data.payload;
+                            if (payload) {
+                              toast({
+                                title: `${payload.name} Weight`,
+                                description: `Weight: ${payload.weight} lbs`
+                              });
+                            }
                           }
                         }}
                       />
