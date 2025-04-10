@@ -1184,9 +1184,7 @@ const NewNutritionView = ({
         </TabsContent>
 
         
-        <TabsContent value="insights" className="space-y-6">
-          <NutrientInsights />
-      
+        <TabsContent value="insights" className="space-y-6">      
           <Card>
             <CardHeader className="pb-0">
               <CardTitle className="text-lg">Recommendations Based on Your Journal</CardTitle>
