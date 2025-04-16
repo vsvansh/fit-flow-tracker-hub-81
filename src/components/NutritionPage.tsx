@@ -1,4 +1,3 @@
-
 import NutritionHub from "./NutritionHub";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -55,11 +54,37 @@ const NutritionPage = () => {
     { day: 'Sun', calories: 2000, protein: 105, carbs: 225, fat: 67 }
   ];
 
-  // Add handler for feature button 
+  // Enhanced handler for feature button 
   const handleShowNewFeature = () => {
     toast({
       title: "New Feature",
-      description: "This new feature is coming soon! Stay tuned for updates."
+      description: "This new feature is coming soon! Stay tuned for updates.",
+      duration: 3000,
+    });
+  };
+
+  // Add handlers for journal actions
+  const handleAddEntry = () => {
+    toast({
+      title: "New Journal Entry",
+      description: "Creating a new nutrition journal entry",
+      duration: 3000,
+    });
+  };
+
+  const handleSaveEntry = () => {
+    toast({
+      title: "Entry Saved",
+      description: "Your journal entry has been saved successfully",
+      duration: 3000,
+    });
+  };
+
+  const handleDeleteEntry = () => {
+    toast({
+      title: "Entry Deleted",
+      description: "Journal entry has been removed",
+      duration: 3000,
     });
   };
 
@@ -137,7 +162,7 @@ const NutritionPage = () => {
       </motion.div>
       
       {/* Main nutrition hub component */}
-      <Tabs defaultValue="track">
+      <Tabs defaultValue="track" className="w-full">
         <TabsList className="mb-4">
           <TabsTrigger value="track">Track</TabsTrigger>
           <TabsTrigger value="analyze">Analyze</TabsTrigger>
@@ -146,64 +171,154 @@ const NutritionPage = () => {
           <TabsTrigger value="plan">Meal Plan</TabsTrigger>
         </TabsList>
 
-        {/* Add new Journal Tab Content */}
-        <TabsContent value="journal">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <BookOpen className="h-5 w-5" />
-                Nutrition Journal
-              </CardTitle>
-              <CardDescription>Keep track of your meals and how you feel</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <Calendar className="h-5 w-5 text-muted-foreground" />
-                  <Button variant="outline" size="sm" onClick={() => {
-                    toast({
-                      title: "New Entry",
-                      description: "Add a new journal entry"
-                    });
-                  }}>
-                    Add Entry
-                  </Button>
+        <TabsContent value="track">
+          <NutritionHub />
+        </TabsContent>
+
+        {/* Fix the Analyze tab spacing */}
+        <TabsContent value="analyze">
+          <div className="space-y-8">
+            <Card>
+              <CardHeader>
+                <CardTitle>Nutrient Goal Comparison</CardTitle>
+                <CardDescription>Compare your actual nutrient intake with your goals</CardDescription>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <div className="h-[350px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart
+                      data={[
+                        { name: 'Protein', actual: 90, goal: 100 },
+                        { name: 'Carbs', actual: 120, goal: 100 },
+                        { name: 'Fat', actual: 80, goal: 100 },
+                        { name: 'Fiber', actual: 75, goal: 100 },
+                        { name: 'Water', actual: 90, goal: 100 },
+                      ]}
+                      margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" opacity={0.1} />
+                      <XAxis dataKey="name" />
+                      <YAxis />
+                      <Tooltip />
+                      <Area type="monotone" dataKey="actual" stroke="#3b82f6" fill="#3b82f680" name="Actual" />
+                      <Area type="monotone" dataKey="goal" stroke="#10b981" fill="#10b98180" name="Goal" />
+                    </AreaChart>
+                  </ResponsiveContainer>
                 </div>
+              </CardContent>
+            </Card>
+            
+            <Card className="mt-8">
+              <CardHeader>
+                <CardTitle>Meal Timing Distribution</CardTitle>
+                <CardDescription>When you consume calories throughout the day</CardDescription>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <div className="h-[350px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart
+                      data={[
+                        { time: 'Morning', calories: 450 },
+                        { time: 'Mid-day', calories: 650 },
+                        { time: 'Afternoon', calories: 250 },
+                        { time: 'Evening', calories: 550 },
+                        { time: 'Night', calories: 100 },
+                      ]}
+                      margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+                    >
+                      <defs>
+                        <linearGradient id="colorMeals" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.8}/>
+                          <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0.1}/>
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" opacity={0.1} />
+                      <XAxis dataKey="time" />
+                      <YAxis />
+                      <Tooltip />
+                      <Area type="monotone" dataKey="calories" stroke="#8b5cf6" fill="url(#colorMeals)" name="Calories" />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
 
-                {nutritionLog.map((entry, index) => (
-                  <Card key={index} className="bg-muted/50">
-                    <CardContent className="p-4">
-                      <div className="flex justify-between items-start mb-4">
-                        <div>
-                          <h4 className="font-medium">{entry.date}</h4>
-                          <p className="text-sm text-muted-foreground">{entry.mood}</p>
-                        </div>
-                        <Badge variant="outline">{entry.meals.length} meals</Badge>
-                      </div>
-                      
-                      <div className="space-y-3">
-                        {entry.meals.map((meal) => (
-                          <div key={meal.id} className="flex justify-between items-center p-2 bg-background rounded">
-                            <div>
-                              <p className="font-medium">{meal.name}</p>
-                              <p className="text-sm text-muted-foreground">
-                                {meal.calories} cal · P: {meal.protein}g · C: {meal.carbs}g · F: {meal.fat}g
-                              </p>
-                            </div>
-                            <Clock className="h-4 w-4 text-muted-foreground" />
+        {/* Enhanced Journal Tab */}
+        <TabsContent value="journal">
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <div className="flex justify-between items-center">
+                  <div>
+                    <CardTitle>Nutrition Journal</CardTitle>
+                    <CardDescription>Track your daily meals and reflections</CardDescription>
+                  </div>
+                  <Button onClick={handleAddEntry}>Add New Entry</Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  {nutritionLog.map((entry, index) => (
+                    <Card key={index} className="bg-muted/50">
+                      <CardContent className="p-4">
+                        <div className="flex justify-between items-start mb-4">
+                          <div>
+                            <h4 className="font-medium">{entry.date}</h4>
+                            <p className="text-sm text-muted-foreground">{entry.mood}</p>
                           </div>
-                        ))}
-                      </div>
+                          <div className="flex gap-2">
+                            <Button variant="outline" size="sm" onClick={handleSaveEntry}>
+                              Save
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="text-red-500"
+                              onClick={handleDeleteEntry}
+                            >
+                              Delete
+                            </Button>
+                          </div>
+                        </div>
+                        
+                        <div className="space-y-3">
+                          {entry.meals.map((meal) => (
+                            <div key={meal.id} className="flex justify-between items-center p-2 bg-background rounded">
+                              <div>
+                                <p className="font-medium">{meal.name}</p>
+                                <p className="text-sm text-muted-foreground">
+                                  {meal.calories} cal · P: {meal.protein}g · C: {meal.carbs}g · F: {meal.fat}g
+                                </p>
+                              </div>
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                onClick={() => {
+                                  toast({
+                                    title: "Edit Meal",
+                                    description: `Editing ${meal.name}`,
+                                    duration: 3000,
+                                  });
+                                }}
+                              >
+                                Edit
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
 
-                      <div className="mt-4 p-3 bg-muted rounded-lg">
-                        <p className="text-sm italic">{entry.notes}</p>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+                        <div className="mt-4 p-3 bg-muted rounded-lg">
+                          <p className="text-sm italic">{entry.notes}</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
 
         {/* Add Advanced Insights Tab */}
@@ -280,82 +395,6 @@ const NutritionPage = () => {
                     <Badge variant="outline" className="bg-amber-50 text-amber-700">Carbs</Badge>
                     <Badge variant="outline" className="bg-red-50 text-red-700">Fat</Badge>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="track">
-          <NutritionHub />
-        </TabsContent>
-
-        {/* Fix the Analyze tab to prevent overlapping graphs */}
-        <TabsContent value="analyze">
-          <div className="space-y-8"> {/* Added more spacing between sections */}
-            {/* First graph section */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Nutrient Goal Comparison</CardTitle>
-                <CardDescription>Compare your actual nutrient intake with your goals</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="h-[350px]"> {/* Increased height for better visibility */}
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart
-                      data={[
-                        { name: 'Protein', actual: 90, goal: 100 },
-                        { name: 'Carbs', actual: 120, goal: 100 },
-                        { name: 'Fat', actual: 80, goal: 100 },
-                        { name: 'Fiber', actual: 75, goal: 100 },
-                        { name: 'Water', actual: 90, goal: 100 },
-                      ]}
-                      margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" opacity={0.1} />
-                      <XAxis dataKey="name" />
-                      <YAxis />
-                      <Tooltip />
-                      <Area type="monotone" dataKey="actual" stroke="#3b82f6" fill="#3b82f680" name="Actual" />
-                      <Area type="monotone" dataKey="goal" stroke="#10b981" fill="#10b98180" name="Goal" />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                </div>
-              </CardContent>
-            </Card>
-            
-            {/* Second graph section with proper spacing */}
-            <Card className="mt-8"> {/* Added explicit top margin */}
-              <CardHeader>
-                <CardTitle>Meal Timing Distribution</CardTitle>
-                <CardDescription>When you consume calories throughout the day</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="h-[350px]"> {/* Increased height for better visibility */}
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart
-                      data={[
-                        { time: 'Morning', calories: 450 },
-                        { time: 'Mid-day', calories: 650 },
-                        { time: 'Afternoon', calories: 250 },
-                        { time: 'Evening', calories: 550 },
-                        { time: 'Night', calories: 100 },
-                      ]}
-                      margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
-                    >
-                      <defs>
-                        <linearGradient id="colorMeals" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.8}/>
-                          <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0.1}/>
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" opacity={0.1} />
-                      <XAxis dataKey="time" />
-                      <YAxis />
-                      <Tooltip />
-                      <Area type="monotone" dataKey="calories" stroke="#8b5cf6" fill="url(#colorMeals)" name="Calories" />
-                    </AreaChart>
-                  </ResponsiveContainer>
                 </div>
               </CardContent>
             </Card>
