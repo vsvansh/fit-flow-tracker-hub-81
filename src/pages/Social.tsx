@@ -11,6 +11,9 @@ import BackToHome from "@/components/BackToHome";
 import { toast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
 import SocialFeed from "@/components/SocialFeed";
+import ChatBox from "@/components/ChatBox";
+import EventDetails from "@/components/EventDetails";
+import { launchConfetti } from "@/utils/confettiUtil";
 import {
   Users, MessageCircle, Heart, Award, Share2, Settings, Bell,
   BarChart2, Filter, Search, Calendar, Clock, ArrowRight, MapPin,
@@ -20,12 +23,14 @@ import {
 const Social = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("feed");
+  const [activeChatFriend, setActiveChatFriend] = useState<{name: string, avatar: string} | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<any>(null);
   
   // Sample user data
   const userData = {
     name: "Alex Johnson",
     username: "alex_fitness",
-    avatar: "/placeholder.svg",
+    avatar: "https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8dXNlcnxlbnwwfHwwfHx8MA%3D%3D",
     bio: "Fitness enthusiast, marathon runner, and health coach. Sharing my journey and helping others reach their goals!",
     followers: 1.2, // in thousands
     following: 453,
@@ -51,20 +56,50 @@ const Social = () => {
     ]
   };
 
-  // Sample friends data
+  // Sample friends data with proper images
   const friendsData = [
-    { name: "Emma Wilson", avatar: "/placeholder.svg", lastActive: "2h ago" },
-    { name: "James Rodriguez", avatar: "/placeholder.svg", lastActive: "5h ago" },
-    { name: "Sarah Chen", avatar: "/placeholder.svg", lastActive: "1d ago" },
-    { name: "Mike Brown", avatar: "/placeholder.svg", lastActive: "Just now" },
-    { name: "Lisa Taylor", avatar: "/placeholder.svg", lastActive: "3h ago" },
+    { name: "Emma Wilson", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8dXNlcnxlbnwwfHwwfHx8MA%3D%3D", lastActive: "2h ago" },
+    { name: "James Rodriguez", avatar: "https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8dXNlcnxlbnwwfHwwfHx8MA%3D%3D", lastActive: "5h ago" },
+    { name: "Sarah Chen", avatar: "https://images.unsplash.com/photo-1614283233556-f35b0c801ef1?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mjh8fHVzZXJ8ZW58MHx8MHx8fDA%3D", lastActive: "1d ago" },
+    { name: "Mike Brown", avatar: "https://images.unsplash.com/photo-1639149888905-fb39731f2e6c?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTl8fHVzZXJ8ZW58MHx8MHx8fDA%3D", lastActive: "Just now" },
+    { name: "Lisa Taylor", avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTB8fHVzZXJ8ZW58MHx8MHx8fDA%3D", lastActive: "3h ago" },
   ];
 
-  // Sample events data
+  // Sample events data with extended details
   const eventsData = [
-    { title: "Weekend Trail Run", date: "Apr 15, 2025", participants: 24, location: "Central Park" },
-    { title: "Group HIIT Session", date: "Apr 18, 2025", participants: 12, location: "Fitness Hub Gym" },
-    { title: "5K Charity Run", date: "Apr 25, 2025", participants: 156, location: "Downtown" },
+    { 
+      title: "Weekend Trail Run", 
+      date: "Apr 15, 2025", 
+      participants: 24, 
+      location: "Central Park",
+      description: "Join us for a scenic trail run through Central Park. All fitness levels welcome. We'll have water stations and post-run refreshments.",
+      time: "8:00 AM - 10:00 AM",
+      organizer: "NYC Running Club",
+      difficulty: "Intermediate", 
+      type: "Running"
+    },
+    { 
+      title: "Group HIIT Session", 
+      date: "Apr 18, 2025", 
+      participants: 12, 
+      location: "Fitness Hub Gym",
+      description: "High-intensity interval training in a group setting. This 45-minute session will challenge your strength and endurance.",
+      time: "6:30 PM - 7:15 PM",
+      organizer: "Fitness Hub Trainers",
+      difficulty: "Advanced",
+      type: "HIIT"
+    },
+    { 
+      title: "5K Charity Run", 
+      date: "Apr 25, 2025", 
+      participants: 156, 
+      location: "Downtown",
+      description: "Run for a cause! All proceeds go to local children's hospitals. T-shirt and medal included with registration.",
+      time: "9:00 AM - 11:00 AM",
+      organizer: "Community Health Foundation",
+      difficulty: "Beginner-friendly",
+      type: "Charity Event"
+    },
   ];
 
   const handleUploadPhoto = () => {
@@ -77,15 +112,23 @@ const Social = () => {
   const handleShareWorkout = () => {
     toast({
       title: "Share Workout",
-      description: "Workout share functionality initiated.",
+      description: "Your workout has been shared with your followers.",
     });
   };
   
   const handleShareStats = () => {
     toast({
       title: "Share Stats",
-      description: "Stats share functionality initiated.",
+      description: "Your fitness stats have been shared with your followers.",
     });
+  };
+  
+  const handleChatClick = (friend: {name: string, avatar: string}) => {
+    setActiveChatFriend(friend);
+  };
+  
+  const handleEventDetails = (event: any) => {
+    setSelectedEvent(event);
   };
 
   return (
@@ -235,8 +278,13 @@ const Social = () => {
                         <p className="text-xs text-gray-500 dark:text-gray-400">{friend.lastActive}</p>
                       </div>
                     </div>
-                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                      <MessageCircle className="h-4 w-4 text-blue-500" />
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="h-8 w-8 p-0 transition-colors hover:text-blue-500"
+                      onClick={() => handleChatClick(friend)}
+                    >
+                      <MessageCircle className="h-4 w-4" />
                     </Button>
                   </div>
                 ))}
@@ -265,7 +313,12 @@ const Social = () => {
                     </div>
                     <div className="flex justify-between items-center mt-2">
                       <span className="text-xs text-gray-500 dark:text-gray-400">{event.participants} participants</span>
-                      <Button variant="link" size="sm" className="p-0 h-auto text-blue-600 dark:text-blue-400">
+                      <Button 
+                        variant="link" 
+                        size="sm" 
+                        className="p-0 h-auto text-blue-600 dark:text-blue-400"
+                        onClick={() => handleEventDetails(event)}
+                      >
                         Details <ArrowRight className="h-3 w-3 ml-1" />
                       </Button>
                     </div>
@@ -276,6 +329,27 @@ const Social = () => {
           </Card>
         </div>
       </div>
+      
+      {/* Chat box that appears when a friend's chat button is clicked */}
+      {activeChatFriend && (
+        <ChatBox 
+          friendName={activeChatFriend.name}
+          friendAvatar={activeChatFriend.avatar}
+          isOpen={Boolean(activeChatFriend)}
+          onClose={() => setActiveChatFriend(null)}
+        />
+      )}
+      
+      {/* Event details modal */}
+      {selectedEvent && (
+        <div className="fixed inset-0 bg-black/50 z-40" onClick={() => setSelectedEvent(null)}>
+          <EventDetails 
+            event={selectedEvent}
+            isOpen={Boolean(selectedEvent)}
+            onClose={() => setSelectedEvent(null)}
+          />
+        </div>
+      )}
     </div>
   );
 };
