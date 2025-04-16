@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -33,10 +32,11 @@ import {
   Milk,
   Carrot,
   Check,
-  PlusCircle
+  PlusCircle,
+  Activity,
+  Dumbbell
 } from "lucide-react";
 
-// Sample meal data
 const meals = [
   {
     id: 1,
@@ -130,7 +130,6 @@ const meals = [
   }
 ];
 
-// Sample meal plans
 const mealPlans = [
   {
     id: 1,
@@ -164,7 +163,6 @@ const mealPlans = [
   }
 ];
 
-// Sample food log data
 const initialFoodLog = [
   {
     id: 1,
@@ -203,7 +201,6 @@ const initialFoodLog = [
   }
 ];
 
-// More sample meals for today's meals
 const additionalMeals = [
   {
     id: 5,
@@ -223,7 +220,6 @@ const additionalMeals = [
   },
 ];
 
-// Sample weekly meal routine
 const initialWeeklyMealRoutine = {
   monday: {
     breakfast: "Oatmeal with Berries",
@@ -239,6 +235,26 @@ const initialWeeklyMealRoutine = {
     breakfast: "Egg White Omelette",
     lunch: "Tuna Salad Wrap",
     dinner: "Lean Beef Stir-fry"
+  },
+  thursday: {
+    breakfast: "Protein Pancakes",
+    lunch: "Mediterranean Salad",
+    dinner: "Grilled Fish with Vegetables"
+  },
+  friday: {
+    breakfast: "Avocado Toast",
+    lunch: "Chicken Wrap",
+    dinner: "Vegetable Stir-fry"
+  },
+  saturday: {
+    breakfast: "Greek Yogurt with Granola",
+    lunch: "Quinoa Bowl",
+    dinner: "Lean Steak with Sweet Potato"
+  },
+  sunday: {
+    breakfast: "Fruit Smoothie Bowl",
+    lunch: "Salmon Salad",
+    dinner: "Turkey Chili"
   }
 };
 
@@ -261,12 +277,10 @@ const Nutrition = () => {
   const [addMealDialogOpen, setAddMealDialogOpen] = useState(false);
   const [mealBeingEdited, setMealBeingEdited] = useState<number | null>(null);
 
-  // Filter meals based on search query
   const filteredMeals = meals.filter(meal => 
     meal.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
-  
-  // Calculate total macros for the day
+
   const dailyTotals = foodLog.reduce(
     (acc, meal) => {
       const mealTotals = meal.foods.reduce(
@@ -290,16 +304,14 @@ const Nutrition = () => {
     },
     { calories: 0, protein: 0, carbs: 0, fat: 0 }
   );
-  
-  // Goals for the day
+
   const dailyGoals = {
     calories: 2200,
     protein: 140,
     carbs: 220,
     fat: 73
   };
-  
-  // Calculate percentages for progress bars
+
   const calculatePercentage = (current: number, goal: number) => {
     return Math.min(Math.round((current / goal) * 100), 100);
   };
@@ -324,7 +336,7 @@ const Nutrition = () => {
     
     setAddMealDialogOpen(false);
   };
-  
+
   const handleRemoveFoodFromLog = (mealId: number, foodId: number) => {
     setFoodLog(prevLog => {
       return prevLog.map(meal => {
@@ -343,7 +355,7 @@ const Nutrition = () => {
       description: "Item removed from your food log."
     });
   };
-  
+
   const handleCreateMealPlan = () => {
     const newPlan = {
       id: mealPlans.length + 1,
@@ -356,7 +368,6 @@ const Nutrition = () => {
       description: `${newPlan.name} has been created successfully.`
     });
     
-    // Reset form and close dialog
     setNewMealPlan({
       name: "",
       description: "",
@@ -369,49 +380,12 @@ const Nutrition = () => {
   };
 
   const handleAddDayToRoutine = () => {
-    const newRoutine = { ...weeklyMealRoutine };
-    
-    // Add Thursday
-    if (!newRoutine.hasOwnProperty('thursday')) {
-      newRoutine.thursday = {
-        breakfast: "Protein Pancakes",
-        lunch: "Mediterranean Salad",
-        dinner: "Grilled Fish with Vegetables"
-      };
-    }
-    // Add Friday
-    else if (!newRoutine.hasOwnProperty('friday')) {
-      newRoutine.friday = {
-        breakfast: "Avocado Toast",
-        lunch: "Chicken Wrap",
-        dinner: "Vegetable Stir-fry"
-      };
-    }
-    // Add Saturday
-    else if (!newRoutine.hasOwnProperty('saturday')) {
-      newRoutine.saturday = {
-        breakfast: "Greek Yogurt with Granola",
-        lunch: "Quinoa Bowl",
-        dinner: "Lean Steak with Sweet Potato"
-      };
-    }
-    // Add Sunday
-    else if (!newRoutine.hasOwnProperty('sunday')) {
-      newRoutine.sunday = {
-        breakfast: "Fruit Smoothie Bowl",
-        lunch: "Salmon Salad",
-        dinner: "Turkey Chili"
-      };
-    }
-    
-    setWeeklyMealRoutine(newRoutine);
-    
     toast({
-      title: "Day added",
-      description: "New day added to your weekly meal routine."
+      title: "All days added",
+      description: "Your weekly meal routine already includes all days of the week."
     });
   };
-  
+
   return (
     <div className="container mx-auto px-4 pb-12">
       <BackToHome className="mb-4" />
@@ -432,7 +406,6 @@ const Nutrition = () => {
         </TabsList>
         
         <div className="mt-6">
-          {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Card>
@@ -663,7 +636,6 @@ const Nutrition = () => {
             </Card>
           </TabsContent>
           
-          {/* Track Tab */}
           <TabsContent value="track" className="space-y-6">
             <Card>
               <CardHeader className="pb-3">
@@ -905,7 +877,6 @@ const Nutrition = () => {
             </Card>
           </TabsContent>
           
-          {/* Meal Plans Tab */}
           <TabsContent value="mealplans" className="space-y-6">
             <Card>
               <CardHeader className="pb-3">
@@ -1081,7 +1052,6 @@ const Nutrition = () => {
             </Card>
           </TabsContent>
           
-          {/* Diet Routine Tab */}
           <TabsContent value="routine" className="space-y-6">
             <Card>
               <CardHeader className="pb-3">

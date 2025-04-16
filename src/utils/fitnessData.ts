@@ -134,3 +134,32 @@ export const getStreakCount = (): number => {
   // For demonstration purposes, return a fixed number
   return 7;
 };
+
+// Add the missing getWeeklyStats function
+export const getWeeklyStats = () => {
+  // Calculate average stats from the last 7 days of activities
+  const lastSevenDays = dailyActivities.slice(-7);
+  
+  const averageSteps = Math.round(
+    lastSevenDays.reduce((sum, day) => sum + day.steps, 0) / lastSevenDays.length
+  );
+  
+  const averageCalories = Math.round(
+    lastSevenDays.reduce((sum, day) => sum + day.caloriesBurned, 0) / lastSevenDays.length
+  );
+  
+  const averageDistance = parseFloat(
+    (lastSevenDays.reduce((sum, day) => sum + day.distance, 0) / lastSevenDays.length).toFixed(1)
+  );
+  
+  const averageActiveMinutes = Math.round(
+    lastSevenDays.reduce((sum, day) => sum + day.activeMinutes, 0) / lastSevenDays.length
+  );
+  
+  return {
+    averageSteps,
+    averageCalories,
+    averageDistance,
+    averageActiveMinutes
+  };
+};

@@ -12,21 +12,23 @@ import { toast } from "@/components/ui/use-toast";
 // Add an interface to match the shape of the goals
 interface Goal {
   id: number;
-  title: string;
-  description: string;
-  startDate: string;
-  targetDate: string;
+  name: string;
+  target: number;
   progress: number;
-  metrics: {
+  unit: string;
+  achievementRate: number;
+  // Adding the missing properties to make the type conversion work
+  title?: string;
+  description?: string;
+  startDate?: string;
+  targetDate?: string;
+  metrics?: {
     current: number;
     target: number;
     unit: string;
   };
-  name: string;
-  target: number;
-  period?: string; // Make period optional
-  current?: number; // Add current as an optional property
-  unit?: string; // Add unit as an optional property
+  period?: string;
+  current?: number;
 }
 
 const GoalsSetting = () => {
@@ -41,7 +43,16 @@ const GoalsSetting = () => {
     if (savedGoals) {
       setGoals(JSON.parse(savedGoals));
     } else {
-      setGoals(fitnessGoals as Goal[]);
+      // Transform fitnessGoals to match Goal type with metrics
+      const transformedGoals = fitnessGoals.map(goal => ({
+        ...goal,
+        metrics: {
+          current: goal.progress,
+          target: goal.target,
+          unit: goal.unit
+        }
+      }));
+      setGoals(transformedGoals as Goal[]);
     }
   }, []);
 
@@ -125,7 +136,7 @@ const GoalsSetting = () => {
                   <h3 className="font-medium">{goal.name}</h3>
                   {editingGoalId !== goal.id ? (
                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Target: {goal.target} {goal.metrics.unit}
+                      Target: {goal.target} {goal.metrics?.unit || goal.unit}
                     </p>
                   ) : (
                     <div className="flex items-center mt-2">
@@ -140,7 +151,7 @@ const GoalsSetting = () => {
                         className="w-24 h-8"
                         min="1"
                       />
-                      <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">{goal.metrics.unit}</span>
+                      <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">{goal.metrics?.unit || goal.unit}</span>
                     </div>
                   )}
                 </div>
@@ -180,11 +191,11 @@ const GoalsSetting = () => {
               {/* Progress bar */}
               <div className="mt-2">
                 <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mb-1">
-                  <span>{goal.metrics.current} {goal.metrics.unit}</span>
-                  <span>{goal.target} {goal.metrics.unit}</span>
+                  <span>{goal.metrics?.current || goal.progress} {goal.metrics?.unit || goal.unit}</span>
+                  <span>{goal.target} {goal.metrics?.unit || goal.unit}</span>
                 </div>
                 <Progress 
-                  value={animatedGoals[goal.id] ? Math.min((goal.metrics.current / goal.target) * 100, 100) : 0}
+                  value={animatedGoals[goal.id] ? Math.min(((goal.metrics?.current || goal.progress) / goal.target) * 100, 100) : 0}
                   className={`h-2 ${
                     goal.name === "Daily Steps"
                       ? "bg-gray-100 dark:bg-gray-700 [&>div]:bg-blue-500"
@@ -197,7 +208,7 @@ const GoalsSetting = () => {
                 />
                 <div className="flex justify-end">
                   <p className="text-xs mt-1 font-medium bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-blue-400">
-                    {Math.round((goal.metrics.current / goal.target) * 100)}% completed
+                    {Math.round(((goal.metrics?.current || goal.progress) / goal.target) * 100)}% completed
                   </p>
                 </div>
               </div>
