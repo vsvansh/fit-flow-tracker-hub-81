@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -631,4 +632,180 @@ const SocialFeed = () => {
                 {[
                   { id: 1, user: "Sarah Johnson", avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8dXNlcnxlbnwwfHwwfHx8MA%3D%3D", activity: "completed a 10K run", time: "1 hour ago" },
                   { id: 2, user: "Alex Thompson", avatar: "https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8dXNlcnxlbnwwfHwwfHx8MA%3D%3D", activity: "achieved a new personal record in bench press", time: "3 hours ago" },
-                  { id: 3, user: "Emma Wilson", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8dXNlcnxlbnwwfHwwfHx8
+                  { id: 3, user: "Emma Wilson", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8dXNlcnxlbnwwfHwwfHx8MA%3D%3D", activity: "shared a new yoga routine", time: "1 day ago" }
+                ].map((activity) => (
+                  <div key={activity.id} className="flex items-start p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
+                    <Avatar className="h-8 w-8 mr-3">
+                      <AvatarImage src={activity.avatar} alt={activity.user} />
+                      <AvatarFallback>{activity.user[0]}</AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <span className="font-medium">{activity.user}</span>
+                          <span className="text-gray-600 dark:text-gray-300 text-sm"> {activity.activity}</span>
+                        </div>
+                        <span className="text-xs text-gray-500">{activity.time}</span>
+                      </div>
+                    </div>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className={`ml-2 h-8 w-8 p-0 ${thumbsUp[activity.id] ? 'text-blue-500' : ''}`}
+                      onClick={() => handleThumbsUp(activity.id)}
+                    >
+                      <ThumbsUp className={`h-4 w-4 ${thumbsUp[activity.id] ? 'fill-current' : ''}`} />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="achievements" className="space-y-4">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="font-medium">Your Achievements</h3>
+              <Badge variant="outline" className="px-2 py-1">
+                <Trophy className="h-3.5 w-3.5 mr-1 text-amber-500" />
+                <span>2/4 Completed</span>
+              </Badge>
+            </div>
+            
+            <div className="space-y-4">
+              {achievements.map((achievement) => (
+                <Card key={achievement.id} className={`border ${achievement.earned ? 'bg-green-50 dark:bg-green-900/10 border-green-200 dark:border-green-800' : ''}`}>
+                  <CardContent className="p-4">
+                    <div className="flex items-start">
+                      <div className="flex-shrink-0 mr-4">
+                        {achievement.icon}
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                          <h4 className="font-medium">{achievement.title}</h4>
+                          {achievement.earned ? (
+                            <Badge variant="success" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100">
+                              <Check className="h-3 w-3 mr-1" />
+                              Earned
+                            </Badge>
+                          ) : (
+                            <Badge variant="outline" className="text-gray-600">In Progress</Badge>
+                          )}
+                        </div>
+                        <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">{achievement.description}</p>
+                        
+                        {achievement.earned ? (
+                          <p className="text-xs text-gray-500 mt-2">Achieved on {achievement.date}</p>
+                        ) : (
+                          <div className="mt-2">
+                            <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
+                              <span>{achievement.current}</span>
+                              <span>{achievement.progress}%</span>
+                            </div>
+                            <Progress value={achievement.progress} className="h-2" />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+            
+            <div className="flex justify-center mt-4">
+              <Button>
+                <PlusCircle className="h-4 w-4 mr-1" />
+                View All Achievements
+              </Button>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="challenges" className="space-y-4">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="font-medium">Active Challenges</h3>
+              <Button variant="outline" size="sm">
+                <PlusCircle className="h-4 w-4 mr-1" />
+                Browse Challenges
+              </Button>
+            </div>
+            
+            {[
+              { 
+                id: 1, 
+                title: "10K Steps Daily", 
+                description: "Complete 10,000 steps every day for 30 days", 
+                participants: 458, 
+                progress: 60, 
+                days: "18 days remaining",
+                joined: true 
+              },
+              { 
+                id: 2, 
+                title: "Yoga Challenge", 
+                description: "Practice yoga for at least 20 minutes daily for 2 weeks", 
+                participants: 276, 
+                progress: 35, 
+                days: "9 days remaining",
+                joined: false 
+              },
+              { 
+                id: 3, 
+                title: "100 Push-up Challenge", 
+                description: "Work your way up to 100 push-ups in a single session", 
+                participants: 189, 
+                progress: 70, 
+                days: "7 days remaining",
+                joined: false 
+              }
+            ].map((challenge) => (
+              <Card key={challenge.id} className="border">
+                <CardContent className="p-4">
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-start">
+                      <div className="flex items-center">
+                        <Award className="h-5 w-5 mr-2 text-purple-500" />
+                        <h4 className="font-medium">{challenge.title}</h4>
+                      </div>
+                      <Badge variant="outline" className="text-xs">
+                        <Clock className="h-3 w-3 mr-1" />
+                        {challenge.days}
+                      </Badge>
+                    </div>
+                    
+                    <p className="text-sm text-gray-600 dark:text-gray-300">{challenge.description}</p>
+                    
+                    <div className="flex items-center text-xs text-gray-500 space-x-4">
+                      <div className="flex items-center">
+                        <Users className="h-3.5 w-3.5 mr-1" />
+                        <span>{challenge.participants} participants</span>
+                      </div>
+                      <div>
+                        <span>{challenge.progress}% complete</span>
+                      </div>
+                    </div>
+                    
+                    <Progress value={challenge.progress} className="h-2" />
+                    
+                    <div className="flex justify-between pt-2">
+                      <Button variant="outline" size="sm">View Challenge</Button>
+                      
+                      {challenge.joined ? (
+                        <Button size="sm" className="bg-green-600 hover:bg-green-700" disabled>
+                          <Check className="h-4 w-4 mr-1" />
+                          Joined Challenge
+                        </Button>
+                      ) : (
+                        <Button size="sm">Join Challenge</Button>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </TabsContent>
+        </Tabs>
+      </CardContent>
+    </Card>
+  );
+};
+
+export default SocialFeed;
