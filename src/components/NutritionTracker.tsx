@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -674,3 +675,620 @@ const NutritionTracker = () => {
                   </div>
                 </CardContent>
               </Card>
+              
+              <Card className="shadow-sm">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg font-medium">Macronutrient Distribution</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-72 flex justify-center items-center">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <RechartsPieChart>
+                        <Pie
+                          data={macroDistribution}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          outerRadius={80}
+                          fill="#8884d8"
+                          dataKey="value"
+                          label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                        >
+                          {macroDistribution.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                          ))}
+                        </Pie>
+                        <Tooltip 
+                          formatter={(value) => [`${value}%`, 'Percentage']}
+                          contentStyle={{
+                            borderRadius: "0.5rem",
+                            border: "none",
+                            boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)",
+                            backgroundColor: "var(--background)",
+                            color: "var(--foreground)"
+                          }}
+                        />
+                        <Legend />
+                      </RechartsPieChart>
+                    </ResponsiveContainer>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+            
+            <Card className="shadow-sm">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg font-medium">Nutrient Goal Comparison</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="h-80">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <RechartsBarChart
+                          data={nutrientData}
+                          layout="vertical"
+                          margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                        >
+                          <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+                          <XAxis type="number" />
+                          <YAxis dataKey="name" type="category" width={100} />
+                          <Tooltip
+                            contentStyle={{
+                              borderRadius: "0.5rem",
+                              border: "none",
+                              boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)",
+                              backgroundColor: "var(--background)",
+                              color: "var(--foreground)"
+                            }}
+                          />
+                          <Legend />
+                          <Bar dataKey="current" fill="#4ADE80" name="Current" />
+                          <Bar dataKey="goal" fill="#94A3B8" name="Goal" />
+                        </RechartsBarChart>
+                      </ResponsiveContainer>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      <h3 className="font-medium">Nutrient Analysis</h3>
+                      
+                      {nutrientData.map((item, index) => (
+                        <div key={index} className="space-y-2">
+                          <div className="flex justify-between">
+                            <span className="font-medium">{item.name}</span>
+                            <span>{item.current} / {item.goal}g</span>
+                          </div>
+                          <div className="flex items-center">
+                            <Progress 
+                              value={(item.current / item.goal) * 100}
+                              className={`h-2 flex-1 ${
+                                index === 0 ? "bg-blue-100 dark:bg-blue-900/30 [&>div]:bg-blue-500" :
+                                index === 1 ? "bg-amber-100 dark:bg-amber-900/30 [&>div]:bg-amber-500" :
+                                index === 2 ? "bg-red-100 dark:bg-red-900/30 [&>div]:bg-red-500" :
+                                "bg-green-100 dark:bg-green-900/30 [&>div]:bg-green-500"
+                              }`}
+                            />
+                            <Badge variant="outline" className="ml-2 bg-gray-50 dark:bg-gray-800 text-xs">
+                              {Math.round((item.current / item.goal) * 100)}%
+                            </Badge>
+                          </div>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">
+                            {
+                              (item.current / item.goal) < 0.7 ? "Below target range" :
+                              (item.current / item.goal) > 1.1 ? "Above target range" :
+                              "Within target range"
+                            }
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Card className="shadow-sm md:col-span-2">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg font-medium">Nutrition Tips</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {nutritionTips.map((tip, index) => (
+                      <div key={index} className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                        <div className="flex items-start">
+                          <div className={`
+                            p-2 rounded-full mr-3 flex-shrink-0
+                            ${tip.tag === 'recovery' ? 'bg-blue-50 dark:bg-blue-900/20' :
+                              tip.tag === 'hydration' ? 'bg-cyan-50 dark:bg-cyan-900/20' :
+                              'bg-amber-50 dark:bg-amber-900/20'}
+                          `}>
+                            {tip.tag === 'recovery' ? (
+                              <Heart className={`h-4 w-4 text-blue-600 dark:text-blue-400`} />
+                            ) : tip.tag === 'hydration' ? (
+                              <Droplet className={`h-4 w-4 text-cyan-600 dark:text-cyan-400`} />
+                            ) : (
+                              <BrainIcon className={`h-4 w-4 text-amber-600 dark:text-amber-400`} />
+                            )}
+                          </div>
+                          <div>
+                            <h3 className="font-medium">{tip.title}</h3>
+                            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{tip.description}</p>
+                          </div>
+                        </div>
+                        
+                        <div className="mt-3 flex items-center text-xs">
+                          <Badge variant={tip.tag === 'recovery' ? 'success' : tip.tag === 'hydration' ? 'success' : 'warning'} className="mr-2">
+                            {tip.tag}
+                          </Badge>
+                          <span className="text-gray-500 dark:text-gray-400">Based on your recent activity</span>
+                        </div>
+                      </div>
+                    ))}
+                    
+                    <div className="text-center">
+                      <Button variant="outline" onClick={handleViewFullAnalysis}>
+                        View Full Analysis <ArrowRight className="ml-1 h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card className="shadow-sm">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg font-medium">Recommended Foods</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ScrollArea className="h-[500px] pr-4">
+                    <div className="space-y-3">
+                      {recommendedFoods.map((food, index) => (
+                        <div key={index} className="p-3 border rounded-lg">
+                          <div className="flex justify-between">
+                            <div className="flex items-center">
+                              <div className={`
+                                p-2 rounded-full mr-3 flex-shrink-0
+                                ${food.category === 'protein' ? 'bg-red-50 dark:bg-red-900/20' :
+                                  food.category === 'vegetable' ? 'bg-green-50 dark:bg-green-900/20' :
+                                  food.category === 'fruit' ? 'bg-purple-50 dark:bg-purple-900/20' :
+                                  food.category === 'grain' ? 'bg-amber-50 dark:bg-amber-900/20' :
+                                  'bg-blue-50 dark:bg-blue-900/20'}
+                              `}>
+                                {food.category === 'protein' ? (
+                                  <Beef className={`h-4 w-4 text-red-600 dark:text-red-400`} />
+                                ) : food.category === 'vegetable' ? (
+                                  <Carrot className={`h-4 w-4 text-green-600 dark:text-green-400`} />
+                                ) : food.category === 'fruit' ? (
+                                  <Apple className={`h-4 w-4 text-purple-600 dark:text-purple-400`} />
+                                ) : food.category === 'grain' ? (
+                                  <Salad className={`h-4 w-4 text-amber-600 dark:text-amber-400`} />
+                                ) : (
+                                  <Egg className={`h-4 w-4 text-blue-600 dark:text-blue-400`} />
+                                )}
+                              </div>
+                              <div>
+                                <h4 className="font-medium">{food.name}</h4>
+                                <p className="text-xs text-gray-500 dark:text-gray-400">{food.benefits}</p>
+                              </div>
+                            </div>
+                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => handleBookmarkFood(index)}>
+                              <Bookmark className="h-4 w-4 text-gray-500" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+          
+          {/* Discover Tab */}
+          <TabsContent value="discover" className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Card className="md:col-span-2">
+                <CardHeader>
+                  <CardTitle className="text-lg font-medium">Popular Recipes</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="border rounded-lg overflow-hidden">
+                      <div className="bg-gray-100 dark:bg-gray-800 h-40 flex items-center justify-center">
+                        <Salad className="h-16 w-16 text-green-500 opacity-50" />
+                      </div>
+                      <div className="p-4">
+                        <h3 className="font-medium">Mediterranean Quinoa Bowl</h3>
+                        <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 mt-1">
+                          <Clock className="h-3 w-3 mr-1" />
+                          <span>25 mins</span>
+                          <span className="mx-2">•</span>
+                          <span>420 calories</span>
+                        </div>
+                        <div className="flex gap-2 mt-2">
+                          <Badge variant="outline" className="text-xs">High Protein</Badge>
+                          <Badge variant="outline" className="text-xs">Vegetarian</Badge>
+                        </div>
+                        <Button variant="outline" size="sm" className="w-full mt-3">
+                          View Recipe
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    <div className="border rounded-lg overflow-hidden">
+                      <div className="bg-gray-100 dark:bg-gray-800 h-40 flex items-center justify-center">
+                        <Pizza className="h-16 w-16 text-amber-500 opacity-50" />
+                      </div>
+                      <div className="p-4">
+                        <h3 className="font-medium">Protein-Packed Turkey Chili</h3>
+                        <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 mt-1">
+                          <Clock className="h-3 w-3 mr-1" />
+                          <span>45 mins</span>
+                          <span className="mx-2">•</span>
+                          <span>380 calories</span>
+                        </div>
+                        <div className="flex gap-2 mt-2">
+                          <Badge variant="outline" className="text-xs">High Protein</Badge>
+                          <Badge variant="outline" className="text-xs">Gluten Free</Badge>
+                        </div>
+                        <Button variant="outline" size="sm" className="w-full mt-3">
+                          View Recipe
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    <div className="border rounded-lg overflow-hidden">
+                      <div className="bg-gray-100 dark:bg-gray-800 h-40 flex items-center justify-center">
+                        <Coffee className="h-16 w-16 text-purple-500 opacity-50" />
+                      </div>
+                      <div className="p-4">
+                        <h3 className="font-medium">Berry Protein Smoothie Bowl</h3>
+                        <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 mt-1">
+                          <Clock className="h-3 w-3 mr-1" />
+                          <span>10 mins</span>
+                          <span className="mx-2">•</span>
+                          <span>320 calories</span>
+                        </div>
+                        <div className="flex gap-2 mt-2">
+                          <Badge variant="outline" className="text-xs">High Protein</Badge>
+                          <Badge variant="outline" className="text-xs">Breakfast</Badge>
+                        </div>
+                        <Button variant="outline" size="sm" className="w-full mt-3">
+                          View Recipe
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    <div className="border rounded-lg overflow-hidden">
+                      <div className="bg-gray-100 dark:bg-gray-800 h-40 flex items-center justify-center">
+                        <Egg className="h-16 w-16 text-blue-500 opacity-50" />
+                      </div>
+                      <div className="p-4">
+                        <h3 className="font-medium">Sheet Pan Salmon & Vegetables</h3>
+                        <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 mt-1">
+                          <Clock className="h-3 w-3 mr-1" />
+                          <span>30 mins</span>
+                          <span className="mx-2">•</span>
+                          <span>450 calories</span>
+                        </div>
+                        <div className="flex gap-2 mt-2">
+                          <Badge variant="outline" className="text-xs">Omega-3</Badge>
+                          <Badge variant="outline" className="text-xs">Low Carb</Badge>
+                        </div>
+                        <Button variant="outline" size="sm" className="w-full mt-3">
+                          View Recipe
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <Button variant="outline" className="w-full mt-4">
+                    Browse All Recipes
+                  </Button>
+                </CardContent>
+              </Card>
+              
+              <div className="space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg font-medium">Educational Resources</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="p-3 border rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800">
+                        <div className="flex items-center">
+                          <div className="bg-blue-50 dark:bg-blue-900/20 p-2 rounded-full mr-3">
+                            <FileText className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                          </div>
+                          <div>
+                            <h4 className="font-medium">Understanding Macros</h4>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                              A beginner's guide to macronutrients
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="p-3 border rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800">
+                        <div className="flex items-center">
+                          <div className="bg-green-50 dark:bg-green-900/20 p-2 rounded-full mr-3">
+                            <Book className="h-4 w-4 text-green-600 dark:text-green-400" />
+                          </div>
+                          <div>
+                            <h4 className="font-medium">Meal Prep 101</h4>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                              How to prepare a week's worth of meals
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="p-3 border rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800">
+                        <div className="flex items-center">
+                          <div className="bg-amber-50 dark:bg-amber-900/20 p-2 rounded-full mr-3">
+                            <Lightbulb className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                          </div>
+                          <div>
+                            <h4 className="font-medium">Nutrition & Performance</h4>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                              How diet affects your workout results
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg font-medium">Nutrition Coaches</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="p-3 border rounded-lg">
+                        <div className="flex items-center">
+                          <Avatar className="h-10 w-10 mr-3">
+                            <div className="bg-gray-200 dark:bg-gray-700 h-full w-full rounded-full flex items-center justify-center">
+                              <span className="text-xs font-medium">JS</span>
+                            </div>
+                          </Avatar>
+                          <div>
+                            <h4 className="font-medium">Dr. Julia Smith</h4>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                              Sports Nutrition Specialist
+                            </p>
+                          </div>
+                        </div>
+                        <Button variant="outline" size="sm" className="w-full mt-3">
+                          View Profile
+                        </Button>
+                      </div>
+                      
+                      <div className="p-3 border rounded-lg">
+                        <div className="flex items-center">
+                          <Avatar className="h-10 w-10 mr-3">
+                            <div className="bg-gray-200 dark:bg-gray-700 h-full w-full rounded-full flex items-center justify-center">
+                              <span className="text-xs font-medium">MB</span>
+                            </div>
+                          </Avatar>
+                          <div>
+                            <h4 className="font-medium">Michael Brown</h4>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                              Performance Dietitian
+                            </p>
+                          </div>
+                        </div>
+                        <Button variant="outline" size="sm" className="w-full mt-3">
+                          View Profile
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </TabsContent>
+          
+          {/* Journal Tab */}
+          <TabsContent value="journal" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Book className="h-5 w-5 text-indigo-500" />
+                    <CardTitle>Nutrition Journal</CardTitle>
+                  </div>
+                  <Button variant="outline">
+                    <Plus className="h-4 w-4 mr-2" />
+                    New Entry
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  {journalEntries.map((entry, index) => (
+                    <div key={index} className="border rounded-lg p-4">
+                      <div className="flex justify-between items-start mb-3">
+                        <div>
+                          <h3 className="font-medium text-lg">{entry.title}</h3>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">{entry.date}</p>
+                        </div>
+                        <Badge variant="outline" className={`
+                          ${entry.mood === 'energetic' ? 'bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400' :
+                            entry.mood === 'positive' ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400' :
+                            'bg-gray-50 text-gray-700 dark:bg-gray-800 dark:text-gray-400'}
+                        `}>
+                          {entry.mood}
+                        </Badge>
+                      </div>
+                      
+                      <p className="text-gray-700 dark:text-gray-300 mb-4">{entry.content}</p>
+                      
+                      <div className="grid grid-cols-2 gap-4 mb-4">
+                        <div className="flex items-center">
+                          <div className="bg-blue-50 dark:bg-blue-900/20 p-2 rounded-full mr-2">
+                            <Droplet className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium">Water Intake</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">{entry.waterIntake} glasses</p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center">
+                          <div className="bg-purple-50 dark:bg-purple-900/20 p-2 rounded-full mr-2">
+                            <Clock className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium">Sleep</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">{entry.sleepHours} hours</p>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="flex flex-wrap gap-2">
+                        {entry.tags.map((tag, tagIndex) => (
+                          <Badge key={tagIndex} variant="outline" className="text-xs">
+                            {tag}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Lightbulb className="h-5 w-5 text-amber-500" />
+                  <CardTitle>Nutrition Insights</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
+                    <h3 className="font-medium mb-2 text-amber-800 dark:text-amber-300">Pattern Recognition</h3>
+                    <p className="text-sm text-amber-700 dark:text-amber-400">
+                      Based on your journal entries, you appear to have more energy on days following higher protein breakfasts. Consider maintaining this habit to sustain morning energy levels.
+                    </p>
+                  </div>
+                  
+                  <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                    <h3 className="font-medium mb-2 text-blue-800 dark:text-blue-300">Hydration Impact</h3>
+                    <p className="text-sm text-blue-700 dark:text-blue-400">
+                      Your journal shows a correlation between higher water intake (8+ glasses) and more positive mood ratings. Aim to consistently meet your hydration goals.
+                    </p>
+                  </div>
+                  
+                  <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                    <h3 className="font-medium mb-2 text-green-800 dark:text-green-300">Sleep & Nutrition Connection</h3>
+                    <p className="text-sm text-green-700 dark:text-green-400">
+                      You've noted improved portion control on days following 7+ hours of sleep. Consider prioritizing consistent sleep schedules to support your nutrition goals.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          {/* Settings Tab */}
+          <TabsContent value="settings" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Nutrition Preferences</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="daily-goal">Daily Calorie Goal</Label>
+                    <Input id="daily-goal" type="number" placeholder="e.g. 2000" />
+                  </div>
+                  
+                  <div className="grid gap-2">
+                    <Label>Macronutrient Targets</Label>
+                    <div className="grid grid-cols-3 gap-4">
+                      <div>
+                        <Label htmlFor="protein-goal" className="text-xs">Protein (g)</Label>
+                        <Input id="protein-goal" type="number" placeholder="e.g. 150" />
+                      </div>
+                      <div>
+                        <Label htmlFor="carbs-goal" className="text-xs">Carbs (g)</Label>
+                        <Input id="carbs-goal" type="number" placeholder="e.g. 200" />
+                      </div>
+                      <div>
+                        <Label htmlFor="fat-goal" className="text-xs">Fat (g)</Label>
+                        <Input id="fat-goal" type="number" placeholder="e.g. 65" />
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="grid gap-2">
+                    <Label>Dietary Preferences</Label>
+                    <div className="flex flex-wrap gap-2">
+                      {['Vegetarian', 'Vegan', 'Gluten-Free', 'Dairy-Free', 'Keto', 'Paleo'].map((pref) => (
+                        <Badge key={pref} variant="outline" className="cursor-pointer hover:bg-primary/10">
+                          {pref}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label>Food Allergies & Restrictions</Label>
+                    <Input placeholder="Add allergies or restrictions..." />
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <Switch id="meal-reminders" />
+                      <Label htmlFor="meal-reminders">Meal Time Reminders</Label>
+                    </div>
+                    <Select defaultValue="30">
+                      <SelectTrigger className="w-32">
+                        <SelectValue placeholder="Remind me" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="15">15 min before</SelectItem>
+                        <SelectItem value="30">30 min before</SelectItem>
+                        <SelectItem value="60">1 hour before</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <Switch id="water-reminders" />
+                      <Label htmlFor="water-reminders">Water Intake Reminders</Label>
+                    </div>
+                    <Select defaultValue="60">
+                      <SelectTrigger className="w-32">
+                        <SelectValue placeholder="Frequency" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="30">Every 30 min</SelectItem>
+                        <SelectItem value="60">Every hour</SelectItem>
+                        <SelectItem value="90">Every 1.5 hours</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <Switch id="journal-reminders" />
+                    <Label htmlFor="journal-reminders">Daily Journal Reminders</Label>
+                  </div>
+                  
+                  <Button className="w-full">Save Preferences</Button>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </CardContent>
+    </Card>
+  );
+};
+
+export default NutritionTracker;
