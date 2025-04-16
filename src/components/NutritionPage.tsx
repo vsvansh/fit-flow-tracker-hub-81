@@ -1,8 +1,9 @@
+
 import NutritionHub from "./NutritionHub";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Apple, Award, LineChart, ArrowRight } from "lucide-react";
+import { Apple, Award, LineChart, ArrowRight, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
@@ -54,6 +55,14 @@ const NutritionPage = () => {
     { day: 'Sun', calories: 2000, protein: 105, carbs: 225, fat: 67 }
   ];
 
+  // Add handler for feature button 
+  const handleShowNewFeature = () => {
+    toast({
+      title: "New Feature",
+      description: "This new feature is coming soon! Stay tuned for updates."
+    });
+  };
+
   return (
     <div className="container mx-auto p-4">
       {/* Header section with motivational content */}
@@ -90,6 +99,14 @@ const NutritionPage = () => {
                 <Award className="h-4 w-4 text-green-600" />
                 <span>Complete your nutrition profile to unlock personalized insights</span>
               </div>
+              {/* Add button to try new features */}
+              <Button 
+                variant="outline" 
+                className="w-full mt-4 border-green-200 hover:bg-green-50 text-green-700"
+                onClick={handleShowNewFeature}
+              >
+                Show New Feature
+              </Button>
             </CardContent>
           </Card>
           
@@ -273,12 +290,80 @@ const NutritionPage = () => {
           <NutritionHub />
         </TabsContent>
 
+        {/* Fix the Analyze tab to prevent overlapping graphs */}
         <TabsContent value="analyze">
-          <div>Analyze Tab Content</div>
+          <div className="space-y-8"> {/* Added more spacing between sections */}
+            {/* First graph section */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Nutrient Goal Comparison</CardTitle>
+                <CardDescription>Compare your actual nutrient intake with your goals</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-[350px]"> {/* Increased height for better visibility */}
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart
+                      data={[
+                        { name: 'Protein', actual: 90, goal: 100 },
+                        { name: 'Carbs', actual: 120, goal: 100 },
+                        { name: 'Fat', actual: 80, goal: 100 },
+                        { name: 'Fiber', actual: 75, goal: 100 },
+                        { name: 'Water', actual: 90, goal: 100 },
+                      ]}
+                      margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" opacity={0.1} />
+                      <XAxis dataKey="name" />
+                      <YAxis />
+                      <Tooltip />
+                      <Area type="monotone" dataKey="actual" stroke="#3b82f6" fill="#3b82f680" name="Actual" />
+                      <Area type="monotone" dataKey="goal" stroke="#10b981" fill="#10b98180" name="Goal" />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+            
+            {/* Second graph section with proper spacing */}
+            <Card className="mt-8"> {/* Added explicit top margin */}
+              <CardHeader>
+                <CardTitle>Meal Timing Distribution</CardTitle>
+                <CardDescription>When you consume calories throughout the day</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-[350px]"> {/* Increased height for better visibility */}
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart
+                      data={[
+                        { time: 'Morning', calories: 450 },
+                        { time: 'Mid-day', calories: 650 },
+                        { time: 'Afternoon', calories: 250 },
+                        { time: 'Evening', calories: 550 },
+                        { time: 'Night', calories: 100 },
+                      ]}
+                      margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
+                    >
+                      <defs>
+                        <linearGradient id="colorMeals" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.8}/>
+                          <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0.1}/>
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" opacity={0.1} />
+                      <XAxis dataKey="time" />
+                      <YAxis />
+                      <Tooltip />
+                      <Area type="monotone" dataKey="calories" stroke="#8b5cf6" fill="url(#colorMeals)" name="Calories" />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
 
         <TabsContent value="plan">
-          <div>Plan Tab Content</div>
+          <div>Meal Plan Tab Content</div>
         </TabsContent>
       </Tabs>
     </div>
