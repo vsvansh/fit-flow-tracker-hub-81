@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -32,7 +31,12 @@ import {
   Heart,
   Check as CheckIcon,
   Book,
-  FileText
+  FileText,
+  Salad,
+  Pizza,
+  Droplet,
+  Brain as BrainIcon,
+  Lightbulb
 } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
@@ -1039,7 +1043,7 @@ const NutritionTracker = () => {
                     <div className="space-y-4">
                       <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                         <h4 className="font-medium flex items-center text-blue-700 dark:text-blue-300">
-                          <Brain className="h-4 w-4 mr-2" />
+                          <BrainIcon className="h-4 w-4 mr-2" />
                           Pattern Recognition
                         </h4>
                         <p className="mt-1 text-sm">
